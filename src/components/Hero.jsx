@@ -198,10 +198,11 @@ const Hero = () => {
             </p>
 
             <div className="hero-button-container">
-              <Link to="/chart" className="hero-badge-button">
-                <Check size={16} />
-                <span>차트 백테스트 실행</span>
+              <Link to="/chart" className="hero-badge-button no-shimmer">
+                <BarChart3 size={16} />
+                <span>차트보기</span>
               </Link>
+
             </div>
 
             <div className="hero-stats">
@@ -363,7 +364,7 @@ const Hero = () => {
 
       <style jsx>{`
         .hero {
-          padding: 6rem 0 4rem;
+          padding: 12rem 0 4rem;
           background: transparent;
           position: relative;
           overflow: hidden;
@@ -426,6 +427,7 @@ const Hero = () => {
         .hero-button-container {
           display: flex;
           justify-content: center;
+          gap: 1rem;
           margin-bottom: 3rem;
         }
 
@@ -500,6 +502,10 @@ const Hero = () => {
 
         .hero-badge-button:active {
           transform: translateY(-1px);
+        }
+
+        .hero-badge-button.no-shimmer::before {
+          display: none;
         }
 
         .hero-title {

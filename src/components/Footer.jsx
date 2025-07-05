@@ -11,8 +11,7 @@ const Footer = () => {
 
       <style jsx>{`
         .footer {
-          background: rgba(17, 17, 17, 0.65);
-          backdrop-filter: blur(18px);
+          background: transparent;
           padding: 2rem 0;
           margin-top: auto;
           position: relative;
@@ -25,7 +24,7 @@ const Footer = () => {
           left: 0;
           right: 0;
           height: 1px;
-          background: rgba(255, 255, 255, 0.08);
+          background: transparent;
         }
 
         .container {

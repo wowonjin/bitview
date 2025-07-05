@@ -26,7 +26,7 @@ const Features = () => {
       title: '정밀 백테스트',
       description: '과거 데이터로 투자 전략을 시뮬레이션하고 성과를 검증하세요. AI 기반 전략으로 수익률을 최적화할 수 있습니다.',
       color: 'var(--accent-orange)',
-      link: '/backtest',
+      link: '/advanced-backtest',
       badge: 'AI 추천'
     }
   ]

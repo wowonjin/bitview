@@ -1,12 +1,172 @@
-# React + Vite
+# BitView2 - 고급 암호화폐 분석 플랫폼
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BitView2는 전문가급 암호화폐 차트 분석 및 백테스트 기능을 제공하는 웹 애플리케이션입니다.
 
-Currently, two official plugins are available:
+## 🚀 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 📊 실시간 코인 모니터링
+- 실시간 암호화폐 가격 추적
+- 다양한 정렬 및 필터링 옵션
+- 즐겨찾기 기능
+- 페이지네이션 지원
 
-## Expanding the ESLint configuration
+### 📈 차트 분석
+- TradingView 통합 차트
+- 다양한 시간 간격 지원 (5분 ~ 1주)
+- 여러 암호화폐 심볼 지원
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 🔄 기본 백테스트
+- 이동평균 교차 전략
+- RSI 역전 전략
+- 가격 모멘텀 전략
+- 기본적인 성과 분석
+
+### ⚡ 고급 백테스트 (NEW!)
+전문가급 백테스트 기능으로 다음과 같은 고급 기능을 제공합니다:
+
+#### 📊 고급 전략
+- **트리플 이동평균**: 5일, 20일, 50일 이동평균의 배열을 이용한 전략
+- **MACD + RSI 조합**: MACD 신호와 RSI 과매수/과매도 조합
+- **볼린저 밴드 평균회귀**: 볼린저 밴드 돌파 후 평균회귀 전략
+- **스토캐스틱 다이버전스**: 가격과 스토캐스틱의 다이버전스 기반 전략
+
+#### 🎮 리플레이 기능
+- **실시간 시뮬레이션**: 차트가 실시간으로 그려지며 매수/매도 신호 표시
+- **배속 조절**: 0.5x ~ 8x 속도로 백테스트 진행 과정 관찰
+- **진행률 표시**: 백테스트 진행 상황을 시각적으로 확인
+- **실시간 통계**: 리플레이 중 실시간 수익률, 거래 횟수, 승률 표시
+
+#### 📋 기술적 지표
+- **단순이동평균 (SMA)**: 20일, 50일 이동평균 라인
+- **지수이동평균 (EMA)**: 12일, 26일 지수이동평균
+- **볼린저 밴드**: 상단, 중단, 하단 밴드 표시
+- **MACD**: 시그널 라인과 히스토그램
+- **RSI**: 과매수/과매도 지표
+- **스토캐스틱**: %K, %D 라인
+
+#### 📊 상세 분석
+- **거래 내역**: 모든 매수/매도 거래의 상세 정보
+- **성과 분석**: 포트폴리오 가치 변화 차트
+- **위험 분석**: 
+  - 최대 손실폭 (Max Drawdown)
+  - 변동성 (Volatility)
+  - 샤프 비율 (Sharpe Ratio)
+  - 소르티노 비율 (Sortino Ratio)
+  - VaR (Value at Risk)
+  - 연속 최대 승리/손실
+
+#### ⚙️ 고급 설정
+- **위험 관리**: 스톱로스, 익절, 포지션 크기 조절
+- **거래 비용**: 수수료, 슬리피지 설정
+- **패널 커스터마이징**: 좌우 패널 너비 및 하단 패널 높이 조절
+- **데이터 내보내기**: CSV 형태로 백테스트 결과 다운로드
+
+## 🛠️ 기술 스택
+
+- **Frontend**: React 18, Vite
+- **Charts**: TradingView Widgets, Recharts, Custom SVG Charts
+- **Styling**: CSS3, Responsive Design
+- **Authentication**: Context API
+- **Icons**: Lucide React
+- **Data**: Real-time cryptocurrency data
+
+## 📦 설치 및 실행
+
+### 필요 조건
+- Node.js 16.0.0 이상
+- npm 또는 yarn
+
+### 설치
+```bash
+# 저장소 클론
+git clone [repository-url]
+cd bitview2
+
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
+npm run dev
+```
+
+### 빌드
+```bash
+# 프로덕션 빌드
+npm run build
+
+# 빌드 결과 미리보기
+npm run preview
+```
+
+## 🌐 페이지 구조
+
+- `/` - 메인 페이지 (Hero, Features, Statistics)
+- `/live-coins` - 실시간 코인 모니터링
+- `/chart` - 기본 차트 분석
+- `/trading` - 기본 백테스트
+- `/advanced-backtest` - 고급 백테스트 (NEW!)
+- `/premium` - 프리미엄 기능 안내
+- `/login` - 로그인
+- `/signup` - 회원가입
+- `/admin` - 관리자 대시보드
+
+## 💎 프리미엄 기능
+
+고급 백테스트 기능은 프리미엄 사용자에게만 제공됩니다:
+- 고급 백테스트 전략
+- 리플레이 기능
+- 상세 위험 분석
+- CSV 데이터 내보내기
+
+## 🔧 주요 컴포넌트
+
+### AdvancedBacktest.jsx
+- 고급 백테스트 메인 페이지
+- 리플레이 기능
+- 실시간 분석
+- 기술적 지표 표시
+
+### replayBacktest.js
+- 리플레이 백테스트 유틸리티
+- 실시간 포지션 계산
+- 위험 분석 함수
+- 성과 분석 함수
+
+### advancedBacktest.js
+- 고급 백테스트 전략
+- 기술적 지표 계산
+- 신호 생성 로직
+
+## 📱 반응형 디자인
+
+- 데스크톱: 3패널 레이아웃 (좌측 도구 + 중앙 차트 + 우측 설정)
+- 태블릿: 2패널 레이아웃 (차트 + 설정)
+- 모바일: 단일 패널 레이아웃 (스택형)
+
+## 🎨 UI/UX 특징
+
+- **다크 테마**: 차트 분석에 최적화된 어두운 테마
+- **애니메이션**: 부드러운 전환 효과
+- **실시간 업데이트**: 리플레이 진행률 및 통계 실시간 표시
+- **직관적 컨트롤**: 플레이/일시정지, 배속 조절, 진행률 바
+
+## 🚀 향후 계획
+
+- [ ] 더 많은 기술적 지표 추가
+- [ ] 사용자 정의 전략 생성 기능
+- [ ] 소셜 트레이딩 기능
+- [ ] 알림 및 경고 시스템
+- [ ] 모바일 앱 개발
+- [ ] AI 기반 전략 추천
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스를 따릅니다.
+
+## 👥 기여
+
+프로젝트에 기여하고 싶으시다면 Pull Request를 보내주세요.
+
+## 📞 지원
+
+문의사항이 있으시면 [contact@bitview2.com](mailto:contact@bitview2.com)으로 연락해주세요.
