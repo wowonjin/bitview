@@ -14,6 +14,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
+  const [nameError, setNameError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
@@ -21,11 +22,35 @@ const Signup = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
 
+  // 닉네임 중복 검사 함수
+  const checkNameDuplicate = (name) => {
+    if (!name.trim()) {
+      setNameError('')
+      return
+    }
+
+    const users = JSON.parse(localStorage.getItem('users') || '[]')
+    const existingName = users.find(u => u.name && u.name.toLowerCase() === name.toLowerCase())
+
+    if (existingName) {
+      setNameError('이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.')
+    } else {
+      setNameError('')
+    }
+  }
+
   const handleChange = (e) => {
+    const { name, value } = e.target
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     })
+    
+    // 닉네임 필드인 경우 실시간 중복 검사
+    if (name === 'name') {
+      checkNameDuplicate(value)
+    }
+    
     if (error) setError('')
   }
 
@@ -75,6 +100,24 @@ const Signup = () => {
       return
     }
 
+    // 닉네임 중복 확인 (실시간 검사 결과 확인)
+    if (nameError) {
+      setError(nameError)
+      setIsLoading(false)
+      return
+    }
+
+    // 추가 닉네임 검사 (실시간 검사가 누락된 경우를 대비)
+    const existingName = users.find(u => u.name && u.name.toLowerCase() === formData.name.toLowerCase())
+
+    if (existingName) {
+      const errorMessage = '이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.'
+      setError(errorMessage)
+      setNameError(errorMessage)
+      setIsLoading(false)
+      return
+    }
+
     // 새 사용자 추가
     const newUser = {
       id: Date.now(),
@@ -94,6 +137,7 @@ const Signup = () => {
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
+      password: newUser.password,
       role: 'user',
       exchangeRegistered: false,
       exchangeEmail: null
@@ -216,7 +260,7 @@ const Signup = () => {
             transition={{ delay: 0.6 }}
           >
             <div className="form-group">
-              <label htmlFor="name">이름</label>
+              <label htmlFor="name">닉네임</label>
               <div className="input-container">
                 <User size={20} className="input-icon" />
                 <input
@@ -225,11 +269,21 @@ const Signup = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="홍길동"
+                  placeholder="멋진닉네임"
                   required
                   disabled={isLoading}
                 />
               </div>
+              {nameError && (
+                <motion.div
+                  className="name-error-message"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {nameError}
+                </motion.div>
+              )}
             </div>
 
             <div className="form-group">
@@ -707,6 +761,19 @@ const Signup = () => {
           color: #EF4444;
           font-size: 0.75rem;
           margin-top: 0.25rem;
+        }
+
+        .name-error-message {
+          color: #EF4444;
+          font-size: 0.875rem;
+          margin-top: 0.5rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(239, 68, 68, 0.1);
+          padding: 0.5rem 0.75rem;
+          border-radius: 6px;
+          border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .terms-container {

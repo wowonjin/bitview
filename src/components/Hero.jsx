@@ -197,30 +197,22 @@ const Hero = () => {
               더 스마트한 투자 결정을 내리세요.
             </p>
 
-            <div className="hero-button-container">
-              <Link to="/chart" className="hero-badge-button no-shimmer">
-                <BarChart3 size={16} />
-                <span>차트보기</span>
-              </Link>
-
-            </div>
-
             <div className="hero-stats">
-              <div className="stat-item">
+              <div className="stat-box">
                 <TrendingUp className="stat-icon" />
                 <div className="stat-content">
                   <div className="stat-number">실시간</div>
                   <div className="stat-label">차트 분석</div>
                 </div>
               </div>
-              <div className="stat-item">
+              <div className="stat-box">
                 <Shield className="stat-icon" />
                 <div className="stat-content">
                   <div className="stat-number">정확한</div>
                   <div className="stat-label">백테스트</div>
                 </div>
               </div>
-              <div className="stat-item">
+              <div className="stat-box">
                 <Zap className="stat-icon" />
                 <div className="stat-content">
                   <div className="stat-number">24/7</div>
@@ -407,8 +399,6 @@ const Hero = () => {
           }
         }
 
-
-
         .container {
           position: relative;
           z-index: 2;
@@ -563,10 +553,6 @@ const Hero = () => {
           animation: brandGlow 3s ease-in-out infinite;
         }
 
-
-
-
-
         .hero-description {
           font-size: 1.25rem;
           color: var(--text-secondary);
@@ -658,31 +644,81 @@ const Hero = () => {
 
         .hero-stats {
           display: flex;
-          gap: 2rem;
+          gap: 1rem;
           justify-content: center;
+          margin-bottom: 3rem;
         }
 
-        .stat-item {
+        .stat-box {
           display: flex;
           align-items: center;
           gap: 0.75rem;
+          padding: 1.1rem 1.5rem;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(128, 128, 128, 0.01));
+          border: 1px solid #374151;
+          border-radius: 20px;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s ease;
+          backdrop-filter: blur(20px);
+          box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.15),
+            0 0 20px rgba(59, 130, 246, 0.15),
+            0 0 40px rgba(59, 130, 246, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-box::before {
+          content: '';
+          position: absolute;
+          top: -1px;
+          left: -1px;
+          right: -1px;
+          bottom: -1px;
+          background: linear-gradient(135deg, 
+            rgba(59, 130, 246, 0.15) 0%, 
+            rgba(14, 165, 233, 0.1) 50%, 
+            rgba(6, 182, 212, 0.08) 100%);
+          border-radius: 21px;
+          z-index: -1;
+          opacity: 0.6;
+          filter: blur(0.5px);
+          animation: statGlow 4s ease-in-out infinite;
         }
 
         .stat-icon {
-          color: #888888;
-          width: 24px;
-          height: 24px;
+          width: 1.75rem;
+          height: 1.75rem;
+          color: #3b82f6;
+          flex-shrink: 0;
+        }
+
+        .stat-content {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
         }
 
         .stat-number {
-          font-size: 1.25rem;
+          font-size: 1.125rem;
           font-weight: 700;
           color: var(--text-primary);
+          line-height: 1;
         }
 
         .stat-label {
           font-size: 0.875rem;
           color: var(--text-secondary);
+          line-height: 1;
+        }
+
+        @keyframes statGlow {
+          0%, 100% {
+            opacity: 0.6;
+          }
+          50% {
+            opacity: 1;
+          }
         }
 
         .hero-visual {
@@ -744,8 +780,6 @@ const Hero = () => {
             transform: scale(1.002);
           }
         }
-
-
 
         .dashboard-header {
           display: flex;
@@ -842,8 +876,6 @@ const Hero = () => {
           height: 100%;
           background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
         }
-
-
 
         .portfolio-header {
           display: flex;
@@ -990,8 +1022,6 @@ const Hero = () => {
           opacity: 0;
         }
 
-
-
         .crypto-symbol {
           width: 40px;
           height: 40px;
@@ -1014,9 +1044,6 @@ const Hero = () => {
 
         .nasdaq-symbol {
           color: #3b82f6;
-        }
-          height: 20px;
-          border-radius: 0;
         }
 
         .exchange-icon {

@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle } from 'lucide-react'
+import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [userInfoModalOpen, setUserInfoModalOpen] = useState(false)
-  const { user, logout, isAuthenticated, isAdmin, isPremium } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [tempName, setTempName] = useState('')
+  const [nameError, setNameError] = useState('')
+  const { user, logout, isAuthenticated, isAdmin, isPremium, updateUser } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const dropdownRef = useRef(null)
@@ -37,6 +41,59 @@ const Navbar = () => {
   const handleUserInfoClick = () => {
     setUserInfoModalOpen(true)
     setDropdownOpen(false)
+    setTempName(user?.name || '')
+    setNameError('')
+  }
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const handleEditName = () => {
+    setIsEditingName(true)
+    setNameError('')
+  }
+
+  const handleSaveName = () => {
+    const trimmedName = tempName.trim()
+    
+    if (!trimmedName) {
+      setNameError('닉네임을 입력해주세요.')
+      return
+    }
+
+    // 기존 이름과 같다면 바로 저장
+    if (trimmedName.toLowerCase() === user?.name?.toLowerCase()) {
+      setIsEditingName(false)
+      setNameError('')
+      return
+    }
+
+    // 중복 이름 확인
+    const users = JSON.parse(localStorage.getItem('users') || '[]')
+    const existingName = users.find(u => u.name && u.name.toLowerCase() === trimmedName.toLowerCase())
+
+    if (existingName) {
+      setNameError('이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.')
+      return
+    }
+
+    updateUser({ name: trimmedName })
+    setIsEditingName(false)
+    setNameError('')
+  }
+
+  const handleCancelEditName = () => {
+    setTempName(user?.name || '')
+    setIsEditingName(false)
+    setNameError('')
+  }
+
+  const handleNameChange = (e) => {
+    setTempName(e.target.value)
+    if (nameError) {
+      setNameError('')
+    }
   }
 
   // 드롭다운 외부 클릭 시 닫기
@@ -60,7 +117,7 @@ const Navbar = () => {
         <div className="notice-banner" onClick={handlePremiumClick}>
           <div className="notice-content">
             <span className="notice-text">
-              🎉 <strong>[무료 프리미엄] 지금 가입하면 BitView 한정 즉시 거래 수수료 20% 할인!</strong>
+              🎉 <strong>[프리미엄] 지금 가입하면 BitView 한정 즉시 거래 수수료 20% 할인!</strong>
             </span>
           </div>
         </div>
@@ -98,7 +155,7 @@ const Navbar = () => {
             <div className="navbar-right desktop-menu">
               {!isPremium && !isAdmin && (
                 <button onClick={handlePremiumClick} className={`premium-link ${location.pathname === '/premium' ? 'active' : ''}`}>
-                  <span className="premium-text">💎 무료 프리미엄</span>
+                  <span className="premium-text">💎 프리미엄</span>
                 </button>
               )}
               {isAuthenticated ? (
@@ -219,7 +276,7 @@ const Navbar = () => {
                       }}
                       className="mobile-menu-link premium-mobile-link"
                     >
-                      💎 무료 프리미엄
+                      💎 프리미엄
                     </button>
                   )}
                   {isAdmin && (
@@ -245,7 +302,7 @@ const Navbar = () => {
                     }}
                     className="mobile-menu-link premium-mobile-link"
                   >
-                    💎 무료 프리미엄
+                    💎 프리미엄
                   </button>
                   <Link 
                     to="/signup" 
@@ -285,14 +342,58 @@ const Navbar = () => {
               </div>
               <div className="user-info-item">
                 <label>비밀번호:</label>
-                <span>••••••••</span>
-              </div>
-              {user?.name && (
-                <div className="user-info-item">
-                  <label>이름:</label>
-                  <span>{user.name}</span>
+                <div className="password-container">
+                  <span className="password-display">
+                    {showPassword ? user?.password || '설정되지 않음' : '••••••••'}
+                  </span>
+                  <button 
+                    onClick={togglePasswordVisibility}
+                    className="password-toggle-btn"
+                    title={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
-              )}
+              </div>
+              <div className="user-info-item">
+                <label>닉네임:</label>
+                <div className="name-container">
+                  {isEditingName ? (
+                    <div className="name-edit-container">
+                      <div className="name-edit-input-container">
+                        <input
+                          type="text"
+                          value={tempName}
+                          onChange={handleNameChange}
+                          className="name-input"
+                          placeholder="닉네임을 입력하세요"
+                          autoFocus
+                        />
+                        <div className="name-edit-buttons">
+                          <button onClick={handleSaveName} className="save-btn" title="저장">
+                            <Check size={16} />
+                          </button>
+                          <button onClick={handleCancelEditName} className="cancel-btn" title="취소">
+                            <XIcon size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      {nameError && (
+                        <div className="name-error">
+                          {nameError}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="name-display-container">
+                      <span>{user?.name || '닉네임 설정되지 않음'}</span>
+                      <button onClick={handleEditName} className="edit-btn" title="닉네임 변경">
+                        <Edit2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="user-info-item">
                 <label>계정 유형:</label>
                 <span>
@@ -795,10 +896,11 @@ const Navbar = () => {
 
         .user-info-item {
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
           padding: 0.75rem 0;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          gap: 1rem;
         }
 
         .user-info-item:last-child {
@@ -809,11 +911,141 @@ const Navbar = () => {
           color: #cccccc;
           font-weight: 500;
           font-size: 0.9rem;
+          min-width: 80px;
+          flex-shrink: 0;
         }
 
         .user-info-item span {
           color: white;
           font-weight: 600;
+        }
+
+        .user-info-item > span,
+        .user-info-item > div {
+          flex: 1;
+          display: flex;
+          justify-content: flex-end;
+        }
+
+        /* 비밀번호 표시/숨기기 스타일 */
+        .password-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          justify-content: flex-end;
+        }
+
+        .password-display {
+          color: white;
+          font-weight: 600;
+          font-family: monospace;
+          min-width: 100px;
+          text-align: right;
+        }
+
+        .password-toggle-btn {
+          background: none;
+          border: none;
+          color: #999;
+          cursor: pointer;
+          padding: 0.25rem;
+          border-radius: 4px;
+          transition: color 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .password-toggle-btn:hover {
+          color: #3b82f6;
+        }
+
+        /* 이름 편집 스타일 */
+        .name-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          min-width: 200px;
+          justify-content: flex-end;
+        }
+
+        .name-display-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex: 1;
+          justify-content: flex-end;
+        }
+
+        .name-edit-container {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 0.5rem;
+          flex: 1;
+        }
+
+        .name-edit-input-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          justify-content: flex-end;
+        }
+
+        .name-input {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 6px;
+          color: white;
+          padding: 0.5rem 0.75rem;
+          font-size: 0.9rem;
+          width: 150px;
+          text-align: right;
+        }
+
+        .name-input:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .name-edit-buttons {
+          display: flex;
+          gap: 0.25rem;
+        }
+
+        .edit-btn,
+        .save-btn,
+        .cancel-btn {
+          background: none;
+          border: none;
+          color: #999;
+          cursor: pointer;
+          padding: 0.25rem;
+          border-radius: 4px;
+          transition: color 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .edit-btn:hover {
+          color: #3b82f6;
+        }
+
+        .save-btn:hover {
+          color: #10b981;
+        }
+
+        .cancel-btn:hover {
+          color: #ef4444;
+        }
+
+        .name-error {
+          color: #ef4444;
+          font-size: 0.8rem;
+          margin-top: 0.25rem;
+          text-align: right;
         }
 
         @keyframes fadeIn {

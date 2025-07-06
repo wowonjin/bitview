@@ -35,6 +35,16 @@ const BacktestCalculator = () => {
   // 활성 탭
   const [activeResultTab, setActiveResultTab] = useState('overview')
   
+  // 차트 줌 상태
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [displayRange, setDisplayRange] = useState(100)
+  const chartContainerRef = useRef(null)
+  
+  // 차트 팬(이동) 상태
+  const [chartOffset, setChartOffset] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, offset: 0 })
+  
   // 실시간 가격 정보
   const [marketData, setMarketData] = useState({
     currentPrice: 0,
@@ -46,6 +56,76 @@ const BacktestCalculator = () => {
     binanceFundingRate: 0,
     bybitFundingRate: 0
   })
+  
+  // 차트 줌 핸들러
+  const handleChartZoom = useCallback((event) => {
+    event.preventDefault()
+    
+    const delta = event.deltaY
+    const zoomFactor = 0.1
+    
+    if (delta < 0) {
+      // 줌 인 (확대)
+      setZoomLevel(prev => Math.min(prev + zoomFactor, 3))
+      setDisplayRange(prev => Math.max(prev - 10, 20))
+    } else {
+      // 줌 아웃 (축소)
+      setZoomLevel(prev => Math.max(prev - zoomFactor, 0.5))
+      setDisplayRange(prev => Math.min(prev + 10, 500))
+    }
+  }, [])
+  
+  // 차트 드래그 핸들러
+  const handleMouseDown = useCallback((event) => {
+    setIsDragging(true)
+    setDragStart({
+      x: event.clientX,
+      offset: chartOffset
+    })
+  }, [chartOffset])
+  
+  const handleMouseMove = useCallback((event) => {
+    if (!isDragging) return
+    
+    const deltaX = event.clientX - dragStart.x
+    const sensitivity = 0.5 // 드래그 민감도
+    const newOffset = dragStart.offset + Math.round(deltaX * sensitivity)
+    
+    // 오프셋 범위 제한 (0부터 전체 데이터 길이까지)
+    const maxOffset = Math.max(0, candleData.length - displayRange)
+    setChartOffset(Math.max(0, Math.min(newOffset, maxOffset)))
+  }, [isDragging, dragStart, candleData.length, displayRange])
+  
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+  
+  // 차트 컨테이너에 이벤트 리스너 추가
+  useEffect(() => {
+    const chartContainer = chartContainerRef.current
+    if (chartContainer) {
+      chartContainer.addEventListener('wheel', handleChartZoom, { passive: false })
+      chartContainer.addEventListener('mousedown', handleMouseDown)
+      
+      return () => {
+        chartContainer.removeEventListener('wheel', handleChartZoom)
+        chartContainer.removeEventListener('mousedown', handleMouseDown)
+      }
+    }
+  }, [handleChartZoom, handleMouseDown])
+  
+  // 전역 마우스 이벤트 리스너 (드래그 중일 때)
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp])
   
   // 펀딩 카운트다운을 위한 별도 상태
 
@@ -347,7 +427,7 @@ const BacktestCalculator = () => {
   }, []);
 
   // 캔들스틱 차트 컴포넌트
-  const CandlestickChart = ({ data }) => {
+  const CandlestickChart = ({ data, offset }) => {
     if (!data || data.length === 0) {
       return (
         <div style={{ 
@@ -366,8 +446,12 @@ const BacktestCalculator = () => {
     const width = 800 - margin.left - margin.right
     const height = 380 - margin.top - margin.bottom
 
-    // 최근 100개 데이터만 표시
-    const visibleData = data.slice(-100)
+    // 줌 레벨과 오프셋에 따른 표시 데이터 조정
+    const maxOffset = Math.max(0, data.length - displayRange)
+    const actualOffset = Math.min(offset || 0, maxOffset)
+    const startIndex = Math.max(0, data.length - displayRange - actualOffset)
+    const endIndex = Math.min(data.length, startIndex + displayRange)
+    const visibleData = data.slice(startIndex, endIndex)
     
     if (visibleData.length === 0) return null
       
@@ -770,6 +854,7 @@ const BacktestCalculator = () => {
         
         .results-section {
           margin-top: 20px;
+          margin-bottom: 60px;
           background: rgba(255, 255, 255, 0.02);
           border-radius: 16px;
           padding: 30px;
@@ -1067,15 +1152,61 @@ const BacktestCalculator = () => {
           </div>
           
             {/* 차트 */}
-            <div className="chart-container">
+            <div 
+              className="chart-container"
+              ref={chartContainerRef}
+              style={{ 
+                cursor: isDragging ? 'grabbing' : 'grab',
+                userSelect: 'none' // 드래그 중 텍스트 선택 방지
+              }}
+            >
               {loading ? (
                 <div className="empty-state">
                   <RefreshCw className="animate-spin" size={48} />
                   <div>차트 데이터를 불러오는 중...</div>
                 </div>
               ) : (
-                <CandlestickChart data={candleData} />
+                <CandlestickChart data={candleData} offset={chartOffset} />
               )}
+              
+              {/* 줌 레벨 및 위치 표시 */}
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                background: 'rgba(0, 0, 0, 0.7)',
+                color: '#fff',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                zIndex: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px'
+              }}>
+                <div>줌: {zoomLevel.toFixed(1)}x ({displayRange}개)</div>
+                {chartOffset > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '10px', color: '#ccc' }}>
+                      오프셋: -{chartOffset}
+                    </span>
+                    <button 
+                      onClick={() => setChartOffset(0)}
+                      style={{
+                        background: '#3b82f6',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '2px 6px',
+                        borderRadius: '3px',
+                        fontSize: '9px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      최신
+                    </button>
+                  </div>
+                )}
+              </div>
           </div>
         </div>
         

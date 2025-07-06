@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AuthProvider } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
+import Services from './components/Services'
 import Features from './components/Features'
 import Statistics from './components/Statistics'
 import CryptoCards from './components/CryptoCards'
@@ -17,6 +18,8 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Admin from './pages/Admin'
 import Premium from './pages/Premium'
+import Privacy from './pages/Privacy'
+import Terms from './pages/Terms'
 import './App.css'
 
 const AppContent = () => {
@@ -30,6 +33,7 @@ const AppContent = () => {
             <Route path="/" element={
               <>
                 <Hero />
+                <Services />
               </>
             } />
             <Route path="/live-coins" element={<LiveCoins />} />
@@ -42,6 +46,8 @@ const AppContent = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
           </Routes>
     </div>
   )

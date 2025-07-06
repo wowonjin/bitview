@@ -135,6 +135,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem(`favorites_${user.email}`, JSON.stringify(newFavorites))
   }
 
+  // 사용자 정보 업데이트
+  const updateUser = (updatedData) => {
+    if (!user) return
+
+    const updatedUser = { ...user, ...updatedData }
+    setUser(updatedUser)
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+    
+    // users 배열에서도 해당 사용자 정보 업데이트
+    const users = JSON.parse(localStorage.getItem('users') || '[]')
+    const userIndex = users.findIndex(u => u.email === user.email)
+    
+    if (userIndex !== -1) {
+      users[userIndex] = { ...users[userIndex], ...updatedData }
+      localStorage.setItem('users', JSON.stringify(users))
+    }
+  }
+
   const value = {
     user,
     login,
@@ -145,7 +163,8 @@ export const AuthProvider = ({ children }) => {
     isPremium,
     activatePremium,
     favoriteCoins,
-    toggleFavoriteCoin
+    toggleFavoriteCoin,
+    updateUser
   }
 
   return (
