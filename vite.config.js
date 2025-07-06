@@ -14,7 +14,11 @@ export default defineConfig({
           router: ['react-router-dom']
         }
       }
-    }
+    },
+    // SEO 최적화를 위한 빌드 설정
+    assetsDir: 'assets',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000
   },
   server: {
     proxy: {

@@ -1,0 +1,35 @@
+User-agent: *
+Allow: /
+
+# 주요 페이지
+Allow: /live-coins
+Allow: /chart
+Allow: /advanced-backtest
+Allow: /profit-calculator
+Allow: /funding-calculator
+Allow: /premium
+
+# 정적 파일
+Allow: /assets/
+Allow: /public/
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.jpeg
+Allow: /*.gif
+Allow: /*.svg
+Allow: /*.ico
+Allow: /*.woff
+Allow: /*.woff2
+Allow: /*.ttf
+
+# 개인정보 보호 페이지
+Allow: /privacy
+Allow: /terms
+
+# 사이트맵 위치
+Sitemap: https://bitview.vercel.app/sitemap.xml
+
+# 크롤링 지연 (1초)
+Crawl-delay: 1 
