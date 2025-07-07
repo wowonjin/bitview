@@ -1668,6 +1668,10 @@ const Premium = () => {
         }
 
         @media (max-width: 768px) {
+          .premium-page {
+            padding-top: 80px;
+          }
+
           .hero-title {
             font-size: 2.5rem;
           }
@@ -1721,6 +1725,119 @@ const Premium = () => {
 
           .cta-content-wrapper {
             padding: 2rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .premium-page {
+            padding-top: 70px;
+          }
+
+          .container {
+            padding: 0 1rem;
+          }
+
+          .hero-title {
+            font-size: 2rem;
+            line-height: 1.2;
+          }
+
+          .hero-subtitle {
+            font-size: 1.25rem;
+          }
+
+          .hero-description {
+            font-size: 0.9rem;
+          }
+
+          .section-header h2 {
+            font-size: 1.75rem;
+          }
+
+          .section-header p {
+            font-size: 0.9rem;
+          }
+
+          .cta-card {
+            padding: 2rem 1rem;
+          }
+
+          .cta-content-wrapper {
+            padding: 1.5rem;
+          }
+
+          .cta-content-wrapper h2 {
+            font-size: 1.75rem;
+          }
+
+          .cta-content-wrapper p {
+            font-size: 0.9rem;
+          }
+
+          .exchange-card {
+            padding: 1.5rem;
+          }
+
+          .exchange-header {
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .exchange-logo {
+            width: 48px;
+            height: 48px;
+          }
+
+          .exchange-info h3 {
+            font-size: 1.5rem;
+          }
+
+          .benefit-row {
+            padding: 0.5rem 0;
+          }
+
+          .benefit-row span {
+            font-size: 0.85rem;
+          }
+
+          .cta-button {
+            padding: 0.875rem 1.5rem;
+            font-size: 0.9rem;
+          }
+
+          .feature-card {
+            padding: 1.5rem;
+          }
+
+          .feature-icon {
+            width: 48px;
+            height: 48px;
+          }
+
+          .feature-card h3 {
+            font-size: 1.25rem;
+          }
+
+          .feature-card p {
+            font-size: 0.9rem;
+          }
+
+          .cta-action-button {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+          }
+
+          .instant-activation {
+            font-size: 0.8rem;
+          }
+
+          .final-cta {
+            padding: 4rem 0;
+          }
+
+          .cta-background-glow {
+            width: 600px;
+            height: 600px;
           }
         }
 

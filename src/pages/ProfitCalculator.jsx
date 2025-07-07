@@ -1039,24 +1039,57 @@ const ProfitCalculator = () => {
         }
 
         @media (max-width: 768px) {
+          .profit-calculator-page {
+            padding-top: 80px;
+            padding-bottom: 30px;
+          }
+
+          .calculator-container {
+            padding: 0 16px;
+          }
+
           .calculator-content {
             flex-direction: column;
-            gap: 30px;
+            gap: 24px;
           }
 
           .main-content {
             grid-template-columns: 1fr;
-            gap: 30px;
+            gap: 24px;
+          }
+
+          .calculator-header {
+            margin-bottom: 32px;
           }
 
           .calculator-header h1 {
             font-size: 2rem;
           }
 
+          .calculator-header p {
+            font-size: 1rem;
+          }
+
           .input-section,
           .result-section {
             padding: 20px;
             min-height: auto;
+          }
+
+          .input-group {
+            margin-bottom: 20px;
+          }
+
+          .input-group label {
+            font-size: 14px;
+          }
+
+          .amount-input,
+          .leverage-input,
+          .profit-input,
+          .dropdown-select {
+            padding: 12px 16px;
+            font-size: 14px;
           }
 
           .details-aside {
@@ -1078,9 +1111,20 @@ const ProfitCalculator = () => {
             gap: 8px;
           }
 
+          .tooltip-wrapper {
+            position: static;
+            transform: none;
+            margin-left: 0;
+          }
+
           .tooltip-btn {
             font-size: 11px;
             padding: 6px 10px;
+            position: relative;
+          }
+
+          .tooltip-btn::before {
+            display: none;
           }
 
           .compound-chart {
@@ -1098,14 +1142,181 @@ const ProfitCalculator = () => {
           }
 
           .premium-notice {
-            top: -65px;
+            top: -60px;
             font-size: 13px;
             padding: 10px 14px;
-            min-width: 220px;
+            min-width: 200px;
           }
 
           .premium-notice::before {
             border-width: 10px 10px 0 10px;
+          }
+
+          .result-item {
+            padding: 10px 0;
+          }
+
+          .result-item .label {
+            font-size: 13px;
+          }
+
+          .result-item .value {
+            font-size: 14px;
+          }
+
+          .final-results-box {
+            padding: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .profit-calculator-page {
+            padding-top: 70px;
+            padding-bottom: 20px;
+          }
+
+          .calculator-container {
+            padding: 0 12px;
+          }
+
+          .calculator-header {
+            margin-bottom: 24px;
+          }
+
+          .calculator-header h1 {
+            font-size: 1.75rem;
+          }
+
+          .calculator-header p {
+            font-size: 0.9rem;
+          }
+
+          .calculator-content {
+            gap: 20px;
+          }
+
+          .main-content {
+            gap: 20px;
+          }
+
+          .input-section,
+          .result-section {
+            padding: 16px;
+          }
+
+          .input-group {
+            margin-bottom: 16px;
+          }
+
+          .input-group label {
+            font-size: 13px;
+            margin-bottom: 6px;
+          }
+
+          .amount-input,
+          .leverage-input,
+          .profit-input,
+          .dropdown-select {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .currency-label,
+          .unit-label {
+            font-size: 13px;
+          }
+
+          .calculate-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .premium-notice {
+            top: -55px;
+            font-size: 12px;
+            padding: 8px 12px;
+            min-width: 180px;
+          }
+
+          .result-item {
+            padding: 8px 0;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+          }
+
+          .result-item .label {
+            font-size: 12px;
+          }
+
+          .result-item .value {
+            font-size: 13px;
+            align-self: flex-end;
+          }
+
+          .final-results-box {
+            padding: 12px;
+          }
+
+          .amount-with-tooltip {
+            width: 100%;
+            align-items: flex-end;
+          }
+
+          .tooltip-btn {
+            font-size: 10px;
+            padding: 5px 8px;
+          }
+
+          .details-aside {
+            height: 100vh;
+          }
+
+          .aside-header {
+            padding: 16px;
+          }
+
+          .aside-header h4 {
+            font-size: 16px;
+          }
+
+          .aside-content {
+            padding: 12px;
+          }
+
+          .compound-chart {
+            padding: 10px;
+          }
+
+          .compound-chart h5 {
+            font-size: 12px;
+          }
+
+          .compound-round {
+            padding: 12px;
+            margin-bottom: 12px;
+          }
+
+          .round-header {
+            font-size: 14px;
+            margin-bottom: 10px;
+          }
+
+          .round-details {
+            font-size: 12px;
+            gap: 6px;
+          }
+
+          .detail-item {
+            padding: 4px 0;
+          }
+
+          .detail-label {
+            font-size: 11px;
+          }
+
+          .detail-amount {
+            font-size: 11px;
           }
         }
       `}</style>

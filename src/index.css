@@ -156,16 +156,49 @@ html {
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .container {
+    padding: 0 1rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+
+  /* 텍스트 크기 조정 */
+  .text-xl {
+    font-size: 1.125rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
     padding: 0 0.75rem;
   }
   
   .btn {
     padding: 0.625rem 1.25rem;
-    font-size: 0.813rem;
+    font-size: 0.8rem;
   }
   
   .card {
-    padding: 1rem;
+    padding: 0.75rem;
+  }
+
+  /* 작은 화면에서 텍스트 크기 더 축소 */
+  .text-xl {
+    font-size: 1rem;
+  }
+  
+  .text-lg {
+    font-size: 0.9rem;
   }
 }
 

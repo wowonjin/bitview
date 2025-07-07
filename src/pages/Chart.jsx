@@ -622,6 +622,12 @@ const Chart = () => {
 
   return (
     <div className="chart-page">
+      {/* 모바일 전용 헤더 */}
+      <div className="mobile-page-header">
+        <h1>실시간 차트</h1>
+        <p>PC로 접속하시면 더 많은 기능을 사용할 수 있습니다.</p>
+      </div>
+      
       {/* 메인 컨테이너 */}
       <div className="main-container">
         {/* 좌측 도구 패널 */}
@@ -2172,7 +2178,8 @@ const Chart = () => {
 
         @media (max-width: 768px) {
           .chart-page {
-            padding-top: 60px;
+            padding-top: 80px;
+            padding-bottom: 20px;
           }
 
           .main-container {
@@ -2221,13 +2228,83 @@ const Chart = () => {
 
           .chart-wrapper {
             width: 100%;
-            height: calc(65vh - 120px);
+            height: calc(70vh - 120px);
             left: 0;
             right: 0;
-            padding: 0;
+            padding: 10px;
+            margin-top: 10px;
           }
 
+          .chart-container {
+            height: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+          }
 
+          .chart-controls {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+          }
+
+          .chart-btn {
+            width: 40px;
+            height: 40px;
+          }
+
+          .color-palette-inline {
+            flex-wrap: wrap;
+            gap: 6px;
+          }
+
+          .color-option {
+            width: 24px;
+            height: 24px;
+          }
+
+          .size-options-left {
+            flex-wrap: wrap;
+            gap: 6px;
+          }
+
+          .size-option {
+            width: 36px;
+            height: 36px;
+          }
+
+          .option-section {
+            margin-bottom: 16px;
+          }
+
+          .section-label-left {
+            font-size: 13px;
+          }
+
+          .info-section {
+            font-size: 12px;
+            padding: 10px;
+          }
+
+          .memo-action-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .clear-all-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .memo-editor {
+            width: 240px;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%);
+          }
+
+          .memo-dropdown {
+            max-height: 200px;
+          }
 
           .drawing-controls {
             gap: 8px;
@@ -2235,15 +2312,6 @@ const Chart = () => {
 
           .eraser-controls {
             gap: 8px;
-          }
-
-          .chart-container {
-            height: 100%;
-          }
-
-          .chart-controls {
-            flex-wrap: wrap;
-            justify-content: center;
           }
 
           .memo-controls {
@@ -2266,6 +2334,144 @@ const Chart = () => {
           .grid-4 {
             grid-template-columns: 1fr;
             grid-template-rows: repeat(4, 1fr);
+          }
+
+          .drawing-canvas {
+            width: 100% !important;
+            height: 100% !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .chart-page {
+            padding-top: 70px;
+            padding-bottom: 15px;
+          }
+
+          .tool-container {
+            width: calc(100% - 16px);
+            margin: 8px;
+          }
+
+          .tool-container-title {
+            padding: 12px 12px 8px 12px;
+            font-size: 13px;
+          }
+
+          .main-buttons {
+            padding: 6px 12px 12px 12px;
+            gap: 4px;
+          }
+
+          .main-btn {
+            width: 38px;
+            height: 38px;
+          }
+
+          .main-btn .material-icons {
+            font-size: 16px;
+          }
+
+          .detail-options {
+            padding: 12px;
+            max-height: 250px;
+          }
+
+          .chart-wrapper {
+            width: 100%;
+            height: calc(60vh - 100px);
+            padding: 8px;
+            margin-top: 8px;
+          }
+
+          .chart-controls {
+            gap: 6px;
+          }
+
+          .chart-btn {
+            width: 36px;
+            height: 36px;
+          }
+
+          .color-option {
+            width: 20px;
+            height: 20px;
+          }
+
+          .size-option {
+            width: 32px;
+            height: 32px;
+          }
+
+          .option-section {
+            margin-bottom: 12px;
+          }
+
+          .section-label-left {
+            font-size: 12px;
+            margin-bottom: 6px;
+          }
+
+          .info-section {
+            font-size: 11px;
+            padding: 8px;
+          }
+
+          .memo-action-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+
+          .clear-all-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+
+          .memo-editor {
+            width: calc(100vw - 32px);
+            max-width: 280px;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%);
+          }
+
+          .memo-header {
+            padding: 10px 12px;
+          }
+
+          .memo-title-input {
+            font-size: 14px !important;
+          }
+
+          .memo-content-input {
+            font-size: 13px;
+          }
+
+          .memo-dropdown {
+            max-height: 150px;
+            font-size: 12px;
+          }
+
+          .memo-dropdown-title {
+            font-size: 13px;
+          }
+
+          .memo-dropdown-preview {
+            font-size: 11px;
+          }
+
+          .memo-dropdown-date {
+            font-size: 10px;
+          }
+
+          .tooltip {
+            font-size: 11px;
+            padding: 4px 8px;
+          }
+
+          .grid-4 {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
           }
         }
 

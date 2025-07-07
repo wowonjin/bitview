@@ -97,8 +97,17 @@ const Footer = () => {
             padding: 1.5rem 0;
           }
 
+          .container {
+            padding: 0 1rem;
+          }
+
+          .footer-disclaimer {
+            margin-bottom: 1rem;
+          }
+
           .footer-disclaimer p {
             font-size: 0.7rem;
+            line-height: 1.5;
           }
 
           .footer-links a,
@@ -108,6 +117,39 @@ const Footer = () => {
 
           .footer-copyright p {
             font-size: 0.7rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .footer {
+            padding: 1rem 0;
+          }
+
+          .container {
+            padding: 0 0.75rem;
+          }
+
+          .footer-disclaimer {
+            margin-bottom: 0.75rem;
+          }
+
+          .footer-disclaimer p {
+            font-size: 0.65rem;
+            line-height: 1.4;
+            margin-bottom: 0.4rem;
+          }
+
+          .footer-links {
+            margin-bottom: 0.75rem;
+          }
+
+          .footer-links a,
+          .footer-links .separator {
+            font-size: 0.65rem;
+          }
+
+          .footer-copyright p {
+            font-size: 0.65rem;
           }
         }
       `}</style>

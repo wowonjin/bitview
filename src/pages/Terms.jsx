@@ -245,11 +245,15 @@ const Terms = () => {
 
         @media (max-width: 768px) {
           .terms-page {
-            padding: 60px 0 20px;
+            padding: 80px 0 20px;
+          }
+
+          .container {
+            padding: 0 16px;
           }
 
           .content {
-            padding: 20px;
+            padding: 24px;
           }
 
           h1 {
@@ -262,6 +266,40 @@ const Terms = () => {
 
           p {
             font-size: 0.9rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .terms-page {
+            padding: 70px 0 15px;
+          }
+
+          .container {
+            padding: 0 12px;
+          }
+
+          .content {
+            padding: 20px;
+          }
+
+          h1 {
+            font-size: 1.75rem;
+            margin-bottom: 32px;
+          }
+
+          .section {
+            margin-bottom: 32px;
+          }
+
+          h2 {
+            font-size: 1.125rem;
+            margin-bottom: 12px;
+          }
+
+          p {
+            font-size: 0.85rem;
+            line-height: 1.7;
+            margin-bottom: 12px;
           }
         }
       `}</style>

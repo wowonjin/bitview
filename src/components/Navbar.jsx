@@ -162,7 +162,7 @@ const Navbar = () => {
                 <div className="user-menu" ref={dropdownRef}>
                   <button className="user-dropdown-btn" onClick={toggleDropdown}>
                     <User size={20} />
-                    <span>{user?.name || user?.email}</span>
+                    <span className="user-display-name">{user?.name || user?.email}</span>
                     {isAdmin && <span className="admin-badge">관리자</span>}
                     {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
                     <ChevronDown size={16} className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`} />
@@ -209,20 +209,37 @@ const Navbar = () => {
             </button>
           </div>
 
-          {/* 모바일 메뉴 */}
-          <motion.div
-            className={`mobile-menu ${isOpen ? 'mobile-menu-open' : ''}`}
-            initial={{ opacity: 0, height: 0 }}
-            animate={{
-              opacity: isOpen ? 1 : 0,
-              height: isOpen ? 'auto' : 0,
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="mobile-menu-content">
+          {/* 모바일 사이드바 오버레이 */}
+          <div
+            className={`mobile-sidebar-overlay ${isOpen ? 'active' : ''}`}
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* 모바일 사이드바 */}
+          <div className={`mobile-sidebar ${isOpen ? 'active' : ''}`}>
+            <div className="mobile-sidebar-header">
+              <Link
+                to="/"
+                className="mobile-sidebar-logo"
+                onClick={() => setIsOpen(false)}
+              >
+                <span className="logo-text">
+                  BitView<span className="logo-dot">.</span>
+                </span>
+              </Link>
+              <button
+                className="mobile-sidebar-close"
+                onClick={() => setIsOpen(false)}
+                aria-label="메뉴 닫기"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="mobile-sidebar-nav">
               <Link
                 to="/live-coins"
-                className="mobile-menu-link"
+                className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
                 실시간 코인 가격
@@ -230,7 +247,7 @@ const Navbar = () => {
               
               <Link
                 to="/chart"
-                className="mobile-menu-link"
+                className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
                 실시간 차트
@@ -238,7 +255,7 @@ const Navbar = () => {
               
               <Link
                 to="/profit-calculator"
-                className="mobile-menu-link"
+                className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
                 수익 복리 계산기
@@ -246,7 +263,7 @@ const Navbar = () => {
               
               <Link
                 to="/funding-calculator"
-                className="mobile-menu-link"
+                className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
                 펀딩비 계산기
@@ -254,74 +271,79 @@ const Navbar = () => {
               
               <Link
                 to="/advanced-backtest"
-                className="mobile-menu-link"
+                className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
                 백테스트
               </Link>
-              
+            </div>
+            
+            <div className="mobile-sidebar-user">
               {isAuthenticated ? (
                 <>
-                  <div className="mobile-user-info">
+                  {/* 로그인 상태 - 회원정보 */}
+                  <div className="mobile-sidebar-user-info">
                     <User size={20} />
                     <span>{user?.name || user?.email}</span>
                     {isAdmin && <span className="admin-badge">관리자</span>}
                     {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
                   </div>
+                  
+                  {/* 프리미엄 버튼 - 일반 사용자만 */}
                   {!isPremium && !isAdmin && (
                     <button
                       onClick={(e) => {
                         handlePremiumClick(e)
                         setIsOpen(false)
                       }}
-                      className="mobile-menu-link premium-mobile-link"
+                      className="mobile-sidebar-premium-btn"
                     >
                       💎 프리미엄
                     </button>
                   )}
+                  
+                  {/* 관리자 대시보드 */}
                   {isAdmin && (
                     <Link 
                       to="/admin" 
-                      className="mobile-menu-link"
+                      className="mobile-sidebar-link"
                       onClick={() => setIsOpen(false)}
                     >
                       관리자 대시보드
                     </Link>
                   )}
-                  <button onClick={handleLogout} className="mobile-logout-btn">
+                  
+                  {/* 로그아웃 버튼 */}
+                  <button onClick={handleLogout} className="mobile-sidebar-logout">
                     <LogOut size={16} />
                     로그아웃
                   </button>
                 </>
               ) : (
                 <>
+                  {/* 로그인 전 - 로그인 + 프리미엄 버튼 */}
+                  <Link
+                    to="/login"
+                    className="mobile-sidebar-login-btn"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User size={16} />
+                    로그인
+                  </Link>
+                  
                   <button
                     onClick={(e) => {
                       handlePremiumClick(e)
                       setIsOpen(false)
                     }}
-                    className="mobile-menu-link premium-mobile-link"
+                    className="mobile-sidebar-premium-btn"
                   >
                     💎 프리미엄
                   </button>
-                  <Link 
-                    to="/signup" 
-                    className="mobile-menu-btn signup-btn"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    회원가입
-                  </Link>
-                  <Link 
-                    to="/login" 
-                    className="mobile-menu-btn login-btn"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    로그인
-                  </Link>
                 </>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
       </nav>
 
@@ -437,8 +459,6 @@ const Navbar = () => {
           flex: 1;
         }
 
-
-
         .navbar {
           position: fixed;
           top: ${!isPremium && location.pathname === '/' ? '2.75rem' : '0'};
@@ -503,8 +523,6 @@ const Navbar = () => {
         .chart-link.active {
           color: #ffffff;
         }
-
-
 
         .desktop-menu {
           display: flex;
@@ -603,7 +621,6 @@ const Navbar = () => {
         }
 
         .dropdown-item:hover {
-          background: rgba(255, 255, 255, 0.1);
           color: white;
         }
 
@@ -612,7 +629,6 @@ const Navbar = () => {
         }
 
         .dropdown-item.logout:hover {
-          background: rgba(255, 255, 255, 0.1);
           color: white;
         }
 
@@ -667,109 +683,181 @@ const Navbar = () => {
           background: var(--bg-card);
         }
 
-        .mobile-menu {
-          overflow: hidden;
+        /* ==== 모바일 사이드바 메뉴 ==== */
+        .mobile-sidebar-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(0, 0, 0, 0.6);
+          z-index: 99998;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
         }
 
-        .mobile-menu-content {
-          padding: 1rem 0;
-          border-top: 1px solid var(--border-color);
-          display: none;
-          flex-direction: column;
-          gap: 1rem;
+        .mobile-sidebar-overlay.active {
+          opacity: 1;
+          visibility: visible;
         }
 
-        .mobile-menu-open .mobile-menu-content {
+        .mobile-sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 280px;
+          height: 100vh;
+          background: #111111;
+          z-index: 99999;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+          overflow-y: auto;
+        }
+
+        .mobile-sidebar.active {
+          transform: translateX(0);
+        }
+
+        .mobile-sidebar-header {
           display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          background: #111111;
         }
 
-        .mobile-menu-link {
-          color: var(--text-secondary);
+        .mobile-sidebar-logo {
+          text-decoration: none;
+        }
+
+        .mobile-sidebar-logo .logo-text {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #ffffff;
+        }
+
+        .mobile-sidebar-logo .logo-dot {
+          color: #6680fd;
+        }
+
+        .mobile-sidebar-close {
+          background: none;
+          border: none;
+          color: #ffffff;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .mobile-sidebar-close:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-sidebar-nav {
+          padding: 1rem;
+        }
+
+        .mobile-sidebar-link {
+          display: block;
+          padding: 0.75rem 1rem;
+          color: #ffffff;
           text-decoration: none;
           font-weight: 500;
-          padding: 0.75rem 1rem;
-          border-radius: 0.5rem;
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          width: 100%;
-          text-align: left;
-          font-size: inherit;
-          font-family: inherit;
-          transition: all var(--transition-normal);
-        }
-
-        .mobile-menu-link:hover {
-          color: var(--secondary-cyan);
-          background: var(--bg-card);
-        }
-
-        .mobile-user-info {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          color: white;
-          font-weight: 500;
-          padding: 0.75rem 1rem;
-          background: rgba(51, 65, 85, 0.3);
-          border-radius: 0.5rem;
-        }
-
-        .mobile-logout-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: transparent;
-          border: 1px solid #ef4444;
-          color: #ef4444;
-          padding: 0.75rem 1rem;
-          border-radius: 0.5rem;
-          font-weight: 500;
-          cursor: pointer;
+          border-radius: 8px;
+          margin-bottom: 0.5rem;
           transition: all 0.3s ease;
           text-align: left;
         }
 
-        .mobile-logout-btn:hover {
-          background: #ef4444;
-          color: white;
+        .mobile-sidebar-link:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: #ffffff;
         }
 
-        .mobile-menu-btn {
+        .mobile-sidebar-user {
+          margin-top: auto;
+          padding: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-sidebar-user-info {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #ffffff;
+          font-weight: 500;
           padding: 0.75rem 1rem;
-          border-radius: 0.5rem;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          margin-bottom: 0.5rem;
+        }
+
+        .mobile-sidebar-premium-btn {
+          display: block;
+          width: 100%;
+          padding: 0.75rem 1rem;
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          color: #ffffff;
+          text-decoration: none;
+          font-weight: 600;
+          border-radius: 8px;
+          text-align: center;
+          margin-bottom: 0.5rem;
+          transition: all 0.3s ease;
+        }
+
+        .mobile-sidebar-premium-btn:hover {
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .mobile-sidebar-logout {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.75rem 1rem;
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          border: 1px solid #ef4444;
+          border-radius: 8px;
           font-weight: 500;
           cursor: pointer;
-          transition: all var(--transition-normal);
-          border: 1px solid transparent;
-          text-align: left;
+          transition: all 0.3s ease;
+        }
+
+        .mobile-sidebar-logout:hover {
+          background: #ef4444;
+          color: #ffffff;
+        }
+
+        .mobile-sidebar-login-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.75rem 1rem;
+          background: rgba(59, 130, 246, 0.1);
+          color: #3b82f6;
           text-decoration: none;
-          display: block;
+          font-weight: 500;
+          border-radius: 8px;
+          margin-bottom: 0.5rem;
+          transition: all 0.3s ease;
         }
 
-        .mobile-menu-btn.signup-btn {
-          background: transparent;
-          color: var(--text-secondary);
-          border-color: transparent;
-        }
-
-        .mobile-menu-btn.signup-btn:hover {
-          background: transparent;
+        .mobile-sidebar-login-btn:hover {
+          background: #3b82f6;
           color: #ffffff;
-          border-color: transparent;
         }
 
-        .mobile-menu-btn.login-btn {
-          background: transparent;
-          color: var(--text-secondary);
-          border-color: transparent;
-        }
 
-        .mobile-menu-btn.login-btn:hover {
-          background: transparent;
-          color: #ffffff;
-          border-color: transparent;
-        }
 
         /* 프리미엄 링크 스타일 */
         .premium-link {
@@ -817,22 +905,7 @@ const Navbar = () => {
           z-index: 1;
         }
 
-        .premium-mobile-link {
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
-          color: white !important;
-          font-weight: 600;
-          border: none;
-          border-radius: 8px;
-          text-align: center;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
 
-        .premium-mobile-link:hover {
-          background: linear-gradient(135deg, #2563eb, #1d4ed8);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-        }
 
         /* 회원 정보 모달 스타일 */
         .user-info-modal-overlay {
@@ -1092,6 +1165,34 @@ const Navbar = () => {
           .user-info-modal {
             max-width: 350px;
             padding: 1.5rem;
+          }
+
+          /* 모바일에서 사용자 이름/이메일 숨기기 */
+          .user-display-name {
+            display: none;
+          }
+
+          /* 모바일에서 VIP 배지 크기 조정 */
+          .vip-badge {
+            min-width: 60px;
+            white-space: nowrap;
+            padding: 0.2rem 0.7rem;
+          }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-sidebar {
+            display: none !important;
+          }
+
+          .mobile-sidebar-overlay {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .mobile-sidebar {
+            width: 260px;
           }
         }
       `}</style>

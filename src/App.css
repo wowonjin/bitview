@@ -55,6 +55,18 @@ body::after {
   width: 100%;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -1464,6 +1476,17 @@ main {
   z-index: 100;
 }
 
+/* PC 버전에서 네비게이터 여백 추가 */
+.hero {
+  padding-top: 100px;
+}
+
+/* 다른 페이지들도 PC에서 네비게이터 여백 추가 */
+.page-content, .live-coins-page, .chart-page, .advanced-backtest-container, 
+.terms-page, .auth-page, .profit-calculator-page, .privacy-page, .premium-page, .admin-page {
+  padding-top: 100px;
+}
+
 .navbar-content {
   display: flex;
   align-items: center;
@@ -1559,25 +1582,241 @@ main {
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .navbar-left {
-    gap: 1rem;
+  /* 모바일 네비게이터 레이아웃 변경 */
+  .navbar-content {
+    display: grid !important;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 1rem 0;
   }
   
-  .chart-link {
+  /* 왼쪽: 메뉴 버튼 */
+  .mobile-menu-toggle {
+    grid-column: 1;
+    justify-self: start;
+    display: block;
+    order: 1;
+  }
+  
+  /* 가운데: BitView 로고 */
+  .navbar-left {
+    grid-column: 2;
+    justify-self: center;
+    order: 2;
+  }
+  
+  .navbar-left .chart-link {
     display: none;
+  }
+  
+  /* 오른쪽: 프리미엄 + 로그인 버튼 */
+  .navbar-right {
+    grid-column: 3;
+    justify-self: end;
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    order: 3;
   }
   
   .desktop-menu {
-    display: none;
-  }
-  
-  .mobile-menu-toggle {
-    display: block;
+    display: flex !important;
   }
   
   .dropdown-menu {
     width: 180px;
     top: calc(100% + 0.25rem);
+  }
+  
+  /* 모바일에서 회원가입 버튼 숨기기 */
+  .navbar-right .signup-btn {
+    display: none !important;
+  }
+  
+  /* 모바일에서 로그인 버튼을 아이콘으로 변경 */
+  .navbar-right .login-btn {
+    font-size: 0 !important;
+    padding: 0.5rem !important;
+    position: relative;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+  
+  .navbar-right .login-btn::before {
+    content: "account_circle";
+    font-family: 'Material Icons';
+    font-size: 1.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+  }
+  
+  /* 모바일에서 프리미엄 버튼에서 "프리미엄" 텍스트만 제거 */
+  .navbar-right .premium-link {
+    padding: 0.5rem !important;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .navbar-right .premium-text {
+    font-size: 0 !important;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .navbar-right .premium-text::before {
+    content: "💎";
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  
+  /* 모바일에서만 네비게이터바 fixed */
+  .navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  
+  /* 모바일에서만 공지 배너 fixed */
+  .notice-banner {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 101;
+  }
+  
+  /* 공지 배너가 있을 때 네비게이터바 위치 조정 */
+  .notice-banner ~ .navbar {
+    top: 48px !important;
+  }
+  
+  /* 모바일 버전에서 body padding-top 조정 */
+  body {
+    padding-top: 160px !important; /* 모바일에서 충분한 여백 확보 */
+  }
+  
+  /* 모바일 버전에서 상단 여백 조정 */
+  .hero {
+    padding-top: 20px !important;
+    margin-top: 0 !important;
+  }
+  
+  /* 다른 페이지들 모바일 여백 */
+  .page-content, .live-coins-page, .chart-page, .advanced-backtest-container, 
+  .terms-page, .profit-calculator-page, .privacy-page, .premium-page, .admin-page {
+    padding-top: 20px !important;
+    margin-top: 0 !important;
+  }
+
+  /* 모바일에서 로그인/회원가입 페이지 상단 여백 통일 */
+  .auth-page {
+    padding-top: 5px !important;
+    margin-top: 0 !important;
+  }
+
+  /* 회원가입 페이지 컨테이너 위치 조정 */
+  .auth-page .auth-container {
+    transform: none !important;
+  }
+
+  /* 모바일에서 페이지 헤더 표시 */
+  .mobile-page-header {
+    display: block !important;
+    text-align: left;
+    margin-bottom: 1.5rem;
+    padding: 0;
+  }
+  
+  .mobile-page-header h1 {
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .mobile-page-header p {
+    color: #9ca3af;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  /* 모바일에서 계산기 헤더 왼쪽 정렬 */
+  .calculator-header {
+    text-align: left !important;
+  }
+  
+  .calculator-header h1 {
+    text-align: left !important;
+  }
+  
+  .calculator-header p {
+    text-align: left !important;
+  }
+  
+  /* 모바일에서 도구 선택 창 숨기기 */
+  .tool-container {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tool-container {
+    display: none !important;
+  }
+
+  .mobile-page-header h1 {
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  
+  .mobile-page-header p {
+    color: #9ca3af;
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* 모바일에서 계산기 헤더 왼쪽 정렬 */
+  .calculator-header {
+    text-align: left !important;
+  }
+  
+  .calculator-header h1 {
+    text-align: left !important;
+  }
+  
+  .calculator-header p {
+    text-align: left !important;
+  }
+}
+
+/* 모바일 페이지 헤더 - PC에서는 숨김 */
+.mobile-page-header {
+  display: none;
+}
+
+/* PC에서 모바일 헤더 숨기기 (768px 초과) */
+@media (min-width: 769px) {
+  .mobile-page-header {
+    display: none !important;
   }
 }
 
@@ -1599,4 +1838,177 @@ main {
 
 .notice-text {
   font-size: 0.875rem;
+}
+
+/* 480px 이하 작은 화면에서 추가 여백 조정 */
+@media (max-width: 480px) {
+  /* 모바일 네비게이터 레이아웃 변경 */
+  .navbar-content {
+    display: grid !important;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 1rem 0;
+  }
+  
+  /* 왼쪽: 메뉴 버튼 */
+  .mobile-menu-toggle {
+    grid-column: 1;
+    justify-self: start;
+    display: block;
+    order: 1;
+  }
+  
+  /* 가운데: BitView 로고 */
+  .navbar-left {
+    grid-column: 2;
+    justify-self: center;
+    order: 2;
+  }
+  
+  .navbar-left .chart-link {
+    display: none;
+  }
+  
+  /* 오른쪽: 프리미엄 + 로그인 버튼 */
+  .navbar-right {
+    grid-column: 3;
+    justify-self: end;
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    order: 3;
+  }
+  
+  .desktop-menu {
+    display: flex !important;
+  }
+  
+  /* 모바일에서 회원가입 버튼 숨기기 */
+  .navbar-right .signup-btn {
+    display: none !important;
+  }
+  
+  /* 모바일에서 로그인 버튼을 아이콘으로 변경 */
+  .navbar-right .login-btn {
+    font-size: 0 !important;
+    padding: 0.5rem !important;
+    position: relative;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+  
+  .navbar-right .login-btn::before {
+    content: "account_circle";
+    font-family: 'Material Icons';
+    font-size: 1.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+  }
+  
+  /* 모바일에서 프리미엄 버튼에서 "프리미엄" 텍스트만 제거 */
+  .navbar-right .premium-link {
+    padding: 0.5rem !important;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .navbar-right .premium-text {
+    font-size: 0 !important;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .navbar-right .premium-text::before {
+    content: "💎";
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  
+  /* 모바일에서만 네비게이터바 fixed */
+  .navbar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  
+  /* 모바일에서만 공지 배너 fixed */
+  .notice-banner {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 101;
+  }
+  
+  /* 공지 배너가 있을 때 네비게이터바 위치 조정 */
+  .notice-banner ~ .navbar {
+    top: 48px !important;
+  }
+  
+  body {
+    padding-top: 150px !important; /* 작은 화면에서도 충분한 여백 확보 */
+  }
+  
+  .hero {
+    padding-top: 20px !important;
+    margin-top: 0 !important;
+  }
+  
+  .page-content, .live-coins-page, .chart-page, .advanced-backtest-container, 
+  .terms-page, .profit-calculator-page, .privacy-page, .premium-page, .admin-page {
+    padding-top: 20px !important;
+    margin-top: 0 !important;
+  }
+
+  /* 모바일에서 로그인/회원가입 페이지 상단 여백 통일 */
+  .auth-page {
+    padding-top: 5px !important;
+    margin-top: 0 !important;
+  }
+
+  /* 회원가입 페이지 컨테이너 위치 조정 */
+  .auth-page .auth-container {
+    transform: none !important;
+  }
+
+  /* 모바일에서 페이지 헤더 표시 */
+  .mobile-page-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .mobile-page-title {
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 0.4rem 0;
+    line-height: 1.2;
+  }
+
+  .mobile-page-description {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
+  }
 }

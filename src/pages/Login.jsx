@@ -924,22 +924,170 @@ const Login = () => {
         @media (max-width: 768px) {
           .auth-page {
             padding: 1rem;
+            padding-top: 80px;
+          }
+
+          .auth-container {
+            max-width: 100%;
           }
 
           .auth-card {
             padding: 1.5rem;
+            border-radius: 12px;
           }
 
           .auth-title {
             font-size: 1.75rem;
           }
 
+          .auth-subtitle {
+            font-size: 0.9rem;
+          }
+
+          .form-group {
+            gap: 0.4rem;
+          }
+
+          .form-group label {
+            font-size: 0.8rem;
+          }
+
+          .input-container input {
+            padding: 0.875rem 0.875rem 0.875rem 2.5rem;
+            font-size: 0.9rem;
+          }
+
+          .input-icon {
+            left: 0.75rem;
+            width: 18px;
+            height: 18px;
+          }
+
+          .password-toggle {
+            right: 0.75rem;
+            padding: 0.25rem;
+          }
+
+          .auth-button {
+            padding: 0.875rem;
+            font-size: 0.9rem;
+          }
+
           .modal-overlay {
             padding: 1rem;
           }
 
-          .modal-header, .modal-body {
-            padding: 1.5rem;
+          .modal-content {
+            max-width: 100%;
+          }
+
+          .modal-header {
+            padding: 1.25rem;
+          }
+
+          .modal-body {
+            padding: 1.25rem;
+          }
+
+          .modal-header h2 {
+            font-size: 1.25rem;
+          }
+
+          .modal-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+
+          .checkbox-text {
+            font-size: 0.8rem;
+          }
+
+          .form-options {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-start;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .auth-page {
+            padding: 0.75rem;
+            padding-top: 70px;
+          }
+
+          .auth-card {
+            padding: 1.25rem;
+          }
+
+          .auth-title {
+            font-size: 1.5rem;
+          }
+
+          .auth-subtitle {
+            font-size: 0.85rem;
+          }
+
+          .auth-form {
+            gap: 1rem;
+          }
+
+          .form-group label {
+            font-size: 0.75rem;
+          }
+
+          .input-container input {
+            padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+            font-size: 0.85rem;
+          }
+
+          .input-icon {
+            left: 0.625rem;
+            width: 16px;
+            height: 16px;
+          }
+
+          .password-toggle {
+            right: 0.625rem;
+          }
+
+          .auth-button {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+          }
+
+          .modal-overlay {
+            padding: 0.75rem;
+          }
+
+          .modal-header {
+            padding: 1rem;
+          }
+
+          .modal-body {
+            padding: 1rem;
+          }
+
+          .modal-header h2 {
+            font-size: 1.125rem;
+          }
+
+          .checkbox-text {
+            font-size: 0.75rem;
+            line-height: 1.4;
+          }
+
+          .forgot-link {
+            font-size: 0.75rem;
+          }
+
+          .error-message {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8rem;
+          }
+
+          .message {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8rem;
           }
         }
       `}</style>

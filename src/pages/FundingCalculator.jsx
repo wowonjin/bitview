@@ -867,17 +867,227 @@ const FundingCalculator = () => {
         }
 
         @media (max-width: 768px) {
+          .profit-calculator-page {
+            padding-top: 80px;
+            padding-bottom: 30px;
+          }
+
+          .calculator-container {
+            padding: 0 16px;
+          }
+
           .calculator-content {
             grid-template-columns: 1fr;
-            gap: 2rem;
+            gap: 24px;
           }
           
+          .calculator-header {
+            margin-bottom: 32px;
+          }
+
           .calculator-header h1 {
             font-size: 2rem;
           }
+
+          .calculator-header p {
+            font-size: 1rem;
+          }
           
           .main-content, .result-section {
-            padding: 1.5rem;
+            padding: 20px;
+          }
+
+          .input-group {
+            margin-bottom: 20px;
+          }
+
+          .input-group label {
+            font-size: 14px;
+          }
+
+          .dropdown-select,
+          .coin-input,
+          .amount-input,
+          .leverage-input {
+            padding: 12px 16px;
+            font-size: 14px;
+          }
+
+          .amount-input {
+            padding: 12px 60px 12px 16px;
+          }
+
+          .leverage-input {
+            padding: 12px 40px 12px 16px;
+          }
+
+          .toggle-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .funding-rate-display {
+            padding: 14px;
+          }
+
+          .calculate-btn {
+            padding: 12px 16px;
+            font-size: 14px;
+          }
+
+          .premium-notice {
+            top: -60px;
+            font-size: 13px;
+            padding: 10px 14px;
+            min-width: 200px;
+          }
+
+          .result-item {
+            padding: 10px 0;
+          }
+
+          .result-item .label {
+            font-size: 13px;
+          }
+
+          .result-item .value {
+            font-size: 14px;
+          }
+
+          .funding-results-box {
+            padding: 16px;
+          }
+
+          .result-item.funding.final .value {
+            font-size: 16px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .profit-calculator-page {
+            padding-top: 70px;
+            padding-bottom: 20px;
+          }
+
+          .calculator-container {
+            padding: 0 12px;
+          }
+
+          .calculator-header {
+            margin-bottom: 24px;
+          }
+
+          .calculator-header h1 {
+            font-size: 1.75rem;
+          }
+
+          .calculator-header p {
+            font-size: 0.9rem;
+          }
+
+          .calculator-content {
+            gap: 20px;
+          }
+
+          .main-content, .result-section {
+            padding: 16px;
+          }
+
+          .input-group {
+            margin-bottom: 16px;
+          }
+
+          .input-group label {
+            font-size: 13px;
+            margin-bottom: 6px;
+          }
+
+          .dropdown-select,
+          .coin-input,
+          .amount-input,
+          .leverage-input {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .amount-input {
+            padding: 10px 50px 10px 14px;
+          }
+
+          .leverage-input {
+            padding: 10px 35px 10px 14px;
+          }
+
+          .currency-label,
+          .unit-label {
+            font-size: 13px;
+            right: 14px;
+          }
+
+          .toggle-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+
+          .funding-rate-display {
+            padding: 12px;
+          }
+
+          .funding-info {
+            gap: 0.4rem;
+          }
+
+          .funding-rate .label,
+          .funding-time .label {
+            font-size: 12px;
+          }
+
+          .funding-rate .value {
+            font-size: 1rem;
+          }
+
+          .funding-time .value {
+            font-size: 11px;
+          }
+
+          .calculate-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+
+          .premium-notice {
+            top: -55px;
+            font-size: 12px;
+            padding: 8px 12px;
+            min-width: 180px;
+          }
+
+          .result-item {
+            padding: 8px 0;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+          }
+
+          .result-item .label {
+            font-size: 12px;
+          }
+
+          .result-item .value {
+            font-size: 13px;
+            align-self: flex-end;
+          }
+
+          .funding-results-box {
+            padding: 12px;
+          }
+
+          .result-item.funding.final {
+            font-size: 1rem;
+          }
+
+          .result-item.funding.final .value {
+            font-size: 14px;
           }
         }
       `}</style>

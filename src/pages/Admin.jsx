@@ -898,7 +898,7 @@ const Admin = () => {
 
         @media (max-width: 768px) {
           .admin-page {
-            padding: 80px 10px 20px;
+            padding: 80px 16px 20px;
           }
 
           .users-table .table-header,

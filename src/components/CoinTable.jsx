@@ -446,6 +446,14 @@ const CoinTable = () => {
 
   return (
     <div className="coin-table-container">
+      {/* 모바일에서만 보이는 페이지 헤더 */}
+      <div className="mobile-page-header">
+        <h1 className="mobile-page-title">실시간 코인 시세</h1>
+        <p className="mobile-page-description">
+          전 세계 암호화폐 시장의 실시간 가격 정보를 확인하세요.
+        </p>
+      </div>
+
       {/* 컨트롤 패널 */}
       <div className="coin-table-controls">
         <div className="search-container">

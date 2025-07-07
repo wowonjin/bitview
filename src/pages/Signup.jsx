@@ -1045,14 +1045,81 @@ const Signup = () => {
         @media (max-width: 768px) {
           .auth-page {
             padding: 1rem;
+            padding-top: 80px;
+          }
+
+          .auth-container {
+            max-width: 100%;
+            transform: translateY(20px);
           }
 
           .auth-card {
             padding: 1.5rem;
+            border-radius: 12px;
           }
 
           .auth-title {
             font-size: 1.75rem;
+          }
+
+          .auth-subtitle {
+            font-size: 0.9rem;
+          }
+
+          .form-group {
+            gap: 0.4rem;
+          }
+
+          .form-group label {
+            font-size: 0.8rem;
+          }
+
+          .input-container input {
+            padding: 0.875rem 0.875rem 0.875rem 2.5rem;
+            font-size: 0.9rem;
+          }
+
+          .input-icon {
+            left: 0.75rem;
+            width: 18px;
+            height: 18px;
+          }
+
+          .password-toggle {
+            right: 0.75rem;
+            padding: 0.25rem;
+          }
+
+          .password-requirements {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .requirement {
+            font-size: 0.7rem;
+          }
+
+          .password-mismatch {
+            font-size: 0.7rem;
+          }
+
+          .name-error-message {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+          }
+
+          .checkbox-text {
+            font-size: 0.8rem;
+            line-height: 1.4;
+          }
+
+          .terms-link {
+            font-size: 0.8rem;
+          }
+
+          .auth-button {
+            padding: 0.875rem;
+            font-size: 0.9rem;
           }
 
           .modal-overlay {
@@ -1063,13 +1130,149 @@ const Signup = () => {
             max-width: 100%;
           }
 
-          .modal-header, .modal-body {
-            padding: 1.5rem;
+          .modal-header {
+            padding: 1.25rem;
+          }
+
+          .modal-body {
+            padding: 1.25rem;
+          }
+
+          .modal-header h2 {
+            font-size: 1.25rem;
+          }
+
+          .terms-content {
+            max-height: 300px;
+            font-size: 0.85rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .auth-page {
+            padding: 0.75rem;
+            padding-top: 70px;
+          }
+
+          .auth-container {
+            transform: translateY(10px);
+          }
+
+          .auth-card {
+            padding: 1.25rem;
+          }
+
+          .auth-title {
+            font-size: 1.5rem;
+          }
+
+          .auth-subtitle {
+            font-size: 0.85rem;
+          }
+
+          .auth-form {
+            gap: 1rem;
+          }
+
+          .form-group {
+            gap: 0.3rem;
+          }
+
+          .form-group label {
+            font-size: 0.75rem;
+          }
+
+          .input-container input {
+            padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+            font-size: 0.85rem;
+          }
+
+          .input-icon {
+            left: 0.625rem;
+            width: 16px;
+            height: 16px;
+          }
+
+          .password-toggle {
+            right: 0.625rem;
           }
 
           .password-requirements {
-            flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.4rem;
+          }
+
+          .requirement {
+            font-size: 0.65rem;
+          }
+
+          .password-mismatch {
+            font-size: 0.65rem;
+          }
+
+          .name-error-message {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.5rem;
+          }
+
+          .checkbox-container {
+            align-items: flex-start;
+            gap: 0.4rem;
+          }
+
+          .checkmark {
+            width: 14px;
+            height: 14px;
+            margin-top: 0.125rem;
+          }
+
+          .checkbox-text {
+            font-size: 0.75rem;
+            line-height: 1.3;
+          }
+
+          .terms-link {
+            font-size: 0.75rem;
+          }
+
+          .auth-button {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+          }
+
+          .error-message {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8rem;
+          }
+
+          .modal-overlay {
+            padding: 0.5rem;
+          }
+
+          .modal-header {
+            padding: 1rem;
+          }
+
+          .modal-body {
+            padding: 1rem;
+          }
+
+          .modal-header h2 {
+            font-size: 1.125rem;
+          }
+
+          .terms-content {
+            max-height: 250px;
+            font-size: 0.8rem;
+            padding-right: 0.5rem;
+          }
+
+          .terms-content p {
+            margin-bottom: 0.6rem;
+          }
+
+          .btn-primary {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.85rem;
           }
         }
       `}</style>

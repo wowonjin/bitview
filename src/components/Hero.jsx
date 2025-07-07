@@ -1082,30 +1082,205 @@ const Hero = () => {
 
         @media (max-width: 768px) {
           .hero {
-            padding: 4rem 0 2rem;
+            padding: 3rem 0 2rem;
+            min-height: auto;
+          }
+
+          .container {
+            padding: 0 1rem;
           }
 
           .hero-content {
             grid-template-columns: 1fr;
-            gap: 3rem;
+            gap: 2rem;
             text-align: center;
           }
 
           .hero-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+          }
+
+          .hero-description {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+          }
+
+          .hero-button-container {
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+          }
+
+          .hero-badge-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 280px;
           }
 
           .hero-buttons {
             flex-direction: column;
+            gap: 0.8rem;
             align-items: center;
+          }
+
+          .hero-buttons .btn {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 200px;
           }
 
           .hero-stats {
             justify-content: center;
+            flex-wrap: nowrap;
+            gap: 0.4rem;
+          }
+
+          .stat-box {
+            padding: 0.9rem 0.8rem;
+            flex: 1;
+            max-width: 110px;
+          }
+
+          .stat-icon {
+            width: 1.4rem;
+            height: 1.4rem;
+          }
+
+          .stat-number {
+            font-size: 1rem;
+          }
+
+          .stat-label {
+            font-size: 0.75rem;
           }
 
           .portfolio-summary {
             grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+
+          .portfolio-item {
+            padding: 1rem;
+          }
+
+          .portfolio-value {
+            font-size: 1.2rem;
+          }
+
+          .crypto-list {
+            gap: 0.8rem;
+          }
+
+          .crypto-item {
+            padding: 0.8rem;
+            gap: 0.8rem;
+          }
+
+          .crypto-symbol {
+            width: 35px;
+            height: 35px;
+          }
+
+          .crypto-logo {
+            width: 24px;
+            height: 24px;
+          }
+
+          .crypto-price {
+            font-size: 0.9rem;
+          }
+
+          .crypto-change {
+            font-size: 0.8rem;
+          }
+
+          .bitcoin-rain {
+            display: none;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .hero {
+            padding: 2rem 0 1.5rem;
+          }
+
+          .container {
+            padding: 0 0.75rem;
+          }
+
+          .hero-title {
+            font-size: 1.8rem;
+            line-height: 1.1;
+          }
+
+          .hero-description {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .hero-button-container {
+            margin-bottom: 1.5rem;
+          }
+
+          .hero-badge-button {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.9rem;
+          }
+
+          .hero-buttons .btn {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.9rem;
+          }
+
+          .hero-stats {
+            justify-content: center;
+            flex-wrap: nowrap;
+            gap: 0.2rem;
+          }
+
+          .stat-box {
+            padding: 0.6rem 0.4rem;
+            flex: 1;
+            max-width: 90px;
+          }
+
+          .stat-icon {
+            width: 1rem;
+            height: 1rem;
+          }
+
+          .stat-number {
+            font-size: 0.75rem;
+          }
+
+          .stat-label {
+            font-size: 0.6rem;
+          }
+
+          .portfolio-item {
+            padding: 0.8rem;
+          }
+
+          .portfolio-value {
+            font-size: 1.1rem;
+          }
+
+          .crypto-item {
+            padding: 0.6rem;
+          }
+
+          .crypto-symbol {
+            width: 30px;
+            height: 30px;
+          }
+
+          .crypto-logo {
+            width: 20px;
+            height: 20px;
           }
         }
       `}</style>

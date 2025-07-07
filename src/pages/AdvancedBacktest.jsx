@@ -713,7 +713,13 @@ const BacktestCalculator = () => {
   }
   
   return (
-    <div className="profit-calculator-page" style={{ paddingTop: '100px' }}>
+    <div className="profit-calculator-page">
+      {/* 모바일 전용 헤더 */}
+      <div className="mobile-page-header">
+        <h1>백테스트</h1>
+        <p>과거 데이터를 기반으로 다양한 투자 전략을 시뮬레이션해보세요.</p>
+      </div>
+      
       <div className="calculator-container">
         <div className="calculator-content">
           <div className="main-content">
@@ -1009,6 +1015,250 @@ const BacktestCalculator = () => {
         
         .date-range-separator {
           color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+          .advanced-backtest-container {
+            padding: 80px 16px 20px 16px;
+          }
+
+          .backtest-main-content {
+            grid-template-columns: 1fr;
+            gap: 20px;
+          }
+
+          .chart-section {
+            min-height: 450px;
+          }
+
+          .chart-header {
+            padding: 12px;
+          }
+
+          .chart-header > div {
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+          }
+
+          .chart-header > div > div:first-child {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+          }
+
+          .chart-header > div > div:nth-child(2) {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            align-items: flex-start;
+          }
+
+          .chart-header > div > div:nth-child(2) > div {
+            width: 100%;
+            text-align: left;
+          }
+
+          .chart-container {
+            height: 400px;
+          }
+
+          .right-panel {
+            order: -1;
+            padding: 20px;
+            min-height: 600px;
+          }
+
+          .config-group {
+            margin-bottom: 18px;
+          }
+
+          .config-label {
+            font-size: 14px;
+            margin-bottom: 8px;
+          }
+
+          .config-input,
+          .config-select {
+            padding: 12px 14px;
+            font-size: 14px;
+          }
+
+          .date-range-input {
+            padding: 10px 12px;
+            font-size: 14px;
+          }
+
+          .run-backtest-btn {
+            padding: 14px 18px;
+            font-size: 15px;
+            margin-top: 25px;
+          }
+
+          .results-section {
+            padding: 20px;
+            min-height: 500px;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+          }
+
+          .stat-card {
+            padding: 16px;
+          }
+
+          .stat-title {
+            font-size: 13px;
+          }
+
+          .stat-value {
+            font-size: 18px;
+          }
+
+          .time-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+          }
+
+          table {
+            font-size: 13px;
+          }
+
+          table th,
+          table td {
+            padding: 10px 8px !important;
+            font-size: 12px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .advanced-backtest-container {
+            padding: 70px 12px 15px 12px;
+          }
+
+          .backtest-main-content {
+            gap: 16px;
+          }
+
+          .chart-section {
+            min-height: 400px;
+          }
+
+          .chart-header {
+            padding: 10px;
+          }
+
+          .chart-header > div {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+          }
+
+          .chart-header > div > div:first-child {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+          }
+
+          .chart-header > div > div:nth-child(2) {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+            align-items: flex-start;
+          }
+
+          .chart-header > div > div:nth-child(2) > div {
+            width: 100%;
+            text-align: left;
+          }
+
+          .chart-container {
+            height: 350px;
+          }
+
+          .right-panel {
+            padding: 16px;
+            min-height: 550px;
+          }
+
+          .config-group {
+            margin-bottom: 16px;
+          }
+
+          .config-label {
+            font-size: 13px;
+            margin-bottom: 8px;
+          }
+
+          .config-input,
+          .config-select {
+            padding: 10px 12px;
+            font-size: 13px;
+          }
+
+          .date-range-input {
+            padding: 8px 10px;
+            font-size: 13px;
+          }
+
+          .run-backtest-btn {
+            padding: 12px 16px;
+            font-size: 14px;
+            margin-top: 20px;
+          }
+
+          .results-section {
+            padding: 16px;
+            min-height: 450px;
+          }
+
+          .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+          }
+
+          .stat-card {
+            padding: 14px;
+          }
+
+          .stat-title {
+            font-size: 12px;
+          }
+
+          .stat-value {
+            font-size: 16px;
+          }
+
+          .time-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+          }
+
+          table {
+            font-size: 11px;
+          }
+
+          table th,
+          table td {
+            padding: 6px 4px !important;
+            font-size: 10px !important;
+          }
+
+          .empty-state {
+            padding: 20px;
+            font-size: 14px;
+          }
+
+          .empty-state-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+          }
         }
       `}</style>
       
