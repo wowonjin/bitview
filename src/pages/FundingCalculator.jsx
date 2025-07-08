@@ -197,8 +197,8 @@ const FundingCalculator = () => {
     <div className="profit-calculator-page">
       <div className="calculator-container">
         <div className="calculator-header">
-          <h1>펀딩비 계산기</h1>
-          <p>바이낸스와 바이비트 선물 거래 펀딩비를 실시간으로 계산해보세요</p>
+          <h1 className="mobile-page-title">펀딩비 계산기</h1>
+                      <p className="mobile-page-description">바이낸스와 바이비트 선물 거래 펀딩비를 실시간으로 계산해보세요</p>
         </div>
 
         <div className="calculator-content">

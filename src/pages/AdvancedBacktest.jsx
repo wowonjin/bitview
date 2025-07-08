@@ -716,8 +716,8 @@ const BacktestCalculator = () => {
     <div className="profit-calculator-page">
       {/* 모바일 전용 헤더 */}
       <div className="mobile-page-header">
-        <h1>백테스트</h1>
-        <p>과거 데이터를 기반으로 다양한 투자 전략을 시뮬레이션해보세요.</p>
+        <h1 className="mobile-page-title">백테스트</h1>
+        <p className="mobile-page-description">과거 데이터를 기반으로 다양한 투자 전략을 시뮬레이션해보세요.</p>
       </div>
       
       <div className="calculator-container">

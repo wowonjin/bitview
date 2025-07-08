@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { useState, useEffect, useRef } from 'react'
 import { 
   TrendingUp, 
   BarChart3, 
@@ -14,8 +14,78 @@ import {
   DollarSign
 } from 'lucide-react'
 
+// Intersection Observer 커스텀 훅
+const useIntersectionObserver = (options = {}) => {
+  const [isIntersecting, setIsIntersecting] = useState(false)
+  const ref = useRef(null)
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsIntersecting(true)
+          observer.disconnect() // 한 번만 실행되도록
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '-50px',
+        ...options
+      }
+    )
+    
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+    
+    return () => observer.disconnect()
+  }, [])
+  
+  return [ref, isIntersecting]
+}
+
 const Services = () => {
   const { isAuthenticated, isPremium } = useAuth()
+
+  // Intersection Observer 훅들
+  const [headerRef, headerVisible] = useIntersectionObserver()
+  const [bannerRef, bannerVisible] = useIntersectionObserver()
+
+  // 각 서비스 카드에 대한 ref와 visible 상태
+  const serviceRefs = useRef([])
+  const [serviceVisibility, setServiceVisibility] = useState({})
+
+  // 서비스 카드들에 대한 Intersection Observer 설정
+  useEffect(() => {
+    const observers = []
+    
+    serviceRefs.current.forEach((ref, index) => {
+      if (ref) {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              setServiceVisibility(prev => ({
+                ...prev,
+                [index]: true
+              }))
+              observer.disconnect()
+            }
+          },
+          {
+            threshold: 0.1,
+            rootMargin: '-50px'
+          }
+        )
+        
+        observer.observe(ref)
+        observers.push(observer)
+      }
+    })
+    
+    return () => {
+      observers.forEach(observer => observer.disconnect())
+    }
+  }, [])
 
   const services = [
     {
@@ -74,30 +144,6 @@ const Services = () => {
     }
   ]
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  }
-
-
-
   // 로그인 상태이고 프리미엄 회원이면 배너를 숨김
   const shouldShowBanner = !isAuthenticated || !isPremium
 
@@ -105,38 +151,23 @@ const Services = () => {
     <>
       <section className="services-section">
         <div className="services-container">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="services-header"
-          >
-            <motion.h2 
-              variants={itemVariants}
-              className="services-title"
-            >
+          <div className={`services-header fade-in-up-delay-4 ${headerVisible ? 'visible' : ''}`} ref={headerRef}>
+            <h2 className="services-title">
               빗뷰에서 제공하는 서비스
-            </motion.h2>
-            <motion.p 
-              variants={itemVariants}
-              className="services-subtitle"
-            >
+            </h2>
+            <p className="services-subtitle">
               암호화폐 투자에 필요한 모든 도구를 한 곳에서 만나보세요
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-            className="services-grid"
-          >
-            {services.map((service) => (
-              <motion.div
+          <div className="services-grid">
+            {services.map((service, index) => (
+              <div
                 key={service.id}
-                variants={itemVariants}
+                className={`service-card-wrapper fade-in-up-delay-${Math.min(4 + index, 8)} ${serviceVisibility[index] ? 'visible' : ''}`}
+                ref={ref => {
+                  serviceRefs.current[index] = ref
+                }}
               >
                 <Link 
                   to={service.link} 
@@ -159,19 +190,13 @@ const Services = () => {
                     {service.description}
                   </p>
                 </Link>
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
 
           {shouldShowBanner && (
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={containerVariants}
-              className="services-banner"
-            >
-              <motion.div variants={itemVariants}>
+            <div className={`services-banner fade-in-up-delay-8 ${bannerVisible ? 'visible' : ''}`} ref={bannerRef}>
+              <div>
                 <Link 
                   to="/premium" 
                   className="banner-button"
@@ -179,8 +204,8 @@ const Services = () => {
                   <Zap className="banner-icon" />
                   <span>무료 프리미엄으로 모든 기능을 이용하세요</span>
                 </Link>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
         </div>
       </section>

@@ -1,15 +1,24 @@
+# Bitview 빗뷰 - 비트코인 이더리움 실시간 시세 및 트레이딩 도구
+# 암호화폐 백테스트, 펀딩비 계산기, 복리계산기
+
 User-agent: *
 Allow: /
 
-# 주요 페이지
+# 주요 페이지 - 비트코인 이더리움 리플 솔라나 실시간 시세
 Allow: /live-coins
 Allow: /chart
 Allow: /advanced-backtest
+
+# 계산기 도구 - 바이낸스 바이비트 펀딩비 계산기, 복리계산기
 Allow: /profit-calculator
 Allow: /funding-calculator
-Allow: /premium
 
-# 정적 파일
+# 서비스 페이지
+Allow: /premium
+Allow: /login
+Allow: /signup
+
+# 정적 파일 - 최적화된 이미지 및 리소스
 Allow: /assets/
 Allow: /public/
 Allow: /*.css
@@ -23,13 +32,39 @@ Allow: /*.ico
 Allow: /*.woff
 Allow: /*.woff2
 Allow: /*.ttf
+Allow: /*.webp
 
-# 개인정보 보호 페이지
+# 법적 페이지
 Allow: /privacy
 Allow: /terms
 
-# 사이트맵 위치
+# 사이트맵 위치 - 비트코인 이더리움 암호화폐 사이트
 Sitemap: https://bitview.vercel.app/sitemap.xml
 
-# 크롤링 지연 (1초)
+# 크롤링 최적화 - 트래픽 관리
+Crawl-delay: 1
+
+# 구글봇 특별 지시사항
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0.5
+
+# 빙봇 특별 지시사항
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# 바이두봇 허용 (아시아 검색엔진)
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 2
+
+# 네이버봇 허용 (한국 검색엔진)
+User-agent: Yeti
+Allow: /
+Crawl-delay: 1
+
+# 다음 검색봇 허용 (한국 검색엔진)
+User-agent: Daumoa
+Allow: /
 Crawl-delay: 1 

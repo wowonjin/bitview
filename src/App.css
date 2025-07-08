@@ -1705,7 +1705,6 @@ main {
     top: 48px !important;
   }
   
-  /* 모바일 버전에서 body padding-top 조정 */
   body {
     padding-top: 160px !important; /* 모바일에서 충분한 여백 확보 */
   }
@@ -2010,5 +2009,141 @@ main {
     font-size: 0.85rem;
     line-height: 1.4;
     margin: 0;
+  }
+}
+
+/* 페이지 로딩 애니메이션 스타일 */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-1 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s;
+}
+
+.fade-in-up-delay-1.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-2 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s;
+}
+
+.fade-in-up-delay-2.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-3 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.6s, transform 0.8s ease-out 0.6s;
+}
+
+.fade-in-up-delay-3.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-4 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.1s, transform 0.8s ease-out 0.1s;
+}
+
+.fade-in-up-delay-4.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-5 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.2s, transform 0.8s ease-out 0.2s;
+}
+
+.fade-in-up-delay-5.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-6 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.3s, transform 0.8s ease-out 0.3s;
+}
+
+.fade-in-up-delay-6.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-7 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.4s, transform 0.8s ease-out 0.4s;
+}
+
+.fade-in-up-delay-7.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-up-delay-8 {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out 0.5s, transform 0.8s ease-out 0.5s;
+}
+
+.fade-in-up-delay-8.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 모바일에서 애니메이션 최적화 */
+@media (max-width: 768px) {
+  .fade-in-up,
+  .fade-in-up-delay-1,
+  .fade-in-up-delay-2,
+  .fade-in-up-delay-3,
+  .fade-in-up-delay-4,
+  .fade-in-up-delay-5,
+  .fade-in-up-delay-6,
+  .fade-in-up-delay-7,
+  .fade-in-up-delay-8 {
+    transform: translateY(20px);
+  }
+  
+  .fade-in-up.visible,
+  .fade-in-up-delay-1.visible,
+  .fade-in-up-delay-2.visible,
+  .fade-in-up-delay-3.visible,
+  .fade-in-up-delay-4.visible,
+  .fade-in-up-delay-5.visible,
+  .fade-in-up-delay-6.visible,
+  .fade-in-up-delay-7.visible,
+  .fade-in-up-delay-8.visible {
+    transform: translateY(0);
+  }
+  
+  /* 수익 복리 계산기 제목과 설명 크기 조정 */
+  .profit-calculator-page .calculator-header .mobile-page-title {
+    font-size: 1.45rem !important;
+  }
+  
+  .profit-calculator-page .calculator-header .mobile-page-description {
+    font-size: 0.8rem !important;
   }
 }

@@ -1,7 +1,37 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, TrendingUp, Shield, Zap, BarChart3, Target, Sparkles, Check } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+// Intersection Observer 커스텀 훅
+const useIntersectionObserver = (options = {}) => {
+  const [isIntersecting, setIsIntersecting] = useState(false)
+  const ref = useRef(null)
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsIntersecting(true)
+          observer.disconnect() // 한 번만 실행되도록
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '-50px',
+        ...options
+      }
+    )
+    
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+    
+    return () => observer.disconnect()
+  }, [])
+  
+  return [ref, isIntersecting]
+}
 
 const Hero = () => {
   const [bitcoinPrice, setBitcoinPrice] = useState(65432)
@@ -20,6 +50,12 @@ const Hero = () => {
   const [portfolioValue, setPortfolioValue] = useState(1234567)
   const [bitcoinRain, setBitcoinRain] = useState([])
   
+  // Intersection Observer 훅들
+  const [titleRef, titleVisible] = useIntersectionObserver()
+  const [descRef, descVisible] = useIntersectionObserver()
+  const [statsRef, statsVisible] = useIntersectionObserver()
+  const [visualRef, visualVisible] = useIntersectionObserver()
+
   // 비트코인 떨어지는 효과 생성
   useEffect(() => {
     const createBitcoin = () => {
@@ -181,7 +217,7 @@ const Hero = () => {
       <div className="container">
         <div className="hero-content">
           <div className="hero-text">
-            <h1 className="hero-title">
+            <h1 className={`hero-title fade-in-up ${titleVisible ? 'visible' : ''}`} ref={titleRef}>
               차트 분석부터
               <br />
               백테스트까지
@@ -191,13 +227,13 @@ const Hero = () => {
               </span>에서는 <span className="free-text">전부 무료!</span>
             </h1>
 
-            <p className="hero-description">
+            <p className={`hero-description fade-in-up-delay-1 ${descVisible ? 'visible' : ''}`} ref={descRef}>
               실시간 차트 분석과 백테스트 기능으로
               <br />
               더 스마트한 투자 결정을 내리세요.
             </p>
 
-            <div className="hero-stats">
+            <div className={`hero-stats fade-in-up-delay-2 ${statsVisible ? 'visible' : ''}`} ref={statsRef}>
               <div className="stat-box">
                 <TrendingUp className="stat-icon" />
                 <div className="stat-content">
@@ -222,7 +258,7 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="hero-visual">
+          <div className={`hero-visual fade-in-up-delay-3 ${visualVisible ? 'visible' : ''}`} ref={visualRef}>
             <div className="hero-dashboard">
               <div className="dashboard-header">
                 <div className="dashboard-title">

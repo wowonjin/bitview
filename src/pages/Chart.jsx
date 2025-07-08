@@ -624,8 +624,8 @@ const Chart = () => {
     <div className="chart-page">
       {/* 모바일 전용 헤더 */}
       <div className="mobile-page-header">
-        <h1>실시간 차트</h1>
-        <p>PC로 접속하시면 더 많은 기능을 사용할 수 있습니다.</p>
+        <h1 className="mobile-page-title">실시간 차트</h1>
+        <p className="mobile-page-description">PC로 접속하시면 더 많은 기능을 사용할 수 있습니다.</p>
       </div>
       
       {/* 메인 컨테이너 */}

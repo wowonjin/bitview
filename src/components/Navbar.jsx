@@ -283,10 +283,15 @@ const Navbar = () => {
                 <>
                   {/* 로그인 상태 - 회원정보 */}
                   <div className="mobile-sidebar-user-info">
-                    <User size={20} />
-                    <span>{user?.name || user?.email}</span>
-                    {isAdmin && <span className="admin-badge">관리자</span>}
-                    {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
+                    <div className="user-info-left">
+                      <User size={20} />
+                      <span>{user?.name || user?.email}</span>
+                      {isAdmin && <span className="admin-badge">관리자</span>}
+                      {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
+                    </div>
+                    <button onClick={handleLogout} className="mobile-logout-icon">
+                      <LogOut size={16} />
+                    </button>
                   </div>
                   
                   {/* 프리미엄 버튼 - 일반 사용자만 */}
@@ -312,12 +317,6 @@ const Navbar = () => {
                       관리자 대시보드
                     </Link>
                   )}
-                  
-                  {/* 로그아웃 버튼 */}
-                  <button onClick={handleLogout} className="mobile-sidebar-logout">
-                    <LogOut size={16} />
-                    로그아웃
-                  </button>
                 </>
               ) : (
                 <>
@@ -714,6 +713,8 @@ const Navbar = () => {
           transition: transform 0.3s ease;
           box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
           overflow-y: auto;
+          display: flex;
+          flex-direction: column;
         }
 
         .mobile-sidebar.active {
@@ -727,6 +728,7 @@ const Navbar = () => {
           padding: 1rem;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           background: #111111;
+          flex-shrink: 0;
         }
 
         .mobile-sidebar-logo {
@@ -762,6 +764,8 @@ const Navbar = () => {
 
         .mobile-sidebar-nav {
           padding: 1rem;
+          flex: 1;
+          overflow-y: auto;
         }
 
         .mobile-sidebar-link {
@@ -782,21 +786,46 @@ const Navbar = () => {
         }
 
         .mobile-sidebar-user {
-          margin-top: auto;
           padding: 1rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          flex-shrink: 0;
+          margin-top: auto;
         }
 
         .mobile-sidebar-user-info {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          justify-content: space-between;
           color: #ffffff;
           font-weight: 500;
           padding: 0.75rem 1rem;
-          background: rgba(255, 255, 255, 0.05);
           border-radius: 8px;
           margin-bottom: 0.5rem;
+        }
+
+        .user-info-left {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .mobile-logout-icon {
+          background: none;
+          border: none;
+          color: #ffffff;
+          cursor: pointer;
+          padding: 0.5rem;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.7;
+        }
+
+        .mobile-logout-icon:hover {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          opacity: 1;
         }
 
         .mobile-sidebar-premium-btn {
@@ -811,30 +840,12 @@ const Navbar = () => {
           text-align: center;
           margin-bottom: 0.5rem;
           transition: all 0.3s ease;
+          border: none;
+          cursor: pointer;
         }
 
         .mobile-sidebar-premium-btn:hover {
           background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        }
-
-        .mobile-sidebar-logout {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          width: 100%;
-          padding: 0.75rem 1rem;
-          background: rgba(239, 68, 68, 0.1);
-          color: #ef4444;
-          border: 1px solid #ef4444;
-          border-radius: 8px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .mobile-sidebar-logout:hover {
-          background: #ef4444;
-          color: #ffffff;
         }
 
         .mobile-sidebar-login-btn {
@@ -856,8 +867,6 @@ const Navbar = () => {
           background: #3b82f6;
           color: #ffffff;
         }
-
-
 
         /* 프리미엄 링크 스타일 */
         .premium-link {
@@ -904,8 +913,6 @@ const Navbar = () => {
           position: relative;
           z-index: 1;
         }
-
-
 
         /* 회원 정보 모달 스타일 */
         .user-info-modal-overlay {
