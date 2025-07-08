@@ -1,7 +1,20 @@
 import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 const CryptoCards = () => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   const cryptoData = [
     {
       id: 1,
@@ -103,9 +116,9 @@ const CryptoCards = () => {
       <div className="container">
         <div className="crypto-header">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={isMobile ? false : { opacity: 0, y: 20 }}
+            whileInView={isMobile ? false : { opacity: 1, y: 0 }}
+            transition={isMobile ? {} : { duration: 0.6 }}
           >
             <h2 className="section-title">실시간 시장 동향</h2>
             <p className="section-subtitle">
@@ -118,18 +131,18 @@ const CryptoCards = () => {
 
         <motion.div
           className="crypto-grid"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          variants={isMobile ? {} : containerVariants}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? false : "visible"}
+          viewport={isMobile ? {} : { once: true, amount: 0.3 }}
         >
           {cryptoData.map((crypto) => (
             <motion.div
               key={crypto.id}
               className="crypto-card card"
-              variants={cardVariants}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              variants={isMobile ? {} : cardVariants}
+              whileHover={isMobile ? {} : { scale: 1.05 }}
+              transition={isMobile ? {} : { type: "spring", stiffness: 300 }}
             >
               <div className="crypto-header-card">
                 <div className="crypto-icon" style={{ color: crypto.color }}>

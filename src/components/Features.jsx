@@ -10,8 +10,21 @@ import {
   Award
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 const Features = () => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   const mainFeatures = [
     {
       icon: BarChart3,
@@ -84,9 +97,9 @@ const Features = () => {
       <div className="container">
         <div className="features-header">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={isMobile ? false : { opacity: 0, y: 20 }}
+            whileInView={isMobile ? false : { opacity: 1, y: 0 }}
+            transition={isMobile ? {} : { duration: 0.6 }}
           >
             <h2 className="section-title">투자 성공을 위한 필수 도구</h2>
             <p className="section-subtitle">
@@ -100,18 +113,18 @@ const Features = () => {
         {/* 메인 기능 */}
         <motion.div
           className="main-features"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          variants={isMobile ? {} : containerVariants}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? false : "visible"}
+          viewport={isMobile ? {} : { once: true, amount: 0.3 }}
         >
           {mainFeatures.map((feature, index) => (
             <motion.div
               key={index}
               className="main-feature-card"
-              variants={itemVariants}
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              variants={isMobile ? {} : itemVariants}
+              whileHover={isMobile ? {} : { scale: 1.02 }}
+              transition={isMobile ? {} : { type: "spring", stiffness: 300 }}
             >
               <div className="feature-badge" style={{ color: feature.color }}>
                 {feature.badge}
@@ -135,18 +148,18 @@ const Features = () => {
         {/* 서브 기능 */}
         <motion.div
           className="sub-features"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          variants={isMobile ? {} : containerVariants}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? false : "visible"}
+          viewport={isMobile ? {} : { once: true, amount: 0.3 }}
         >
           {subFeatures.map((feature, index) => (
             <motion.div
               key={index}
               className="sub-feature-card"
-              variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              variants={isMobile ? {} : itemVariants}
+              whileHover={isMobile ? {} : { scale: 1.05 }}
+              transition={isMobile ? {} : { type: "spring", stiffness: 300 }}
             >
               <div className="sub-feature-icon" style={{ color: feature.color }}>
                 <feature.icon size={24} />

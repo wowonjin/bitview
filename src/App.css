@@ -2112,8 +2112,15 @@ main {
   transform: translateY(0);
 }
 
-/* 모바일에서 애니메이션 최적화 */
+/* 모바일에서 애니메이션 제거 */
 @media (max-width: 768px) {
+  /* 배경 애니메이션 제거 */
+  body::before,
+  body::after {
+    animation: none !important;
+  }
+  
+  /* 페이지 로딩 애니메이션 제거 */
   .fade-in-up,
   .fade-in-up-delay-1,
   .fade-in-up-delay-2,
@@ -2123,7 +2130,9 @@ main {
   .fade-in-up-delay-6,
   .fade-in-up-delay-7,
   .fade-in-up-delay-8 {
-    transform: translateY(20px);
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
   
   .fade-in-up.visible,
@@ -2135,7 +2144,8 @@ main {
   .fade-in-up-delay-6.visible,
   .fade-in-up-delay-7.visible,
   .fade-in-up-delay-8.visible {
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: none !important;
   }
   
   /* 수익 복리 계산기 제목과 설명 크기 조정 */

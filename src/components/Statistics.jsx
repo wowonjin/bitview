@@ -1,7 +1,20 @@
 import { motion } from 'framer-motion'
 import { Users, TrendingUp, Award, Globe } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
 const Statistics = () => {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   const stats = [
     {
       icon: Users,
@@ -59,9 +72,9 @@ const Statistics = () => {
       <div className="container">
         <motion.div
           className="stats-header"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
+          whileInView={isMobile ? false : { opacity: 1, y: 0 }}
+          transition={isMobile ? {} : { duration: 0.6 }}
         >
           <h2 className="section-title">믿을 수 있는 수치</h2>
           <p className="section-subtitle">
@@ -71,18 +84,18 @@ const Statistics = () => {
 
         <motion.div
           className="stats-grid"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          variants={isMobile ? {} : containerVariants}
+          initial={isMobile ? false : "hidden"}
+          whileInView={isMobile ? false : "visible"}
+          viewport={isMobile ? {} : { once: true, amount: 0.3 }}
         >
           {stats.map((stat, index) => (
             <motion.div
               key={index}
               className="stat-card"
-              variants={itemVariants}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              variants={isMobile ? {} : itemVariants}
+              whileHover={isMobile ? {} : { scale: 1.05 }}
+              transition={isMobile ? {} : { type: "spring", stiffness: 300 }}
             >
               <div className="stat-icon" style={{ color: stat.color }}>
                 <stat.icon size={32} />
@@ -90,9 +103,9 @@ const Statistics = () => {
               
               <motion.div
                 className="stat-number"
-                initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, delay: index * 0.1 }}
+                initial={isMobile ? false : { opacity: 0, scale: 0.5 }}
+                whileInView={isMobile ? false : { opacity: 1, scale: 1 }}
+                transition={isMobile ? {} : { duration: 0.8, delay: index * 0.1 }}
               >
                 {stat.number}
               </motion.div>
