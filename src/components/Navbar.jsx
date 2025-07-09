@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon, TrendingUp, BarChart3, Calculator, DollarSign, Activity } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import logoImage from '../assets/logo.png'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -129,9 +130,7 @@ const Navbar = () => {
             {/* 로고와 차트보기 */}
             <div className="navbar-left">
               <Link to="/" className="navbar-logo">
-                <span className="logo-text">
-                  BitView<span className="logo-dot">.</span>
-                </span>
+                <img src={logoImage} alt="BitView" className="logo-image" />
               </Link>
               <Link to="/live-coins" className={`chart-link ${location.pathname === '/live-coins' ? 'active' : ''}`}>
                 실시간 코인 가격
@@ -235,6 +234,19 @@ const Navbar = () => {
             </div>
             
             <div className="mobile-sidebar-nav">
+              {/* 프리미엄 버튼 - 로그인 상태 + 일반 사용자만 맨 위에 표시 */}
+              {isAuthenticated && !isPremium && !isAdmin && (
+                <button
+                  onClick={(e) => {
+                    handlePremiumClick(e)
+                    setIsOpen(false)
+                  }}
+                  className="mobile-sidebar-premium-btn"
+                >
+                  💎 프리미엄 가입하기
+                </button>
+              )}
+              
               <Link
                 to="/live-coins"
                 className="mobile-sidebar-link"
@@ -279,37 +291,48 @@ const Navbar = () => {
                 <Activity size={16} />
                 백테스트
               </Link>
+            
+              {/* 구분선과 함께 표시 */}
+              <div className="mobile-sidebar-divider"></div>
+              
+              {/* 로그인 상태일 때 - 사용자 정보 표시 */}
+              {isAuthenticated ? (
+                <div className="mobile-sidebar-user-info">
+                  <div className="user-info-left">
+                    <User size={20} />
+                    <span>{user?.name || user?.email}</span>
+                    {isAdmin && <span className="admin-badge">관리자</span>}
+                    {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
+                  </div>
+                  <button onClick={handleLogout} className="mobile-logout-icon">
+                    <LogOut size={16} />
+                  </button>
+                </div>
+              ) : (
+                /* 로그인 전 상태 - 로그인, 회원가입 버튼 표시 */
+                <div className="mobile-sidebar-auth-buttons">
+                  <Link 
+                    to="/login" 
+                    className="mobile-sidebar-login-btn"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span className="material-symbols-outlined">login</span>
+                    로그인
+                  </Link>
+                  <Link 
+                    to="/signup" 
+                    className="mobile-sidebar-signup-btn"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    회원가입
+                  </Link>
+                </div>
+              )}
             </div>
             
             <div className="mobile-sidebar-user">
-              {isAuthenticated ? (
+              {isAuthenticated && (
                 <>
-                  {/* 로그인 상태 - 회원정보 */}
-                  <div className="mobile-sidebar-user-info">
-                    <div className="user-info-left">
-                      <User size={20} />
-                      <span>{user?.name || user?.email}</span>
-                      {isAdmin && <span className="admin-badge">관리자</span>}
-                      {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
-                    </div>
-                    <button onClick={handleLogout} className="mobile-logout-icon">
-                      <LogOut size={16} />
-                    </button>
-                  </div>
-                  
-                  {/* 프리미엄 버튼 - 일반 사용자만 */}
-                  {!isPremium && !isAdmin && (
-                    <button
-                      onClick={(e) => {
-                        handlePremiumClick(e)
-                        setIsOpen(false)
-                      }}
-                      className="mobile-sidebar-premium-btn"
-                    >
-                      💎 프리미엄
-                    </button>
-                  )}
-                  
                   {/* 관리자 대시보드 */}
                   {isAdmin && (
                     <Link 
@@ -320,26 +343,6 @@ const Navbar = () => {
                       관리자 대시보드
                     </Link>
                   )}
-                </>
-              ) : (
-                <>
-                  {/* 로그인 전 상태 - 로그인 버튼만 표시 */}
-                  <div className="mobile-sidebar-auth-buttons">
-                    <Link 
-                      to="/login" 
-                      className="mobile-sidebar-login-btn"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      로그인
-                    </Link>
-                    <Link 
-                      to="/signup" 
-                      className="mobile-sidebar-signup-btn"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      회원가입
-                    </Link>
-                  </div>
                 </>
               )}
             </div>

@@ -360,7 +360,7 @@ const Login = () => {
 
       <style jsx>{`
         .auth-page {
-          padding-top: 100px;
+          padding-top: 150px;
           min-height: 100vh;
           padding-bottom: 50px;
           overflow: visible;
@@ -924,8 +924,8 @@ const Login = () => {
         @media (max-width: 768px) {
           .auth-page {
             padding: 1rem;
-            padding-top: 0px;
-            margin-top: -50px;
+            padding-top: 120px;
+            margin-top: 0px;
           }
 
           .auth-container {
@@ -1013,8 +1013,8 @@ const Login = () => {
         @media (max-width: 480px) {
           .auth-page {
             padding: 0.75rem;
-            padding-top: 0px;
-            margin-top: -70px;
+            padding-top: 100px;
+            margin-top: 0px;
           }
 
           .auth-card {
