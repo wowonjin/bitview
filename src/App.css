@@ -1691,7 +1691,7 @@ main {
   
   /* 모바일에서 Hero 섹션 상단 여백 추가 */
   .hero {
-    padding-top: 8rem !important;
+    padding-top: 6rem !important;
   }
   
   /* 모바일에서 로그인 인증 이름 표시 조정 */
@@ -1941,7 +1941,7 @@ main {
   }
   
   .hero {
-    padding-top: 10rem !important;
+    padding-top: 7rem !important;
     margin-top: 0 !important;
   }
   
