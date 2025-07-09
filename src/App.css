@@ -1622,9 +1622,11 @@ main {
   .navbar-left {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
     z-index: 10;
     order: 2;
+    width: auto;
   }
   
   /* 모바일에서 로고 이미지 크기 조정 */
@@ -1689,7 +1691,7 @@ main {
   
   /* 모바일에서 Hero 섹션 상단 여백 추가 */
   .hero {
-    padding-top: 12rem !important;
+    padding-top: 8rem !important;
   }
   
   /* 모바일에서 로그인 인증 이름 표시 조정 */
@@ -1843,11 +1845,15 @@ main {
     order: 1;
   }
   
-  /* 가운데: BitView 로고 */
+  /* 가운데: BitView 로고 - 절대 중앙 위치 */
   .navbar-left {
-    grid-column: 2;
-    justify-self: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
     order: 2;
+    width: auto;
   }
   
   /* 작은 화면에서 로고 이미지 크기 조정 */
@@ -1935,7 +1941,7 @@ main {
   }
   
   .hero {
-    padding-top: 14rem !important;
+    padding-top: 10rem !important;
     margin-top: 0 !important;
   }
   
