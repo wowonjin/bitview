@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, TrendingUp, Shield, Zap, BarChart3, Target, Sparkles, Check } from 'lucide-react'
+import { ArrowRight, TrendingUp, Shield, Zap, BarChart3, Target, Sparkles, Check, LogIn } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 // Intersection Observer 커스텀 훅
 const useIntersectionObserver = (options = {}) => {
@@ -34,6 +35,7 @@ const useIntersectionObserver = (options = {}) => {
 }
 
 const Hero = () => {
+  const { isAuthenticated } = useAuth()
   const [bitcoinPrice, setBitcoinPrice] = useState(65432)
   const [bitcoinChange, setBitcoinChange] = useState(2.34)
   const [ripplePrice, setRipplePrice] = useState(0.5234)
@@ -49,12 +51,25 @@ const Hero = () => {
   const [totalAssets, setTotalAssets] = useState(12345678)
   const [portfolioValue, setPortfolioValue] = useState(1234567)
   const [bitcoinRain, setBitcoinRain] = useState([])
+  const [isMobile, setIsMobile] = useState(false)
   
   // Intersection Observer 훅들
   const [titleRef, titleVisible] = useIntersectionObserver()
   const [descRef, descVisible] = useIntersectionObserver()
   const [statsRef, statsVisible] = useIntersectionObserver()
   const [visualRef, visualVisible] = useIntersectionObserver()
+
+  // 모바일 감지
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // 비트코인 떨어지는 효과 생성
   useEffect(() => {
@@ -233,6 +248,16 @@ const Hero = () => {
               더 스마트한 투자 결정을 내리세요.
             </p>
 
+            {/* 모바일 전용 로그인 버튼 */}
+            {isMobile && !isAuthenticated && (
+              <div className={`mobile-login-button fade-in-up-delay-1-5 ${descVisible ? 'visible' : ''}`}>
+                <Link to="/login" className="hero-mobile-login-btn">
+                  <LogIn size={20} />
+                  <span>로그인 하기</span>
+                </Link>
+              </div>
+            )}
+
             <div className={`hero-stats fade-in-up-delay-2 ${statsVisible ? 'visible' : ''}`} ref={statsRef}>
               <div className="stat-box">
                 <TrendingUp className="stat-icon" />
@@ -259,17 +284,18 @@ const Hero = () => {
           </div>
 
           <div className={`hero-visual fade-in-up-delay-3 ${visualVisible ? 'visible' : ''}`} ref={visualRef}>
-            <div className="hero-dashboard">
-              <div className="dashboard-header">
-                <div className="dashboard-title">
-                  <BarChart3 size={20} />
-                  <span>대시보드</span>
+            {!isMobile && (
+              <div className="hero-dashboard">
+                <div className="dashboard-header">
+                  <div className="dashboard-title">
+                    <BarChart3 size={20} />
+                    <span>대시보드</span>
+                  </div>
+                  <div className="dashboard-status">
+                    <div className="status-dot"></div>
+                    <span>실시간</span>
+                  </div>
                 </div>
-                <div className="dashboard-status">
-                  <div className="status-dot"></div>
-                  <span>실시간</span>
-                </div>
-              </div>
               
               <div className="dashboard-content">
                 <div className="portfolio-summary">
@@ -386,6 +412,7 @@ const Hero = () => {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -594,6 +621,71 @@ const Hero = () => {
           color: var(--text-secondary);
           line-height: 1.6;
           margin-bottom: 2.5rem;
+        }
+
+        .mobile-login-button {
+          margin-bottom: 2rem;
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+          display: flex;
+          justify-content: center;
+          width: calc(130px * 3 + 0.6rem * 2);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .mobile-login-button.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .hero-mobile-login-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 14px 16px;
+          width: 100%;
+          background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+          border: none;
+          border-radius: 12px;
+          color: white;
+          font-size: 1rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.3s ease;
+          box-shadow: 
+            0 4px 12px rgba(59, 130, 246, 0.3),
+            0 0 20px rgba(59, 130, 246, 0.2);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .hero-mobile-login-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+          transition: left 0.6s ease;
+        }
+
+        .hero-mobile-login-btn:hover::before {
+          left: 100%;
+        }
+
+        .hero-mobile-login-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 
+            0 6px 16px rgba(59, 130, 246, 0.4),
+            0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .hero-mobile-login-btn:active {
+          transform: translateY(-1px);
         }
 
         .hero-buttons {
@@ -1116,6 +1208,66 @@ const Hero = () => {
           color: #ef4444;
         }
 
+        /* 애니메이션 효과 클래스 */
+        .fade-in-up {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+        }
+
+        .fade-in-up.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .fade-in-up-delay-1 {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+          transition-delay: 0.4s;
+        }
+
+        .fade-in-up-delay-1.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .fade-in-up-delay-1-5 {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+          transition-delay: 0.6s;
+        }
+
+        .fade-in-up-delay-1-5.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .fade-in-up-delay-2 {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+          transition-delay: 0.8s;
+        }
+
+        .fade-in-up-delay-2.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .fade-in-up-delay-3 {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+          transition-delay: 1.2s;
+        }
+
+        .fade-in-up-delay-3.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
         @media (max-width: 768px) {
           .hero {
             padding: 3rem 0 2rem;
@@ -1317,6 +1469,10 @@ const Hero = () => {
           .crypto-logo {
             width: 20px;
             height: 20px;
+          }
+
+          .mobile-login-button {
+            width: calc(110px * 3 + 0.4rem * 2);
           }
         }
       `}</style>

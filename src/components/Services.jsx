@@ -46,6 +46,7 @@ const useIntersectionObserver = (options = {}) => {
 
 const Services = () => {
   const { isAuthenticated, isPremium } = useAuth()
+  const [isMobile, setIsMobile] = useState(false)
 
   // Intersection Observer 훅들
   const [headerRef, headerVisible] = useIntersectionObserver()
@@ -54,6 +55,18 @@ const Services = () => {
   // 각 서비스 카드에 대한 ref와 visible 상태
   const serviceRefs = useRef([])
   const [serviceVisibility, setServiceVisibility] = useState({})
+
+  // 모바일 감지
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // 서비스 카드들에 대한 Intersection Observer 설정
   useEffect(() => {
@@ -149,7 +162,7 @@ const Services = () => {
 
   return (
     <>
-      <section className="services-section">
+      <section className={`services-section ${isMobile ? 'mobile-extra-spacing' : ''}`}>
         <div className="services-container">
           <div className={`services-header fade-in-up-delay-4 ${headerVisible ? 'visible' : ''}`} ref={headerRef}>
             <h2 className="services-title">
@@ -215,6 +228,10 @@ const Services = () => {
           padding: 80px 0;
           background: transparent;
           min-height: 100vh;
+        }
+
+        .services-section.mobile-extra-spacing {
+          padding-top: 140px;
         }
 
         .services-container {

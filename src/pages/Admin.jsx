@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { 
-  Users, Trash2, Crown, Search, Filter, Download
+  Users, Trash2, Crown, Search, Filter, Download, ChevronDown, ChevronUp, ExternalLink
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { useAuth } from '../context/AuthContext'
@@ -14,6 +14,8 @@ const Admin = () => {
   const [showPremiumOnly, setShowPremiumOnly] = useState(false)
   const [showChart, setShowChart] = useState(false)
   const [exchangeFilter, setExchangeFilter] = useState('all') // 'all', 'binance', 'bybit'
+  const [isMobile, setIsMobile] = useState(false)
+  const [showStats, setShowStats] = useState(false)
   
   const navigate = useNavigate()
   const { user: currentUser, isAdmin } = useAuth()
@@ -23,6 +25,13 @@ const Admin = () => {
     
     loadUsers()
     
+    // 모바일 감지
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
     // 주기적으로 사용자 데이터 새로고침 (VIP 상태 변경 감지)
     const interval = setInterval(() => {
       loadUsers()
@@ -30,6 +39,7 @@ const Admin = () => {
     
     return () => {
       document.body.classList.remove('admin-body')
+      window.removeEventListener('resize', checkMobile)
       clearInterval(interval)
     }
   }, [])
@@ -175,59 +185,159 @@ const Admin = () => {
     return data
   }
 
+  const UserCard = ({ user, index }) => (
+    <div className="user-card">
+      <div className="user-card-header">
+        <div className="user-card-info">
+          <div className="user-name">{user.name}</div>
+          <div className="user-email">{user.email}</div>
+        </div>
+        <div className="user-card-actions">
+          <button 
+            className="delete-btn"
+            onClick={() => deleteUser(user.id, user.name)}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+      <div className="user-card-body">
+        <div className="user-card-row">
+          <span className="label">비밀번호:</span>
+          <span className="password-text">{user.password}</span>
+        </div>
+        <div className="user-card-row">
+          <span className="label">가입일:</span>
+          <span>{new Date(user.joinDate).toLocaleDateString('ko-KR')}</span>
+        </div>
+        <div className="user-card-row">
+          <span className="label">회원등급:</span>
+          <div className="premium-status">
+            {user.exchangeRegistered ? (
+              <span className="premium-badge">
+                <Crown size={12} />
+                프리미엄
+              </span>
+            ) : (
+              <span className="regular-badge">일반</span>
+            )}
+          </div>
+        </div>
+        {user.exchangeRegistered && (
+          <div className="user-card-row">
+            <span className="label">거래소:</span>
+            <span className={`exchange-badge ${index % 2 === 0 ? 'binance' : 'bybit'}`}>
+              {index % 2 === 0 ? '바이낸스' : '바이비트'}
+            </span>
+          </div>
+        )}
+        {user.exchangeEmail && (
+          <div className="user-card-row">
+            <span className="label">프리미엄 이메일:</span>
+            <span className="premium-email">{user.exchangeEmail}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="admin-page">
       <div className="admin-container">
         <div className="admin-header">
           <div className="admin-title-section">
             <h1>관리자 페이지</h1>
-            <div className="referral-links">
-              <a href="https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true" target="_blank" rel="noopener noreferrer">바이낸스</a>
-              <a href="https://www.bybit.com/en/referral/dashboard/?utm_source=uj_header" target="_blank" rel="noopener noreferrer">바이비트</a>
-            </div>
+            {!isMobile && (
+              <div className="referral-links">
+                <a href="https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true" target="_blank" rel="noopener noreferrer">
+                  바이낸스 <ExternalLink size={16} />
+                </a>
+                <a href="https://www.bybit.com/en/referral/dashboard/?utm_source=uj_header" target="_blank" rel="noopener noreferrer">
+                  바이비트 <ExternalLink size={16} />
+                </a>
+              </div>
+            )}
           </div>
-          <div className="admin-stats">
-            <div className="stat-item">
-              <span className="stat-label">오늘 가입한 회원</span>
-              <span className="stat-value">{getTodayJoinedCount()}명</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">오늘 가입한 프리미엄 회원</span>
-              <span className="stat-value">{getTodayJoinedPremiumCount()}명</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">전체 회원</span>
-              <span className="stat-value">{users.length}명</span>
-            </div>
-            <div 
-              className="stat-item"
-              onClick={() => setShowChart(!showChart)}
-            >
-              <span className="stat-label premium-label-container">
-                프리미엄 회원
-                <div className="tooltip-right">
-                  <div className="tooltip-row">
-                    <strong className="tooltip-label">오늘 가입</strong>
-                    <div className="tooltip-data">
-                      바이낸스: {getTodayPremiumByExchange().binance}명<br />
-                      바이비트: {getTodayPremiumByExchange().bybit}명
-                    </div>
+          
+          {isMobile ? (
+            <div className="mobile-stats">
+              <button 
+                className="stats-toggle"
+                onClick={() => setShowStats(!showStats)}
+              >
+                통계 {showStats ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              </button>
+              {showStats && (
+                <div className="stats-dropdown">
+                  <div className="stat-item">
+                    <span className="stat-label">오늘 가입 회원</span>
+                    <span className="stat-value">{getTodayJoinedCount()}명</span>
                   </div>
-                  <div className="tooltip-row">
-                    <strong className="tooltip-label">전체</strong>
-                    <div className="tooltip-data">
-                      바이낸스: {getTotalPremiumByExchange().binance}명<br />
-                      바이비트: {getTotalPremiumByExchange().bybit}명
-                    </div>
+                  <div className="stat-item">
+                    <span className="stat-label">오늘 가입 프리미엄</span>
+                    <span className="stat-value">{getTodayJoinedPremiumCount()}명</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">전체 회원</span>
+                    <span className="stat-value">{users.length}명</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">프리미엄 회원</span>
+                    <span className="stat-value">{users.filter(u => u.exchangeRegistered).length}명</span>
+                  </div>
+                  <div className="referral-links mobile-referral">
+                    <a href="https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true" target="_blank" rel="noopener noreferrer">
+                      바이낸스 <ExternalLink size={14} />
+                    </a>
+                    <a href="https://www.bybit.com/en/referral/dashboard/?utm_source=uj_header" target="_blank" rel="noopener noreferrer">
+                      바이비트 <ExternalLink size={14} />
+                    </a>
                   </div>
                 </div>
-              </span>
-              <span className="stat-value">{users.filter(u => u.exchangeRegistered).length}명</span>
+              )}
             </div>
-          </div>
+          ) : (
+            <div className="admin-stats">
+              <div className="stat-item">
+                <span className="stat-label">오늘 가입한 회원</span>
+                <span className="stat-value">{getTodayJoinedCount()}명</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">오늘 가입한 프리미엄 회원</span>
+                <span className="stat-value">{getTodayJoinedPremiumCount()}명</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">전체 회원</span>
+                <span className="stat-value">{users.length}명</span>
+              </div>
+              <div 
+                className="stat-item clickable-stat"
+                onClick={() => setShowChart(!showChart)}
+              >
+                <span className="stat-label premium-label-container">
+                  프리미엄 회원
+                  <div className="tooltip-right">
+                    <div className="tooltip-row">
+                      <strong className="tooltip-label">오늘 가입</strong>
+                      <div className="tooltip-data">
+                        바이낸스: {getTodayPremiumByExchange().binance}명<br />
+                        바이비트: {getTodayPremiumByExchange().bybit}명
+                      </div>
+                    </div>
+                    <div className="tooltip-row">
+                      <strong className="tooltip-label">전체</strong>
+                      <div className="tooltip-data">
+                        바이낸스: {getTotalPremiumByExchange().binance}명<br />
+                        바이비트: {getTotalPremiumByExchange().bybit}명
+                      </div>
+                    </div>
+                  </div>
+                </span>
+                <span className="stat-value">{users.filter(u => u.exchangeRegistered).length}명</span>
+              </div>
+            </div>
+          )}
         </div>
-
-
 
         <div className="admin-divider"></div>
 
@@ -262,22 +372,24 @@ const Admin = () => {
                 <Search size={20} />
                 <input
                   type="text"
-                  placeholder="이름, 이메일, 사용자명으로 검색..."
+                  placeholder="이름, 이메일로 검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button
-                className={`filter-btn ${showPremiumOnly ? 'active' : ''}`}
-                onClick={() => setShowPremiumOnly(!showPremiumOnly)}
-              >
-                <Filter size={20} />
-                {showPremiumOnly ? '전체 보기' : '프리미엄만'}
-              </button>
-              <button className="export-btn" onClick={exportToExcel}>
-                <Download size={20} />
-                엑셀 내보내기
-              </button>
+              <div className="control-buttons">
+                <button
+                  className={`filter-btn ${showPremiumOnly ? 'active' : ''}`}
+                  onClick={() => setShowPremiumOnly(!showPremiumOnly)}
+                >
+                  <Filter size={18} />
+                  {isMobile ? (showPremiumOnly ? '전체' : '프리미엄') : (showPremiumOnly ? '전체 보기' : '프리미엄만')}
+                </button>
+                <button className="export-btn" onClick={exportToExcel}>
+                  <Download size={18} />
+                  {isMobile ? 'Excel' : '엑셀 내보내기'}
+                </button>
+              </div>
             </div>
           </div>
           
@@ -288,86 +400,96 @@ const Admin = () => {
                 <p>조건에 맞는 사용자가 없습니다.</p>
               </div>
             ) : (
-              <div className="users-table">
-                <div className="table-header">
-                  <div className="table-cell">번호</div>
-                  <div className="table-cell">이름</div>
-                  <div className="table-cell">이메일</div>
-                  <div className="table-cell">비밀번호</div>
-                  <div className="table-cell">가입일</div>
-                  <div className="table-cell">프리미엄</div>
-                  <div className="table-cell clickable-header" onClick={() => {
-                    const nextFilter = exchangeFilter === 'all' ? 'binance' : 
-                                     exchangeFilter === 'binance' ? 'bybit' : 'all'
-                    setExchangeFilter(nextFilter)
-                  }}>
-                    가입 거래소 {exchangeFilter === 'all' ? '(전체)' : 
-                                exchangeFilter === 'binance' ? '(바이낸스)' : '(바이비트)'}
+              <>
+                {isMobile ? (
+                  <div className="mobile-users-list">
+                    {filteredUsers.map((user, index) => (
+                      <UserCard key={user.id} user={user} index={index} />
+                    ))}
                   </div>
-                  <div className="table-cell">삭제</div>
-                </div>
-                <div className="table-body">
-                  {filteredUsers.map((user, index) => (
-                    <div
-                      key={user.id}
-                      className="table-row"
-                    >
-                      <div className="table-cell">
-                        {index + 1}
+                ) : (
+                  <div className="users-table">
+                    <div className="table-header">
+                      <div className="table-cell">번호</div>
+                      <div className="table-cell">이름</div>
+                      <div className="table-cell">이메일</div>
+                      <div className="table-cell">비밀번호</div>
+                      <div className="table-cell">가입일</div>
+                      <div className="table-cell">프리미엄</div>
+                      <div className="table-cell clickable-header" onClick={() => {
+                        const nextFilter = exchangeFilter === 'all' ? 'binance' : 
+                                         exchangeFilter === 'binance' ? 'bybit' : 'all'
+                        setExchangeFilter(nextFilter)
+                      }}>
+                        가입 거래소 {exchangeFilter === 'all' ? '(전체)' : 
+                                    exchangeFilter === 'binance' ? '(바이낸스)' : '(바이비트)'}
                       </div>
-                      <div className="table-cell">
-                        <div className="user-name">
-                          <span>{user.name}</span>
-                        </div>
-                      </div>
-                      <div className="table-cell">
-                        <div className="email-info">
-                          <div className="email-id">{user.email}</div>
-                          <div className="premium-email">{user.exchangeEmail || '-'}</div>
-                        </div>
-                      </div>
-                      <div className="table-cell">
-                        <span className="password-text">{user.password}</span>
-                      </div>
-                      <div className="table-cell">
-                        {new Date(user.joinDate).toLocaleDateString('ko-KR')}
-                      </div>
-                      <div className="table-cell">
-                        <div className="premium-status">
-                          {user.exchangeRegistered ? (
-                            <span className="premium-badge">
-                              <Crown size={14} />
-                              프리미엄
-                            </span>
-                          ) : (
-                            <span className="regular-badge">일반</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="table-cell">
-                        <div className="exchange-info">
-                          {user.exchangeRegistered ? (
-                            <span className={`exchange-badge ${index % 2 === 0 ? 'binance' : 'bybit'}`}>
-                              {/* 임시로 인덱스 기반으로 거래소 배정 */}
-                              {index % 2 === 0 ? '바이낸스' : '바이비트'}
-                            </span>
-                          ) : (
-                            <span className="no-exchange">-</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="table-cell">
-                        <button 
-                          className="delete-btn"
-                          onClick={() => deleteUser(user.id, user.name)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
+                      <div className="table-cell">삭제</div>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="table-body">
+                      {filteredUsers.map((user, index) => (
+                        <div
+                          key={user.id}
+                          className="table-row"
+                        >
+                          <div className="table-cell">
+                            {index + 1}
+                          </div>
+                          <div className="table-cell">
+                            <div className="user-name">
+                              <span>{user.name}</span>
+                            </div>
+                          </div>
+                          <div className="table-cell">
+                            <div className="email-info">
+                              <div className="email-id">{user.email}</div>
+                              <div className="premium-email">{user.exchangeEmail || '-'}</div>
+                            </div>
+                          </div>
+                          <div className="table-cell">
+                            <span className="password-text">{user.password}</span>
+                          </div>
+                          <div className="table-cell">
+                            {new Date(user.joinDate).toLocaleDateString('ko-KR')}
+                          </div>
+                          <div className="table-cell">
+                            <div className="premium-status">
+                              {user.exchangeRegistered ? (
+                                <span className="premium-badge">
+                                  <Crown size={14} />
+                                  프리미엄
+                                </span>
+                              ) : (
+                                <span className="regular-badge">일반</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="table-cell">
+                            <div className="exchange-info">
+                              {user.exchangeRegistered ? (
+                                <span className={`exchange-badge ${index % 2 === 0 ? 'binance' : 'bybit'}`}>
+                                  {/* 임시로 인덱스 기반으로 거래소 배정 */}
+                                  {index % 2 === 0 ? '바이낸스' : '바이비트'}
+                                </span>
+                              ) : (
+                                <span className="no-exchange">-</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="table-cell">
+                            <button 
+                              className="delete-btn"
+                              onClick={() => deleteUser(user.id, user.name)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -434,10 +556,23 @@ const Admin = () => {
           text-decoration: none;
           font-size: 1rem;
           font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .referral-links a:hover {
           text-decoration: underline;
+        }
+
+        .mobile-referral {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid #374151;
+        }
+
+        .mobile-referral a {
+          font-size: 0.9rem;
         }
 
         .stat-item {
@@ -459,6 +594,10 @@ const Admin = () => {
           font-weight: 700;
         }
 
+        .clickable-stat {
+          cursor: pointer;
+        }
+
         .premium-label-container {
           position: relative;
           cursor: pointer;
@@ -478,6 +617,7 @@ const Admin = () => {
           z-index: 9999;
           margin-left: 10px;
           min-width: 200px;
+          background: #1f2937;
         }
 
         .tooltip-right::before {
@@ -511,6 +651,60 @@ const Admin = () => {
         .tooltip-data {
           flex: 1;
           color: #9ca3af;
+        }
+
+        .mobile-stats {
+          position: relative;
+        }
+
+        .stats-toggle {
+          background: #1f2937;
+          border: 1px solid #374151;
+          color: #f9fafb;
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-weight: 500;
+        }
+
+        .stats-toggle:hover {
+          background: #374151;
+        }
+
+        .stats-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          width: 280px;
+          background: #1f2937;
+          border: 1px solid #374151;
+          border-radius: 8px;
+          padding: 1rem;
+          margin-top: 0.5rem;
+          z-index: 10;
+        }
+
+        .stats-dropdown .stat-item {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.5rem 0;
+          border-bottom: 1px solid #374151;
+        }
+
+        .stats-dropdown .stat-item:last-child {
+          border-bottom: none;
+        }
+
+        .stats-dropdown .stat-label {
+          font-size: 0.875rem;
+        }
+
+        .stats-dropdown .stat-value {
+          font-size: 1.1rem;
         }
 
         .chart-section {
@@ -651,6 +845,11 @@ const Admin = () => {
           color: #6b7280;
         }
 
+        .control-buttons {
+          display: flex;
+          gap: 0.5rem;
+        }
+
         .filter-btn, .export-btn {
           display: flex;
           align-items: center;
@@ -683,6 +882,56 @@ const Admin = () => {
         .export-btn:hover {
           background: #047857;
           border-color: #047857;
+        }
+
+        .mobile-users-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .user-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid #374151;
+          border-radius: 8px;
+          padding: 1rem;
+        }
+
+        .user-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 1rem;
+        }
+
+        .user-card-info .user-name {
+          color: #f9fafb;
+          font-size: 1rem;
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+        }
+
+        .user-card-info .user-email {
+          color: #9ca3af;
+          font-size: 0.875rem;
+        }
+
+        .user-card-body {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .user-card-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .user-card-row .label {
+          color: #9ca3af;
+          font-size: 0.875rem;
+          font-weight: 500;
         }
 
         .users-table {
@@ -744,8 +993,6 @@ const Admin = () => {
           align-items: center;
           gap: 0.5rem;
         }
-
-
 
         .premium-status {
           display: flex;
@@ -819,8 +1066,6 @@ const Admin = () => {
           color: #9ca3af;
           border: 1px solid #4b5563;
         }
-
-
 
         .delete-btn {
           background: #dc2626;
@@ -901,49 +1146,95 @@ const Admin = () => {
             padding: 80px 16px 20px;
           }
 
-          .users-table .table-header,
-          .table-body .table-row {
-            grid-template-columns: 0.4fr 1.2fr 2fr 1.5fr 1fr 1fr 1fr 0.8fr;
+          .admin-header {
+            align-items: stretch;
           }
 
-          .users-table .table-header .table-cell,
-          .table-body .table-row .table-cell {
-            padding: 0.5rem 0.25rem;
-            font-size: 0.8rem;
+          .admin-header h1 {
+            font-size: 1.5rem;
+          }
+
+          .users-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .users-header h2 {
+            font-size: 1.5rem;
+          }
+
+          .users-controls {
+            flex-direction: column;
+            gap: 1rem;
+          }
+
+          .search-box {
+            min-width: auto;
+            width: 100%;
+          }
+
+          .control-buttons {
+            justify-content: center;
+          }
+
+          .chart-container {
+            height: 150px;
+          }
+
+          .chart-area {
+            gap: 0.5rem;
+          }
+
+          .chart-bar {
+            width: 30px;
+          }
+
+          .tooltip-right {
+            display: none;
           }
         }
 
         @media (max-width: 480px) {
-          .users-table .table-header,
-          .table-body .table-row {
-            grid-template-columns: 0.3fr 1fr 1.8fr 1.2fr 0.8fr 0.8fr 0.8fr 0.6fr;
+          .admin-page {
+            padding: 70px 12px 20px;
           }
 
-          .users-table .table-header .table-cell,
-          .table-body .table-row .table-cell {
-            padding: 0.4rem 0.2rem;
-            font-size: 0.7rem;
+          .admin-header h1 {
+            font-size: 1.25rem;
           }
 
-          .user-name {
+          .users-header h2 {
+            font-size: 1.25rem;
+          }
+
+          .control-buttons {
             flex-direction: column;
-            gap: 0.25rem;
+            width: 100%;
           }
 
-
-
-          .premium-badge, .regular-badge {
-            padding: 0.15rem 0.3rem;
-            font-size: 0.6rem;
+          .filter-btn, .export-btn {
+            width: 100%;
+            justify-content: center;
           }
 
-          .delete-btn {
-            padding: 0.3rem;
+          .user-card {
+            padding: 0.75rem;
           }
 
-          .password-text {
-            font-size: 0.6rem;
-            padding: 0.15rem 0.25rem;
+          .user-card-header {
+            flex-direction: column;
+            gap: 0.5rem;
+          }
+
+          .user-card-actions {
+            align-self: flex-end;
+          }
+
+          .stats-dropdown {
+            width: 100vw;
+            left: 50%;
+            transform: translateX(-50%);
+            right: auto;
           }
         }
       `}</style>

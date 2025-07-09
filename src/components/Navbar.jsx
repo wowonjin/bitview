@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon, TrendingUp, BarChart3, Calculator, DollarSign, Activity } from 'lucide-react'
+import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon, TrendingUp, BarChart3, Calculator, DollarSign, Activity, UserPlus, Mail } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import logoImage from '../assets/logo.png'
 
@@ -118,7 +118,7 @@ const Navbar = () => {
         <div className="notice-banner" onClick={handlePremiumClick}>
           <div className="notice-content">
             <span className="notice-text">
-              🎉 <strong>지금 가입하면 BitView 한정 즉시 거래 수수료 20% 할인!</strong>
+              🎉 <strong>지금 가입하면 BitView 한정 즉시 USDT 지급!</strong>
             </span>
           </div>
         </div>
@@ -173,6 +173,41 @@ const Navbar = () => {
                     
                     {dropdownOpen && (
                       <div className="dropdown-menu">
+                        {/* 프리미엄 가입하기 버튼 - 일반 사용자만 */}
+                        {!isPremium && !isAdmin && (
+                                                     <button
+                             onClick={(e) => {
+                               handlePremiumClick(e)
+                               setDropdownOpen(false)
+                             }}
+                             className="dropdown-item premium"
+                           >
+                             💎 프리미엄 가입하기
+                           </button>
+                        )}
+                        
+                                                 {/* 사용자 정보 섹션 */}
+                         <div className="dropdown-user-info">
+                           <div className="user-info-details">
+                             <div className="user-name-display">
+                               <User size={16} />
+                               {user?.name || '이름 없음'}
+                             </div>
+                             <div className="user-email-display">
+                               <Mail size={16} />
+                               {user?.email}
+                             </div>
+                           </div>
+                           {(isAdmin || isPremium) && (
+                             <div className="user-badges">
+                               {isAdmin && <span className="admin-badge">관리자</span>}
+                               {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
+                             </div>
+                           )}
+                         </div>
+                        
+                        <div className="dropdown-divider"></div>
+                        
                         <button onClick={handleUserInfoClick} className="dropdown-item">
                           <UserCircle size={16} />
                           회원 정보
@@ -223,30 +258,19 @@ const Navbar = () => {
           {/* 모바일 사이드바 */}
           <div className={`mobile-sidebar ${isOpen ? 'active' : ''}`}>
             <div className="mobile-sidebar-header">
-              <span className="mobile-sidebar-title">메뉴</span>
+              <Link to="/" className="mobile-sidebar-logo" onClick={() => setIsOpen(false)}>
+                <img src={logoImage} alt="BitView" className="sidebar-logo-image" />
+              </Link>
               <button
                 className="mobile-sidebar-close"
                 onClick={() => setIsOpen(false)}
                 aria-label="메뉴 닫기"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
             
             <div className="mobile-sidebar-nav">
-              {/* 프리미엄 버튼 - 로그인 상태 + 일반 사용자만 맨 위에 표시 */}
-              {isAuthenticated && !isPremium && !isAdmin && (
-                <button
-                  onClick={(e) => {
-                    handlePremiumClick(e)
-                    setIsOpen(false)
-                  }}
-                  className="mobile-sidebar-premium-btn"
-                >
-                  💎 프리미엄 가입하기
-                </button>
-              )}
-              
               <Link
                 to="/live-coins"
                 className="mobile-sidebar-link"
@@ -297,36 +321,84 @@ const Navbar = () => {
               
               {/* 로그인 상태일 때 - 사용자 정보 표시 */}
               {isAuthenticated ? (
-                <div className="mobile-sidebar-user-info">
-                  <div className="user-info-left">
-                    <User size={20} />
-                    <span>{user?.name || user?.email}</span>
-                    {isAdmin && <span className="admin-badge">관리자</span>}
-                    {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
-                  </div>
-                  <button onClick={handleLogout} className="mobile-logout-icon">
-                    <LogOut size={16} />
+                <>
+                  {/* 프리미엄 가입하기 버튼 - 일반 사용자만 */}
+                  {!isPremium && !isAdmin && (
+                    <button
+                      onClick={(e) => {
+                        handlePremiumClick(e)
+                        setIsOpen(false)
+                      }}
+                      className="mobile-sidebar-premium-btn"
+                    >
+                      💎 프리미엄 가입하기
+                    </button>
+                  )}
+                  
+                                     {/* 사용자 정보 섹션 */}
+                   <div className="mobile-user-info-section">
+                     <div className="mobile-user-details">
+                       <div className="mobile-user-name">
+                         <User size={16} />
+                         {user?.name || '이름 없음'}
+                       </div>
+                       <div className="mobile-user-email">
+                         <Mail size={16} />
+                         {user?.email}
+                       </div>
+                       {(isAdmin || isPremium) && (
+                         <div className="mobile-user-badges">
+                           {isAdmin && <span className="admin-badge">관리자</span>}
+                           {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                  
+                  {/* 회원정보 링크 */}
+                  <button 
+                    onClick={() => {
+                      handleUserInfoClick()
+                      setIsOpen(false)
+                    }} 
+                    className="mobile-sidebar-link"
+                  >
+                    <UserCircle size={16} />
+                    회원 정보
                   </button>
-                </div>
+                  
+                  {/* 로그아웃 버튼 */}
+                  <button 
+                    onClick={() => {
+                      handleLogout()
+                      setIsOpen(false)
+                    }} 
+                    className="mobile-sidebar-link logout-btn"
+                  >
+                    <LogOut size={16} />
+                    로그아웃
+                  </button>
+                </>
               ) : (
                 /* 로그인 전 상태 - 로그인, 회원가입 버튼 표시 */
-                <div className="mobile-sidebar-auth-buttons">
+                <>
                   <Link 
                     to="/login" 
-                    className="mobile-sidebar-login-btn"
+                    className="mobile-sidebar-link"
                     onClick={() => setIsOpen(false)}
                   >
-                    <span className="material-symbols-outlined">login</span>
+                    <User size={16} />
                     로그인
                   </Link>
                   <Link 
                     to="/signup" 
-                    className="mobile-sidebar-signup-btn"
+                    className="mobile-sidebar-link"
                     onClick={() => setIsOpen(false)}
                   >
+                    <UserPlus size={16} />
                     회원가입
                   </Link>
-                </div>
+                </>
               )}
             </div>
             
@@ -596,10 +668,9 @@ const Navbar = () => {
           position: absolute;
           top: 100%;
           right: 0;
-          background: rgba(17, 17, 17, 0.70);
+          background: rgb(17, 17, 17);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 8px;
-          backdrop-filter: blur(18px);
           min-width: 200px;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
           z-index: 1000;
@@ -633,6 +704,58 @@ const Navbar = () => {
 
         .dropdown-item.logout:hover {
           color: white;
+        }
+
+        .dropdown-item.premium {
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          color: white;
+          margin-bottom: 0.5rem;
+          border-radius: 6px;
+          font-weight: 600;
+        }
+
+        .dropdown-item.premium:hover {
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          color: white;
+        }
+
+        .dropdown-user-info {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info-details {
+          margin-bottom: 0.5rem;
+        }
+
+        .user-name-display {
+          color: white;
+          font-weight: 600;
+          font-size: 0.95rem;
+          margin-bottom: 0.25rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .user-email-display {
+          color: #9ca3af;
+          font-size: 0.8rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .user-badges {
+          display: flex;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .dropdown-divider {
+          height: 1px;
+          background: rgba(255, 255, 255, 0.1);
+          margin: 0.5rem 0;
         }
 
         .auth-btn {
@@ -735,11 +858,16 @@ const Navbar = () => {
           flex-shrink: 0;
         }
 
-        .mobile-sidebar-title {
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: #ffffff;
+        .mobile-sidebar-logo {
+          text-decoration: none;
+          display: flex;
+          align-items: center;
           margin-left: 0.75rem;
+        }
+
+        .sidebar-logo-image {
+          height: 20px;
+          width: auto;
         }
 
         .mobile-sidebar-close {
@@ -846,6 +974,55 @@ const Navbar = () => {
 
         .mobile-sidebar-premium-btn:hover {
           background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .mobile-user-info-section {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          padding: 0.75rem;
+          margin-bottom: 0.5rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-user-details {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .mobile-user-name {
+          color: #ffffff;
+          font-weight: 600;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .mobile-user-email {
+          color: #9ca3af;
+          font-size: 0.8rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .mobile-user-badges {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .mobile-sidebar-link.logout-btn {
+          color: #fca5a5;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .mobile-sidebar-link.logout-btn:hover {
+          background: rgba(239, 68, 68, 0.2);
+          color: #ffffff;
         }
 
         /* 프리미엄 링크 스타일 */
@@ -1179,6 +1356,34 @@ const Navbar = () => {
             white-space: nowrap;
             padding: 0.2rem 0.7rem;
           }
+
+          /* 드롭다운 메뉴 모바일 조정 */
+          .dropdown-menu {
+            min-width: 250px;
+            right: -50px;
+          }
+
+          .dropdown-user-info {
+            padding: 0.5rem 0.75rem;
+          }
+
+          .user-name-display {
+            font-size: 0.9rem;
+          }
+
+          .user-name-display svg {
+            width: 14px;
+            height: 14px;
+          }
+
+          .user-email-display {
+            font-size: 0.75rem;
+          }
+
+          .user-email-display svg {
+            width: 14px;
+            height: 14px;
+          }
         }
 
         @media (min-width: 769px) {
@@ -1216,8 +1421,8 @@ const Navbar = () => {
             padding: 0.5rem;
           }
 
-          .mobile-sidebar-title {
-            font-size: 1rem;
+          .sidebar-logo-image {
+            height: 18px;
           }
 
           .mobile-sidebar-nav {
@@ -1241,6 +1446,28 @@ const Navbar = () => {
           .mobile-sidebar-premium-btn {
             padding: 0.5rem 0.75rem;
             font-size: 0.9rem;
+          }
+
+          .mobile-user-info-section {
+            padding: 0.5rem;
+          }
+
+          .mobile-user-name {
+            font-size: 0.85rem;
+          }
+
+          .mobile-user-name svg {
+            width: 14px;
+            height: 14px;
+          }
+
+          .mobile-user-email {
+            font-size: 0.75rem;
+          }
+
+          .mobile-user-email svg {
+            width: 14px;
+            height: 14px;
           }
 
 
@@ -1271,8 +1498,8 @@ const Navbar = () => {
             padding: 0.5rem;
           }
 
-          .mobile-sidebar-title {
-            font-size: 0.9rem;
+          .sidebar-logo-image {
+            height: 16px;
           }
 
           .mobile-sidebar-nav {
@@ -1296,6 +1523,28 @@ const Navbar = () => {
           .mobile-sidebar-premium-btn {
             padding: 0.4rem 0.5rem;
             font-size: 0.8rem;
+          }
+
+          .mobile-user-info-section {
+            padding: 0.4rem 0.5rem;
+          }
+
+          .mobile-user-name {
+            font-size: 0.8rem;
+          }
+
+          .mobile-user-name svg {
+            width: 12px;
+            height: 12px;
+          }
+
+          .mobile-user-email {
+            font-size: 0.7rem;
+          }
+
+          .mobile-user-email svg {
+            width: 12px;
+            height: 12px;
           }
 
 

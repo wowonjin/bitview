@@ -1039,11 +1039,11 @@ const Premium = () => {
 
         /* Hero Section */
         .hero-section {
-          min-height: 100vh;
+          min-height: 80vh;
           display: flex;
           align-items: center;
           position: relative;
-          padding: 2rem 0;
+          padding: 1rem 0;
           background: #0a0a0a;
         }
 
@@ -1765,12 +1765,12 @@ const Premium = () => {
 
         @media (max-width: 768px) {
           .premium-page {
-            padding-top: 80px;
+            padding-top: 60px;
           }
 
           .hero-section {
-            min-height: 70vh;
-            padding: 1.5rem 0;
+            min-height: 50vh;
+            padding: 1rem 0;
           }
 
           .hero-container {
@@ -1963,8 +1963,14 @@ const Premium = () => {
             padding: 2.5rem 0;
           }
           
-          .partners-section,
-          .features-section,
+          .partners-section {
+            padding: 8rem 0 6rem;
+          }
+
+          .features-section {
+            padding: 8rem 0 6rem;
+          }
+
           .cta-section {
             padding: 2rem 0;
           }
@@ -1972,7 +1978,7 @@ const Premium = () => {
 
         @media (max-width: 480px) {
           .premium-page {
-            padding-top: 70px;
+            padding-top: 50px;
           }
 
           .container {
@@ -1980,8 +1986,8 @@ const Premium = () => {
           }
 
           .hero-section {
-            min-height: 60vh;
-            padding: 1rem 0;
+            min-height: 40vh;
+            padding: 0.5rem 0;
           }
 
           .hero-container {
@@ -2165,8 +2171,14 @@ const Premium = () => {
             padding: 2rem 0;
           }
           
-          .partners-section,
-          .features-section,
+          .partners-section {
+            padding: 9rem 0 6rem;
+          }
+
+          .features-section {
+            padding: 9rem 0 6rem;
+          }
+
           .cta-section {
             padding: 1.5rem 0;
           }

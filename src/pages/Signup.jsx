@@ -750,11 +750,11 @@ const Signup = () => {
         }
 
         .requirement.valid {
-          color: #10B981;
+          color: #3B82F6;
         }
 
         .requirement.valid svg {
-          color: #10B981;
+          color: #3B82F6;
         }
 
         .password-mismatch {
@@ -1092,8 +1092,9 @@ const Signup = () => {
           }
 
           .password-requirements {
-            flex-direction: column;
+            flex-direction: row;
             gap: 0.5rem;
+            flex-wrap: wrap;
           }
 
           .requirement {
@@ -1201,6 +1202,7 @@ const Signup = () => {
 
           .password-requirements {
             gap: 0.4rem;
+            flex-wrap: wrap;
           }
 
           .requirement {
