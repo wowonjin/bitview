@@ -355,6 +355,102 @@ const Premium = () => {
             padding: 2rem 2rem 1rem;
           }
           
+          @media (max-width: 768px) {
+            .progress-indicator {
+              padding: 1.5rem 1.5rem 0.8rem;
+            }
+            
+            .verification-content {
+              padding: 1.5rem;
+            }
+            
+            .modern-title {
+              font-size: 1.5rem;
+            }
+            
+            .modern-subtitle {
+              font-size: 0.9rem;
+              margin-bottom: 1.5rem;
+            }
+            
+            .celebration-icon {
+              font-size: 2.5rem;
+              margin-bottom: 0.8rem;
+            }
+            
+            .success-animation {
+              margin-bottom: 1.5rem;
+            }
+            
+            .verification-container {
+              max-width: 400px;
+              min-height: 350px;
+            }
+            
+            .step-circle {
+              width: 28px;
+              height: 28px;
+              font-size: 0.8rem;
+            }
+            
+            .step-label {
+              font-size: 0.7rem;
+            }
+            
+            .progress-line {
+              width: 30px;
+              margin: 0 0.5rem;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .progress-indicator {
+              padding: 1.2rem 1rem 0.5rem;
+            }
+            
+            .verification-content {
+              padding: 1.2rem;
+            }
+            
+            .modern-title {
+              font-size: 1.3rem;
+            }
+            
+            .modern-subtitle {
+              font-size: 0.8rem;
+              margin-bottom: 1.2rem;
+            }
+            
+            .celebration-icon {
+              font-size: 2rem;
+              margin-bottom: 0.5rem;
+            }
+            
+            .success-animation {
+              margin-bottom: 1.2rem;
+            }
+            
+            .verification-container {
+              max-width: 350px;
+              min-height: 300px;
+            }
+            
+            .step-circle {
+              width: 24px;
+              height: 24px;
+              font-size: 0.7rem;
+            }
+            
+            .step-label {
+              font-size: 0.65rem;
+            }
+            
+            .progress-line {
+              width: 25px;
+              margin: 0 0.3rem;
+            }
+          }
+          
           .progress-step {
             display: flex;
             flex-direction: column;
@@ -771,7 +867,7 @@ const Premium = () => {
           <div className="section-header">
             <div className="animated-icon animated-gift-icon">🎁</div>
             <h2>파트너 거래소 특별 혜택</h2>
-            <p>아래 파트너 거래소에 <span className="white-highlight">신규 가입</span>하시면, BitView의 모든 프리미엄 기능이 <span className="white-highlight">즉시 활성화</span>됩니다.</p>
+            <p><span className="white-highlight">신규 가입</span>하시면,<br className="mobile-break"/>BitView의 모든 프리미엄 기능이 <span className="white-highlight">즉시 활성화</span>됩니다.</p>
           </div>
 
           <div className="exchanges-container">
@@ -896,7 +992,7 @@ const Premium = () => {
                 <Zap size={24} />
               </div>
               <h2>지금 바로 시작하세요</h2>
-              <p>파트너 거래소 신규 가입 즉시 BitView의 모든 프리미엄 기능이 자동으로 활성화됩니다.</p>
+              <p>파트너 거래소 신규 가입 즉시 BitView의 모든 프리미엄 기능이<br className="mobile-break"/> 자동으로 활성화됩니다.</p>
             </div>
             <div className="cta-buttons-wrapper">
               <button onClick={() => handleExchangeClick('binance', binanceRef)} className="cta-action-button reveal-on-scroll" style={{ '--delay': '0s' }}>
@@ -1672,59 +1768,205 @@ const Premium = () => {
             padding-top: 80px;
           }
 
+          .hero-section {
+            min-height: 70vh;
+            padding: 1.5rem 0;
+          }
+
+          .hero-container {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 0 1rem;
+          }
+
+          .hero-badge {
+            margin-bottom: 1.5rem;
+          }
+
           .hero-title {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
+            line-height: 1.2;
+            margin-bottom: 1rem;
           }
 
           .hero-subtitle {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
+          }
+
+          .hero-description {
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
           }
 
           .hero-stats {
-            flex-direction: column;
-            gap: 1rem;
+            flex-direction: row;
+            gap: 0.8rem;
+            justify-content: center;
+          }
+          
+          .stat-card {
+            flex: 1;
+            min-width: 0;
+            padding: 1rem 0.8rem;
+          }
+          
+          .stat-number {
+            font-size: 1.5rem;
+          }
+          
+          .stat-label {
+            font-size: 0.75rem;
           }
 
           .section-header h2 {
-            font-size: 2rem;
+            font-size: 1.5rem;
+          }
+
+          .section-header p {
+            font-size: 0.85rem;
           }
 
           .cta-card {
-            padding: 2.5rem 1.5rem;
+            padding: 1.5rem 1rem;
           }
 
           .cta-content-wrapper h2 {
-            font-size: 2rem;
+            font-size: 1.3rem;
+          }
+
+          .cta-content-wrapper p {
+            font-size: 0.8rem;
           }
 
           .cta-buttons {
             flex-direction: column;
             align-items: center;
+            gap: 0.8rem;
           }
 
           .primary-cta, .secondary-cta {
             width: 100%;
             max-width: 280px;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
           }
 
           .exchanges-container {
             grid-template-columns: 1fr;
+            gap: 1rem;
+          }
+          
+          .benefit-check {
+            width: 1rem;
+            height: 1rem;
+          }
+          
+          .only-badge {
+            padding: 0.08rem 0.25rem;
+            font-size: 0.7rem;
           }
 
           .exchange-card {
-            padding: 2rem;
+            padding: 1.2rem;
+          }
+          
+          .exchange-header {
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+          }
+          
+          .exchange-logo {
+            width: 50px;
+            height: 50px;
+          }
+          
+          .exchange-info h3 {
+            font-size: 1.3rem;
+          }
+          
+          .benefit-row {
+            padding: 0.5rem 0;
+            gap: 0.5rem;
+          }
+          
+          .benefit-row span {
+            font-size: 0.8rem;
+          }
+          
+          .cta-button {
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
           }
 
           .features-grid {
             grid-template-columns: 1fr;
+            gap: 0.8rem;
           }
 
           .feature-card {
-            padding: 2rem;
+            padding: 1.2rem;
+          }
+          
+          .feature-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 0.8rem;
+          }
+          
+          .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+          }
+          
+          .feature-card p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+          }
+          
+          .feature-icon svg {
+            width: 20px;
+            height: 20px;
           }
 
           .cta-content-wrapper {
-            padding: 2rem;
+            padding: 1.2rem;
+          }
+          
+          .cta-action-button {
+            padding: 0.9rem 1.5rem;
+            font-size: 0.95rem;
+          }
+          
+          .cta-icon-wrapper {
+            width: 40px;
+            height: 40px;
+          }
+          
+          .floating-card {
+            animation: none;
+          }
+          
+          .cta-button .w-5 {
+            width: 1rem;
+            height: 1rem;
+          }
+          
+          .animated-gift-icon {
+            font-size: 2rem;
+          }
+          
+          .lightning-icon {
+            font-size: 2rem;
+          }
+          
+          .section {
+            padding: 2.5rem 0;
+          }
+          
+          .partners-section,
+          .features-section,
+          .cta-section {
+            padding: 2rem 0;
           }
         }
 
@@ -1737,107 +1979,205 @@ const Premium = () => {
             padding: 0 1rem;
           }
 
-          .hero-title {
-            font-size: 2rem;
-            line-height: 1.2;
+          .hero-section {
+            min-height: 60vh;
+            padding: 1rem 0;
           }
 
-          .hero-subtitle {
-            font-size: 1.25rem;
+          .hero-container {
+            gap: 1.5rem;
+            padding: 0 0.5rem;
           }
 
-          .hero-description {
-            font-size: 0.9rem;
-          }
-
-          .section-header h2 {
-            font-size: 1.75rem;
-          }
-
-          .section-header p {
-            font-size: 0.9rem;
-          }
-
-          .cta-card {
-            padding: 2rem 1rem;
-          }
-
-          .cta-content-wrapper {
-            padding: 1.5rem;
-          }
-
-          .cta-content-wrapper h2 {
-            font-size: 1.75rem;
-          }
-
-          .cta-content-wrapper p {
-            font-size: 0.9rem;
-          }
-
-          .exchange-card {
-            padding: 1.5rem;
-          }
-
-          .exchange-header {
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-          }
-
-          .exchange-logo {
-            width: 48px;
-            height: 48px;
-          }
-
-          .exchange-info h3 {
-            font-size: 1.5rem;
-          }
-
-          .benefit-row {
-            padding: 0.5rem 0;
-          }
-
-          .benefit-row span {
-            font-size: 0.85rem;
-          }
-
-          .cta-button {
-            padding: 0.875rem 1.5rem;
-            font-size: 0.9rem;
-          }
-
-          .feature-card {
-            padding: 1.5rem;
-          }
-
-          .feature-icon {
-            width: 48px;
-            height: 48px;
-          }
-
-          .feature-card h3 {
-            font-size: 1.25rem;
-          }
-
-          .feature-card p {
-            font-size: 0.9rem;
-          }
-
-          .cta-action-button {
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-          }
-
-          .instant-activation {
+          .hero-badge {
+            margin-bottom: 1rem;
             font-size: 0.8rem;
           }
 
+          .hero-title {
+            font-size: 1.5rem;
+            line-height: 1.2;
+            margin-bottom: 0.8rem;
+          }
+
+          .hero-subtitle {
+            font-size: 1rem;
+          }
+
+          .hero-description {
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .hero-stats {
+            flex-direction: row;
+            gap: 0.5rem;
+            justify-content: center;
+          }
+          
+          .stat-card {
+            flex: 1;
+            min-width: 0;
+            padding: 0.8rem 0.5rem;
+          }
+          
+          .stat-number {
+            font-size: 1.2rem;
+          }
+          
+          .stat-label {
+            font-size: 0.65rem;
+          }
+
+          .floating-card {
+            width: 280px;
+            padding: 1.5rem;
+            animation: none;
+          }
+          
+          .cta-button .w-5 {
+            width: 0.9rem;
+            height: 0.9rem;
+          }
+          
+          .animated-gift-icon {
+            font-size: 1.5rem;
+          }
+          
+          .lightning-icon {
+            font-size: 1.5rem;
+          }
+
+          .section-header h2 {
+            font-size: 1.3rem;
+          }
+
+          .section-header p {
+            font-size: 0.8rem;
+          }
+
+          .cta-card {
+            padding: 1.2rem 0.8rem;
+          }
+
+          .cta-content-wrapper {
+            padding: 1rem;
+          }
+
+          .cta-content-wrapper h2 {
+            font-size: 1.1rem;
+          }
+
+          .cta-content-wrapper p {
+            font-size: 0.7rem;
+          }
+
+          .exchange-card {
+            padding: 1rem;
+          }
+
+          .exchange-header {
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+          }
+
+          .exchange-logo {
+            width: 35px;
+            height: 35px;
+          }
+
+          .exchange-info h3 {
+            font-size: 1.1rem;
+          }
+
+          .benefit-row {
+            padding: 0.25rem 0;
+            gap: 0.4rem;
+          }
+
+          .benefit-row span {
+            font-size: 0.75rem;
+          }
+
+          .cta-button {
+            padding: 0.6rem 1rem;
+            font-size: 0.8rem;
+          }
+          
+          .benefits-container {
+            margin-bottom: 1rem;
+          }
+          
+          .benefit-check {
+            width: 0.8rem;
+            height: 0.8rem;
+          }
+          
+          .only-badge {
+            padding: 0.05rem 0.2rem;
+            font-size: 0.6rem;
+          }
+
+          .feature-card {
+            padding: 1rem;
+          }
+
+          .feature-icon {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 0.6rem;
+          }
+
+          .feature-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+          }
+
+          .feature-card p {
+            font-size: 0.75rem;
+            line-height: 1.4;
+          }
+          
+          .feature-icon svg {
+            width: 16px;
+            height: 16px;
+          }
+
+          .cta-action-button {
+            padding: 0.7rem 1rem;
+            font-size: 0.85rem;
+          }
+
+          .cta-icon-wrapper {
+            width: 35px;
+            height: 35px;
+          }
+
+          .instant-activation {
+            font-size: 0.7rem;
+          }
+
           .final-cta {
-            padding: 4rem 0;
+            padding: 1.5rem 0;
+          }
+          
+          .section {
+            padding: 2rem 0;
+          }
+          
+          .partners-section,
+          .features-section,
+          .cta-section {
+            padding: 1.5rem 0;
+          }
+          
+          .features-grid {
+            gap: 0.6rem;
           }
 
           .cta-background-glow {
-            width: 600px;
-            height: 600px;
+            width: 500px;
+            height: 500px;
           }
         }
 
@@ -1883,6 +2223,13 @@ const Premium = () => {
           -webkit-text-fill-color: transparent !important;
           background-clip: text !important;
           font-weight: 600;
+        }
+
+        /* PC에서는 모바일 줄바꿈 숨기기 */
+        @media (min-width: 769px) {
+          .mobile-break {
+            display: none;
+          }
         }
       `}</style>
     </div>

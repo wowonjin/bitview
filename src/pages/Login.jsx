@@ -365,7 +365,7 @@ const Login = () => {
           padding-bottom: 50px;
           overflow: visible;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
           padding-left: 2rem;
           padding-right: 2rem;
@@ -924,7 +924,8 @@ const Login = () => {
         @media (max-width: 768px) {
           .auth-page {
             padding: 1rem;
-            padding-top: 80px;
+            padding-top: 0px;
+            margin-top: -50px;
           }
 
           .auth-container {
@@ -932,45 +933,45 @@ const Login = () => {
           }
 
           .auth-card {
-            padding: 1.5rem;
-            border-radius: 12px;
+            padding: 1.25rem;
+            border-radius: 10px;
           }
 
           .auth-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
           }
 
           .auth-subtitle {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
           }
 
           .form-group {
-            gap: 0.4rem;
+            gap: 0.3rem;
           }
 
           .form-group label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
           }
 
           .input-container input {
-            padding: 0.875rem 0.875rem 0.875rem 2.5rem;
-            font-size: 0.9rem;
+            padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+            font-size: 0.85rem;
           }
 
           .input-icon {
-            left: 0.75rem;
-            width: 18px;
-            height: 18px;
+            left: 0.625rem;
+            width: 16px;
+            height: 16px;
           }
 
           .password-toggle {
-            right: 0.75rem;
-            padding: 0.25rem;
+            right: 0.625rem;
+            padding: 0.2rem;
           }
 
           .auth-button {
-            padding: 0.875rem;
-            font-size: 0.9rem;
+            padding: 0.75rem;
+            font-size: 0.85rem;
           }
 
           .modal-overlay {
@@ -1012,47 +1013,48 @@ const Login = () => {
         @media (max-width: 480px) {
           .auth-page {
             padding: 0.75rem;
-            padding-top: 70px;
+            padding-top: 0px;
+            margin-top: -70px;
           }
 
           .auth-card {
-            padding: 1.25rem;
+            padding: 1rem;
           }
 
           .auth-title {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
           }
 
           .auth-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
           }
 
           .auth-form {
-            gap: 1rem;
+            gap: 0.8rem;
           }
 
           .form-group label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
           }
 
           .input-container input {
-            padding: 0.75rem 0.75rem 0.75rem 2.25rem;
-            font-size: 0.85rem;
+            padding: 0.625rem 0.625rem 0.625rem 2rem;
+            font-size: 0.8rem;
           }
 
           .input-icon {
-            left: 0.625rem;
-            width: 16px;
-            height: 16px;
+            left: 0.5rem;
+            width: 14px;
+            height: 14px;
           }
 
           .password-toggle {
-            right: 0.625rem;
+            right: 0.5rem;
           }
 
           .auth-button {
-            padding: 0.75rem;
-            font-size: 0.85rem;
+            padding: 0.625rem;
+            font-size: 0.8rem;
           }
 
           .modal-overlay {

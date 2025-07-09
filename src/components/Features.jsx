@@ -349,11 +349,11 @@ const Features = () => {
         @media (max-width: 768px) {
           .main-features {
             grid-template-columns: 1fr;
-            gap: 1.5rem;
+            gap: 2rem;
           }
 
           .main-feature-card {
-            padding: 2rem;
+            padding: 3rem;
           }
 
           .feature-icon-large {
@@ -377,11 +377,11 @@ const Features = () => {
 
           .sub-features {
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            gap: 1.5rem;
           }
 
           .sub-feature-card {
-            padding: 1.5rem;
+            padding: 2.5rem;
           }
 
           .sub-feature-icon {
@@ -392,6 +392,24 @@ const Features = () => {
           .sub-feature-icon svg {
             width: 20px;
             height: 20px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .main-features {
+            gap: 1.5rem;
+          }
+
+          .main-feature-card {
+            padding: 2.5rem;
+          }
+
+          .sub-features {
+            gap: 1rem;
+          }
+
+          .sub-feature-card {
+            padding: 2rem;
           }
         }
       `}</style>

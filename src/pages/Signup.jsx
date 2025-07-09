@@ -533,7 +533,7 @@ const Signup = () => {
           padding-bottom: 50px;
           overflow: visible;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
           padding-left: 2rem;
           padding-right: 2rem;
@@ -1045,49 +1045,50 @@ const Signup = () => {
         @media (max-width: 768px) {
           .auth-page {
             padding: 1rem;
-            padding-top: 80px;
+            padding-top: 0px;
+            margin-top: -50px;
           }
 
           .auth-container {
             max-width: 100%;
-            transform: translateY(20px);
+            transform: translateY(-10px);
           }
 
           .auth-card {
-            padding: 1.5rem;
-            border-radius: 12px;
+            padding: 1.25rem;
+            border-radius: 10px;
           }
 
           .auth-title {
-            font-size: 1.75rem;
+            font-size: 1.5rem;
           }
 
           .auth-subtitle {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
           }
 
           .form-group {
-            gap: 0.4rem;
+            gap: 0.3rem;
           }
 
           .form-group label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
           }
 
           .input-container input {
-            padding: 0.875rem 0.875rem 0.875rem 2.5rem;
-            font-size: 0.9rem;
+            padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+            font-size: 0.85rem;
           }
 
           .input-icon {
-            left: 0.75rem;
-            width: 18px;
-            height: 18px;
+            left: 0.625rem;
+            width: 16px;
+            height: 16px;
           }
 
           .password-toggle {
-            right: 0.75rem;
-            padding: 0.25rem;
+            right: 0.625rem;
+            padding: 0.2rem;
           }
 
           .password-requirements {
@@ -1096,30 +1097,30 @@ const Signup = () => {
           }
 
           .requirement {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
           }
 
           .password-mismatch {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
           }
 
           .name-error-message {
-            font-size: 0.8rem;
-            padding: 0.4rem 0.6rem;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.5rem;
           }
 
           .checkbox-text {
-            font-size: 0.8rem;
-            line-height: 1.4;
+            font-size: 0.75rem;
+            line-height: 1.3;
           }
 
           .terms-link {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
           }
 
           .auth-button {
-            padding: 0.875rem;
-            font-size: 0.9rem;
+            padding: 0.75rem;
+            font-size: 0.85rem;
           }
 
           .modal-overlay {
@@ -1151,50 +1152,51 @@ const Signup = () => {
         @media (max-width: 480px) {
           .auth-page {
             padding: 0.75rem;
-            padding-top: 70px;
+            padding-top: 0px;
+            margin-top: -70px;
           }
 
           .auth-container {
-            transform: translateY(10px);
+            transform: translateY(-15px);
           }
 
           .auth-card {
-            padding: 1.25rem;
+            padding: 1rem;
           }
 
           .auth-title {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
           }
 
           .auth-subtitle {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
           }
 
           .auth-form {
-            gap: 1rem;
+            gap: 0.8rem;
           }
 
           .form-group {
-            gap: 0.3rem;
+            gap: 0.25rem;
           }
 
           .form-group label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
           }
 
           .input-container input {
-            padding: 0.75rem 0.75rem 0.75rem 2.25rem;
-            font-size: 0.85rem;
+            padding: 0.625rem 0.625rem 0.625rem 2rem;
+            font-size: 0.8rem;
           }
 
           .input-icon {
-            left: 0.625rem;
-            width: 16px;
-            height: 16px;
+            left: 0.5rem;
+            width: 14px;
+            height: 14px;
           }
 
           .password-toggle {
-            right: 0.625rem;
+            right: 0.5rem;
           }
 
           .password-requirements {
@@ -1202,41 +1204,41 @@ const Signup = () => {
           }
 
           .requirement {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
           }
 
           .password-mismatch {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
           }
 
           .name-error-message {
-            font-size: 0.75rem;
-            padding: 0.35rem 0.5rem;
+            font-size: 0.7rem;
+            padding: 0.3rem 0.4rem;
           }
 
           .checkbox-container {
             align-items: flex-start;
-            gap: 0.4rem;
+            gap: 0.3rem;
           }
 
           .checkmark {
-            width: 14px;
-            height: 14px;
-            margin-top: 0.125rem;
+            width: 12px;
+            height: 12px;
+            margin-top: 0.1rem;
           }
 
           .checkbox-text {
-            font-size: 0.75rem;
-            line-height: 1.3;
+            font-size: 0.7rem;
+            line-height: 1.2;
           }
 
           .terms-link {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
           }
 
           .auth-button {
-            padding: 0.75rem;
-            font-size: 0.85rem;
+            padding: 0.625rem;
+            font-size: 0.8rem;
           }
 
           .error-message {

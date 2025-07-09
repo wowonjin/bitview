@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon } from 'lucide-react'
+import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon, TrendingUp, BarChart3, Calculator, DollarSign, Activity } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const Navbar = () => {
@@ -117,7 +117,7 @@ const Navbar = () => {
         <div className="notice-banner" onClick={handlePremiumClick}>
           <div className="notice-content">
             <span className="notice-text">
-              🎉 <strong>[프리미엄] 지금 가입하면 BitView 한정 즉시 거래 수수료 20% 할인!</strong>
+              🎉 <strong>지금 가입하면 BitView 한정 즉시 거래 수수료 20% 할인!</strong>
             </span>
           </div>
         </div>
@@ -153,46 +153,52 @@ const Navbar = () => {
 
             {/* 사용자 메뉴 */}
             <div className="navbar-right desktop-menu">
-              {!isPremium && !isAdmin && (
-                <button onClick={handlePremiumClick} className={`premium-link ${location.pathname === '/premium' ? 'active' : ''}`}>
-                  <span className="premium-text">💎 프리미엄</span>
-                </button>
-              )}
               {isAuthenticated ? (
-                <div className="user-menu" ref={dropdownRef}>
-                  <button className="user-dropdown-btn" onClick={toggleDropdown}>
-                    <User size={20} />
-                    <span className="user-display-name">{user?.name || user?.email}</span>
-                    {isAdmin && <span className="admin-badge">관리자</span>}
-                    {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
-                    <ChevronDown size={16} className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`} />
-                  </button>
-                  
-                  {dropdownOpen && (
-                    <div className="dropdown-menu">
-                      <button onClick={handleUserInfoClick} className="dropdown-item">
-                        <UserCircle size={16} />
-                        회원 정보
-                      </button>
-                      {isAdmin && (
-                        <Link 
-                          to="/admin" 
-                          className="dropdown-item"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          <Settings size={16} />
-                          관리자 대시보드
-                        </Link>
-                      )}
-                      <button onClick={handleLogout} className="dropdown-item logout">
-                        <LogOut size={16} />
-                        로그아웃
-                      </button>
-                    </div>
+                <>
+                  {/* 로그인 상태 - 프리미엄 버튼 (일반 사용자만) */}
+                  {!isPremium && !isAdmin && (
+                    <button onClick={handlePremiumClick} className={`premium-link ${location.pathname === '/premium' ? 'active' : ''}`}>
+                      <span className="premium-text">💎 프리미엄</span>
+                    </button>
                   )}
-                </div>
+                  
+                  {/* 사용자 드롭다운 */}
+                  <div className="user-menu" ref={dropdownRef}>
+                    <button className="user-dropdown-btn" onClick={toggleDropdown}>
+                      <User size={20} />
+                      <span className="user-display-name">{user?.name || user?.email}</span>
+                      {isAdmin && <span className="admin-badge">관리자</span>}
+                      {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
+                      <ChevronDown size={16} className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`} />
+                    </button>
+                    
+                    {dropdownOpen && (
+                      <div className="dropdown-menu">
+                        <button onClick={handleUserInfoClick} className="dropdown-item">
+                          <UserCircle size={16} />
+                          회원 정보
+                        </button>
+                        {isAdmin && (
+                          <Link 
+                            to="/admin" 
+                            className="dropdown-item"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            <Settings size={16} />
+                            관리자 대시보드
+                          </Link>
+                        )}
+                        <button onClick={handleLogout} className="dropdown-item logout">
+                          <LogOut size={16} />
+                          로그아웃
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
               ) : (
                 <>
+                  {/* 로그인 전 상태 - 로그인 버튼만 */}
                   <Link to="/signup" className="auth-btn signup-btn">회원가입</Link>
                   <Link to="/login" className="auth-btn login-btn">로그인</Link>
                 </>
@@ -218,15 +224,7 @@ const Navbar = () => {
           {/* 모바일 사이드바 */}
           <div className={`mobile-sidebar ${isOpen ? 'active' : ''}`}>
             <div className="mobile-sidebar-header">
-              <Link
-                to="/"
-                className="mobile-sidebar-logo"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="logo-text">
-                  BitView<span className="logo-dot">.</span>
-                </span>
-              </Link>
+              <span className="mobile-sidebar-title">메뉴</span>
               <button
                 className="mobile-sidebar-close"
                 onClick={() => setIsOpen(false)}
@@ -242,6 +240,7 @@ const Navbar = () => {
                 className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
+                <TrendingUp size={16} />
                 실시간 코인 가격
               </Link>
               
@@ -250,6 +249,7 @@ const Navbar = () => {
                 className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
+                <BarChart3 size={16} />
                 실시간 차트
               </Link>
               
@@ -258,6 +258,7 @@ const Navbar = () => {
                 className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
+                <Calculator size={16} />
                 수익 복리 계산기
               </Link>
               
@@ -266,6 +267,7 @@ const Navbar = () => {
                 className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
+                <DollarSign size={16} />
                 펀딩비 계산기
               </Link>
               
@@ -274,6 +276,7 @@ const Navbar = () => {
                 className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
+                <Activity size={16} />
                 백테스트
               </Link>
             </div>
@@ -320,25 +323,23 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  {/* 로그인 전 - 로그인 + 프리미엄 버튼 */}
-                  <Link
-                    to="/login"
-                    className="mobile-sidebar-login-btn"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <User size={16} />
-                    로그인
-                  </Link>
-                  
-                  <button
-                    onClick={(e) => {
-                      handlePremiumClick(e)
-                      setIsOpen(false)
-                    }}
-                    className="mobile-sidebar-premium-btn"
-                  >
-                    💎 프리미엄
-                  </button>
+                  {/* 로그인 전 상태 - 로그인 버튼만 표시 */}
+                  <div className="mobile-sidebar-auth-buttons">
+                    <Link 
+                      to="/login" 
+                      className="mobile-sidebar-login-btn"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      로그인
+                    </Link>
+                    <Link 
+                      to="/signup" 
+                      className="mobile-sidebar-signup-btn"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      회원가입
+                    </Link>
+                  </div>
                 </>
               )}
             </div>
@@ -731,18 +732,11 @@ const Navbar = () => {
           flex-shrink: 0;
         }
 
-        .mobile-sidebar-logo {
-          text-decoration: none;
-        }
-
-        .mobile-sidebar-logo .logo-text {
-          font-size: 1.5rem;
+        .mobile-sidebar-title {
+          font-size: 1.2rem;
           font-weight: 700;
           color: #ffffff;
-        }
-
-        .mobile-sidebar-logo .logo-dot {
-          color: #6680fd;
+          margin-left: 0.75rem;
         }
 
         .mobile-sidebar-close {
@@ -769,7 +763,9 @@ const Navbar = () => {
         }
 
         .mobile-sidebar-link {
-          display: block;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
           padding: 0.75rem 1rem;
           color: #ffffff;
           text-decoration: none;
@@ -778,6 +774,7 @@ const Navbar = () => {
           margin-bottom: 0.5rem;
           transition: all 0.3s ease;
           text-align: left;
+          font-size: 0.9rem;
         }
 
         .mobile-sidebar-link:hover {
@@ -846,26 +843,6 @@ const Navbar = () => {
 
         .mobile-sidebar-premium-btn:hover {
           background: linear-gradient(135deg, #2563eb, #1d4ed8);
-        }
-
-        .mobile-sidebar-login-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          width: 100%;
-          padding: 0.75rem 1rem;
-          background: rgba(59, 130, 246, 0.1);
-          color: #3b82f6;
-          text-decoration: none;
-          font-weight: 500;
-          border-radius: 8px;
-          margin-bottom: 0.5rem;
-          transition: all 0.3s ease;
-        }
-
-        .mobile-sidebar-login-btn:hover {
-          background: #3b82f6;
-          color: #ffffff;
         }
 
         /* 프리미엄 링크 스타일 */
@@ -1153,12 +1130,20 @@ const Navbar = () => {
             font-size: 0.8rem;
           }
 
+          .navbar-content {
+            padding: 0.5rem 0;
+          }
+
           .navbar-left {
-            gap: 1rem;
+            gap: 0.5rem;
+          }
+
+          .logo-text {
+            font-size: 1.2rem;
           }
 
           .chart-link {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
           }
 
           .desktop-menu {
@@ -1167,6 +1152,12 @@ const Navbar = () => {
 
           .mobile-menu-toggle {
             display: block;
+            padding: 0.25rem;
+          }
+
+          .mobile-menu-toggle svg {
+            width: 20px;
+            height: 20px;
           }
 
           .user-info-modal {
@@ -1198,9 +1189,113 @@ const Navbar = () => {
         }
 
         @media (max-width: 480px) {
-          .mobile-sidebar {
-            width: 260px;
+          .navbar-content {
+            padding: 0.25rem 0;
           }
+
+          .navbar-left {
+            gap: 0.25rem;
+          }
+
+          .logo-text {
+            font-size: 1rem;
+          }
+
+          .chart-link {
+            font-size: 0.7rem;
+          }
+
+          .mobile-sidebar {
+            width: 240px;
+          }
+
+          .mobile-sidebar-header {
+            padding: 0.5rem;
+          }
+
+          .mobile-sidebar-title {
+            font-size: 1rem;
+          }
+
+          .mobile-sidebar-nav {
+            padding: 0.5rem;
+          }
+
+          .mobile-sidebar-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+          }
+
+          .mobile-sidebar-user {
+            padding: 0.5rem;
+          }
+
+          .mobile-sidebar-user-info {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+          }
+
+          .mobile-sidebar-premium-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+          }
+
+
+        }
+
+        @media (max-width: 360px) {
+          .navbar-content {
+            padding: 0.25rem 0;
+          }
+
+          .navbar-left {
+            gap: 0.25rem;
+          }
+
+          .logo-text {
+            font-size: 0.9rem;
+          }
+
+          .chart-link {
+            font-size: 0.6rem;
+          }
+
+          .mobile-sidebar {
+            width: 220px;
+          }
+
+          .mobile-sidebar-header {
+            padding: 0.5rem;
+          }
+
+          .mobile-sidebar-title {
+            font-size: 0.9rem;
+          }
+
+          .mobile-sidebar-nav {
+            padding: 0.5rem;
+          }
+
+          .mobile-sidebar-link {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+          }
+
+          .mobile-sidebar-user {
+            padding: 0.5rem;
+          }
+
+          .mobile-sidebar-user-info {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+          }
+
+          .mobile-sidebar-premium-btn {
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+          }
+
+
         }
       `}</style>
     </>

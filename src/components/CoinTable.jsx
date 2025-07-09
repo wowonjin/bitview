@@ -467,12 +467,6 @@ const CoinTable = () => {
           />
         </div>
         
-        <div className="coin-count-display">
-          <span className="coin-count-text">
-            총 {filteredCoins.length}개 코인
-          </span>
-        </div>
-        
         <div className="filter-controls">
           {/* 관심 코인만 필터 버튼 제거 */}
         </div>

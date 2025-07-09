@@ -1172,13 +1172,13 @@ const Hero = () => {
           .hero-stats {
             justify-content: center;
             flex-wrap: nowrap;
-            gap: 0.4rem;
+            gap: 0.6rem;
           }
 
           .stat-box {
-            padding: 0.9rem 0.8rem;
+            padding: 1.2rem 1rem;
             flex: 1;
-            max-width: 110px;
+            max-width: 130px;
           }
 
           .stat-icon {
@@ -1275,13 +1275,13 @@ const Hero = () => {
           .hero-stats {
             justify-content: center;
             flex-wrap: nowrap;
-            gap: 0.2rem;
+            gap: 0.4rem;
           }
 
           .stat-box {
-            padding: 0.6rem 0.4rem;
+            padding: 1rem 0.8rem;
             flex: 1;
-            max-width: 90px;
+            max-width: 110px;
           }
 
           .stat-icon {

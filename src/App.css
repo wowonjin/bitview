@@ -282,21 +282,6 @@ main {
   gap: 1rem;
 }
 
-.coin-count-display {
-  display: flex;
-  align-items: center;
-  color: #9ca3af;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.coin-count-text {
-  background: rgba(55, 65, 81, 0.3);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(75, 85, 99, 0.3);
-}
-
 .ecosystem-filters {
   display: flex;
   flex-wrap: wrap;
@@ -489,7 +474,7 @@ main {
   font-weight: 500;
 }
 
-.last-update, .coin-count {
+.last-update {
   color: #9ca3af;
 }
 
@@ -867,24 +852,22 @@ main {
   }
   
   .coin-table-controls {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
     gap: 1rem;
-  }
-  
-  .coin-count-display {
-    order: 1;
-    text-align: center;
+    flex-wrap: wrap;
   }
   
   .search-container {
     order: 2;
     max-width: none;
+    flex: 1;
+    min-width: 200px;
   }
 
   .ecosystem-filters {
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 6px;
     padding: 0;
   }
@@ -1319,7 +1302,7 @@ main {
 
 @media (max-width: 768px) {
   .advanced-backtest-container {
-    margin-top: 60px;
+    padding: 1rem;
   }
   
   .chart-header h2 {
@@ -1332,7 +1315,7 @@ main {
   }
   
   .speed-btn {
-    padding: 3px 6px;
+    padding: 4px 6px;
     font-size: 11px;
   }
   
@@ -1349,16 +1332,36 @@ main {
   }
   
   .stats-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .stat-card {
-    padding: 10px;
+    padding: 12px;
   }
   
   .stat-value {
-    font-size: 16px;
+    font-size: 1.2rem;
+  }
+  
+  /* 모바일에서 백테스트 페이지 배경색 제거 */
+  .advanced-backtest-container {
+    background: transparent;
+  }
+  
+  .left-panel, .right-panel, .chart-header, .bottom-panel {
+    background: transparent;
+    border: none;
+  }
+  
+  .chart-section {
+    background: transparent;
+  }
+  
+  /* 모바일에서 차트 컨테이너 배경색 제거 */
+  .chart-container, .candlestick-chart {
+    background: transparent;
+    border: none;
   }
 }
 
@@ -1589,6 +1592,7 @@ main {
     align-items: center;
     justify-items: center;
     padding: 1rem 0;
+    position: relative;
   }
   
   /* 왼쪽: 메뉴 버튼 */
@@ -1599,10 +1603,12 @@ main {
     order: 1;
   }
   
-  /* 가운데: BitView 로고 */
+  /* 가운데: BitView 로고 - 절대 중앙 위치 */
   .navbar-left {
-    grid-column: 2;
-    justify-self: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
     order: 2;
   }
   
@@ -1706,19 +1712,19 @@ main {
   }
   
   body {
-    padding-top: 160px !important; /* 모바일에서 충분한 여백 확보 */
+    padding-top: 120px !important; /* 모바일에서 간격 축소 */
   }
   
   /* 모바일 버전에서 상단 여백 조정 */
   .hero {
-    padding-top: 20px !important;
+    padding-top: 6rem !important;
     margin-top: 0 !important;
   }
   
   /* 다른 페이지들 모바일 여백 */
   .page-content, .live-coins-page, .chart-page, .advanced-backtest-container, 
   .terms-page, .profit-calculator-page, .privacy-page, .premium-page, .admin-page {
-    padding-top: 20px !important;
+    padding-top: 5px !important;
     margin-top: 0 !important;
   }
 
@@ -1736,9 +1742,15 @@ main {
   /* 모바일에서 페이지 헤더 표시 */
   .mobile-page-header {
     display: block !important;
-    text-align: left;
-    margin-bottom: 1.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
     padding: 0;
+  }
+  
+  /* 차트 페이지에서 더 작은 간격 적용 */
+  .chart-page .mobile-page-header {
+    margin-bottom: 0.2rem;
+    padding: 0.4rem;
   }
   
   .mobile-page-header h1 {
@@ -1755,17 +1767,17 @@ main {
     line-height: 1.4;
   }
   
-  /* 모바일에서 계산기 헤더 왼쪽 정렬 */
+  /* 모바일에서 계산기 헤더 가운데 정렬 */
   .calculator-header {
-    text-align: left !important;
+    text-align: center !important;
   }
   
   .calculator-header h1 {
-    text-align: left !important;
+    text-align: center !important;
   }
   
   .calculator-header p {
-    text-align: left !important;
+    text-align: center !important;
   }
   
   /* 모바일에서 도구 선택 창 숨기기 */
@@ -1793,17 +1805,17 @@ main {
     line-height: 1.4;
   }
   
-  /* 모바일에서 계산기 헤더 왼쪽 정렬 */
+  /* 모바일에서 계산기 헤더 가운데 정렬 */
   .calculator-header {
-    text-align: left !important;
+    text-align: center !important;
   }
   
   .calculator-header h1 {
-    text-align: left !important;
+    text-align: center !important;
   }
   
   .calculator-header p {
-    text-align: left !important;
+    text-align: center !important;
   }
 }
 
@@ -1848,6 +1860,7 @@ main {
     align-items: center;
     justify-items: center;
     padding: 1rem 0;
+    position: relative;
   }
   
   /* 왼쪽: 메뉴 버튼 */
@@ -1960,17 +1973,17 @@ main {
   }
   
   body {
-    padding-top: 150px !important; /* 작은 화면에서도 충분한 여백 확보 */
+    padding-top: 110px !important; /* 작은 화면에서 간격 축소 */
   }
   
   .hero {
-    padding-top: 20px !important;
+    padding-top: 6rem !important;
     margin-top: 0 !important;
   }
   
   .page-content, .live-coins-page, .chart-page, .advanced-backtest-container, 
   .terms-page, .profit-calculator-page, .privacy-page, .premium-page, .admin-page {
-    padding-top: 20px !important;
+    padding-top: 5px !important;
     margin-top: 0 !important;
   }
 
@@ -1991,11 +2004,17 @@ main {
     text-align: center;
     margin-bottom: 1rem;
     padding: 0.8rem;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    border-radius: 0;
+    border: none;
   }
-
+  
+    /* 차트 페이지에서 더 작은 간격 적용 */
+  .chart-page .mobile-page-header {
+    margin-bottom: 0.2rem;
+    padding: 0.4rem;
+  }
+ 
   .mobile-page-title {
     color: #ffffff;
     font-size: 1.3rem;
@@ -2156,4 +2175,169 @@ main {
   .profit-calculator-page .calculator-header .mobile-page-description {
     font-size: 0.8rem !important;
   }
+}
+
+/* 모바일 사이드바 스타일 */
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  height: 100vh;
+  width: 280px;
+  background: rgba(17, 17, 17, 0.85);
+  backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  transition: right 0.3s ease;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mobile-sidebar.active {
+  right: 0;
+}
+
+.mobile-sidebar-header {
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.mobile-sidebar-close {
+  background: none;
+  border: none;
+  color: #ffffff;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: background 0.2s ease;
+}
+
+.mobile-sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-sidebar-nav {
+  padding: 1rem 0;
+  flex: 1;
+}
+
+.mobile-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+}
+
+.mobile-sidebar-link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: #6680fd;
+}
+
+.mobile-sidebar-user {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: auto;
+}
+
+.mobile-sidebar-user-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  color: #ffffff;
+}
+
+.user-info-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-logout-icon {
+  background: none;
+  border: none;
+  color: #ffffff;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: background 0.2s ease;
+}
+
+.mobile-logout-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-sidebar-premium-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.mobile-sidebar-premium-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* 모바일 사이드바 인증 버튼 스타일 */
+.mobile-sidebar-auth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-sidebar-login-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.mobile-sidebar-login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mobile-sidebar-signup-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  color: #ffffff;
+  text-decoration: none;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.mobile-sidebar-signup-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
