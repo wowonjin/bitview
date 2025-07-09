@@ -156,6 +156,11 @@ const Premium = () => {
     }
   ]
 
+  // 페이지 로드 시 최상단으로 스크롤
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // scroll reveal effect
   useEffect(() => {
     const elements = document.querySelectorAll('.reveal-on-scroll');
@@ -329,6 +334,7 @@ const Premium = () => {
             display: flex;
             flex-direction: column;
             min-height: 400px;
+            margin-top: -4rem;
           }
           
           @keyframes slideUp {
@@ -385,6 +391,7 @@ const Premium = () => {
             .verification-container {
               max-width: 400px;
               min-height: 350px;
+              margin-top: -8rem;
             }
             
             .step-circle {
@@ -1165,6 +1172,7 @@ const Premium = () => {
           border-radius: 16px;
           backdrop-filter: blur(10px);
           transition: all 0.3s ease;
+          flex: 1;
         }
 
         .stat-card:hover {
@@ -1187,12 +1195,12 @@ const Premium = () => {
 
         .hero-visual {
           display: flex;
-          justify-content: center;
+          justify-content: flex-start;
           align-items: center;
         }
 
         .floating-card {
-          width: 320px;
+          width: 100%;
           background: rgba(255, 255, 255, 0.08);
           border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 20px;
@@ -1354,6 +1362,12 @@ const Premium = () => {
           gap: 2rem;
           max-width: 1200px;
           margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+          .exchanges-container {
+            margin-top: -2rem;
+          }
         }
 
         .exchange-card {
@@ -1901,6 +1915,16 @@ const Premium = () => {
           .features-grid {
             grid-template-columns: 1fr;
             gap: 0.8rem;
+            margin-top: -2rem;
+          }
+
+          .cta-buttons-wrapper {
+            margin-top: 0rem;
+          }
+
+          .cta-content-wrapper {
+            padding: 1.5rem;
+            gap: 1rem;
           }
 
           .feature-card {

@@ -173,20 +173,7 @@ const Navbar = () => {
                     
                     {dropdownOpen && (
                       <div className="dropdown-menu">
-                        {/* 프리미엄 가입하기 버튼 - 일반 사용자만 */}
-                        {!isPremium && !isAdmin && (
-                                                     <button
-                             onClick={(e) => {
-                               handlePremiumClick(e)
-                               setDropdownOpen(false)
-                             }}
-                             className="dropdown-item premium"
-                           >
-                             💎 프리미엄 가입하기
-                           </button>
-                        )}
-                        
-                                                 {/* 사용자 정보 섹션 */}
+                        {/* 사용자 정보 섹션 */}
                          <div className="dropdown-user-info">
                            <div className="user-info-details">
                              <div className="user-name-display">
@@ -334,50 +321,6 @@ const Navbar = () => {
                       💎 프리미엄 가입하기
                     </button>
                   )}
-                  
-                                     {/* 사용자 정보 섹션 */}
-                   <div className="mobile-user-info-section">
-                     <div className="mobile-user-details">
-                       <div className="mobile-user-name">
-                         <User size={16} />
-                         {user?.name || '이름 없음'}
-                       </div>
-                       <div className="mobile-user-email">
-                         <Mail size={16} />
-                         {user?.email}
-                       </div>
-                       {(isAdmin || isPremium) && (
-                         <div className="mobile-user-badges">
-                           {isAdmin && <span className="admin-badge">관리자</span>}
-                           {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
-                         </div>
-                       )}
-                     </div>
-                   </div>
-                  
-                  {/* 회원정보 링크 */}
-                  <button 
-                    onClick={() => {
-                      handleUserInfoClick()
-                      setIsOpen(false)
-                    }} 
-                    className="mobile-sidebar-link"
-                  >
-                    <UserCircle size={16} />
-                    회원 정보
-                  </button>
-                  
-                  {/* 로그아웃 버튼 */}
-                  <button 
-                    onClick={() => {
-                      handleLogout()
-                      setIsOpen(false)
-                    }} 
-                    className="mobile-sidebar-link logout-btn"
-                  >
-                    <LogOut size={16} />
-                    로그아웃
-                  </button>
                 </>
               ) : (
                 /* 로그인 전 상태 - 로그인, 회원가입 버튼 표시 */

@@ -1387,7 +1387,12 @@ const Hero = () => {
           }
 
           .bitcoin-rain {
-            display: none;
+            display: block;
+          }
+          
+          .falling-bitcoin {
+            font-size: 1.2rem;
+            animation-duration: 6s;
           }
         }
 
