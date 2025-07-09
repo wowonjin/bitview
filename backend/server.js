@@ -3,7 +3,13 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+
+// 라우터 가져오기
+const authRoutes = require('./routes/auth');
+const { resetTokenQueries } = require('./utils/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,7 +27,33 @@ const allowedOrigins = [
   process.env.CUSTOM_DOMAIN
 ].filter(Boolean);
 
+// 전역 요청 제한
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15분
+  max: 100, // 최대 100개 요청
+  message: {
+    success: false,
+    message: '너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // 미들웨어 설정
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false
+}));
+
+app.use(globalLimiter);
+
 app.use(cors({
   origin: function (origin, callback) {
     // 같은 도메인에서의 요청이거나 허용된 origin인 경우
@@ -38,8 +70,9 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 // 임시 저장소 (실제 프로덕션에서는 데이터베이스 사용)
 const resetTokens = new Map();
@@ -73,6 +106,18 @@ const createTransporter = () => {
 
 const transporter = createTransporter();
 
+// 인증 라우터 등록
+app.use('/api/auth', authRoutes);
+
+// 헬스체크 엔드포인트
+app.get('/api/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // 비밀번호 재설정 요청 API
 app.post('/api/forgot-password', async (req, res) => {
   try {
@@ -85,18 +130,23 @@ app.post('/api/forgot-password', async (req, res) => {
       });
     }
 
-    // 실제로는 데이터베이스에서 사용자 확인
-    // 현재는 프론트엔드에서 localStorage 확인하도록 함
+    // 데이터베이스에서 사용자 확인
+    const { userQueries } = require('./utils/database');
+    const user = await userQueries.findByEmail(email);
+    
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: '해당 이메일로 가입된 계정이 없습니다.' 
+      });
+    }
     
     // 재설정 토큰 생성 (6자리 숫자)
     const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15분 후 만료
 
-    // 토큰 저장
-    resetTokens.set(email, {
-      token: resetToken,
-      expiresAt: expiresAt
-    });
+    // 토큰을 데이터베이스에 저장
+    await resetTokenQueries.create(email, resetToken, expiresAt.toISOString());
 
     // 이메일 내용 생성
     const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
@@ -163,9 +213,9 @@ app.post('/api/forgot-password', async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    // 15분 후 토큰 자동 삭제
-    setTimeout(() => {
-      resetTokens.delete(email);
+    // 만료된 토큰 자동 정리 (백그라운드 작업)
+    setTimeout(async () => {
+      await resetTokenQueries.cleanExpired();
     }, 15 * 60 * 1000);
 
     res.json({ 
@@ -184,7 +234,7 @@ app.post('/api/forgot-password', async (req, res) => {
 });
 
 // 토큰 검증 API
-app.post('/api/verify-reset-token', (req, res) => {
+app.post('/api/verify-reset-token', async (req, res) => {
   try {
     const { email, token } = req.body;
 
@@ -195,27 +245,13 @@ app.post('/api/verify-reset-token', (req, res) => {
       });
     }
 
-    const savedToken = resetTokens.get(email);
+    // 데이터베이스에서 토큰 검증
+    const savedToken = await resetTokenQueries.findByEmailAndToken(email, token);
 
     if (!savedToken) {
       return res.status(400).json({ 
         success: false, 
-        message: '유효하지 않은 요청입니다.' 
-      });
-    }
-
-    if (savedToken.token !== token) {
-      return res.status(400).json({ 
-        success: false, 
-        message: '인증 코드가 올바르지 않습니다.' 
-      });
-    }
-
-    if (new Date() > savedToken.expiresAt) {
-      resetTokens.delete(email);
-      return res.status(400).json({ 
-        success: false, 
-        message: '인증 코드가 만료되었습니다.' 
+        message: '유효하지 않은 인증 코드입니다.' 
       });
     }
 

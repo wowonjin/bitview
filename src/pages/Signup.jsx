@@ -20,20 +20,19 @@ const Signup = () => {
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, signup } = useAuth()
 
-  // 닉네임 중복 검사 함수
+  // 닉네임 중복 검사 함수 (서버에서 처리하므로 클라이언트 측에서는 단순 검증만)
   const checkNameDuplicate = (name) => {
     if (!name.trim()) {
       setNameError('')
       return
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const existingName = users.find(u => u.name && u.name.toLowerCase() === name.toLowerCase())
-
-    if (existingName) {
-      setNameError('이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.')
+    if (name.length < 2) {
+      setNameError('닉네임은 2자 이상이어야 합니다.')
+    } else if (name.length > 20) {
+      setNameError('닉네임은 20자 이하여야 합니다.')
     } else {
       setNameError('')
     }
@@ -90,16 +89,6 @@ const Signup = () => {
       return
     }
 
-    // 기존 사용자 확인
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const existingUser = users.find(u => u.email === formData.email)
-
-    if (existingUser) {
-      setError('이미 가입된 이메일입니다.')
-      setIsLoading(false)
-      return
-    }
-
     // 닉네임 중복 확인 (실시간 검사 결과 확인)
     if (nameError) {
       setError(nameError)
@@ -107,45 +96,21 @@ const Signup = () => {
       return
     }
 
-    // 추가 닉네임 검사 (실시간 검사가 누락된 경우를 대비)
-    const existingName = users.find(u => u.name && u.name.toLowerCase() === formData.name.toLowerCase())
-
-    if (existingName) {
-      const errorMessage = '이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.'
-      setError(errorMessage)
-      setNameError(errorMessage)
-      setIsLoading(false)
-      return
-    }
-
-    // 새 사용자 추가
-    const newUser = {
-      id: Date.now(),
+    // API를 통한 회원가입
+    const result = await signup({
       name: formData.name,
       email: formData.email,
       password: formData.password,
-      joinDate: new Date().toISOString(),
-      exchangeRegistered: false,
-      exchangeEmail: null
+      confirmPassword: formData.confirmPassword
+    })
+
+    if (result.success) {
+      setIsLoading(false)
+      navigate('/')
+    } else {
+      setError(result.message || '회원가입에 실패했습니다.')
+      setIsLoading(false)
     }
-
-    users.push(newUser)
-    localStorage.setItem('users', JSON.stringify(users))
-
-    // 자동 로그인
-    const userData = {
-      id: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-      password: newUser.password,
-      role: 'user',
-      exchangeRegistered: false,
-      exchangeEmail: null
-    }
-    login(userData)
-
-    setIsLoading(false)
-    navigate('/')
   }
 
   const termsContent = `

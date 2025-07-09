@@ -37,39 +37,17 @@ const Login = () => {
     // 로딩 애니메이션을 위한 지연
     await new Promise(resolve => setTimeout(resolve, 800))
 
-    // 관리자 계정 체크
-    if (formData.email === 'admin@gmail.com' && formData.password === 'admin123') {
-      const adminUser = {
-        email: formData.email,
-        role: 'admin'
-      }
-      login(adminUser)
-      navigate('/')
-      setIsLoading(false)
-      return
-    }
-
-    // 일반 사용자 로그인 체크
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const user = users.find(u => u.email === formData.email && u.password === formData.password)
-
-    if (user) {
-      const userData = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        password: user.password,
-        role: 'user',
-        exchangeRegistered: user.exchangeRegistered || false,
-        exchangeEmail: user.exchangeEmail || null
-      }
-      login(userData)
+    // API를 통한 로그인
+    const result = await login(formData.email, formData.password)
+    
+    if (result.success) {
       // location.state에 from이 있으면 해당 페이지로, 없으면 홈으로 이동
       const redirectTo = location.state?.from || '/'
       navigate(redirectTo)
     } else {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+      setError(result.message || '로그인에 실패했습니다.')
     }
+    
     setIsLoading(false)
   }
 
