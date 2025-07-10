@@ -256,14 +256,35 @@ const Services = () => {
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(128, 128, 128, 0.01));
+          border: 1px solid #374151;
           border-radius: 50px;
           font-size: 0.875rem;
           font-weight: 500;
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(20px);
           margin-bottom: 2rem;
           color: #e2e8f0;
+          box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.15),
+            0 0 20px rgba(59, 130, 246, 0.15),
+            0 0 40px rgba(59, 130, 246, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .hero-badge::before {
+          content: '';
+          position: absolute;
+          top: -1px;
+          left: -1px;
+          right: -1px;
+          bottom: -1px;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.1) 50%, rgba(6, 182, 212, 0.08) 100%);
+          border-radius: 50px;
+          z-index: -1;
+          opacity: 0.6;
+          filter: blur(0.5px);
         }
 
         .services-title {
@@ -390,6 +411,10 @@ const Services = () => {
             font-size: 0.75rem;
             padding: 0.4rem 0.8rem;
             margin-bottom: 1.5rem;
+          }
+
+          .hero-badge::before {
+            border-radius: 50px;
           }
 
           .services-container {
