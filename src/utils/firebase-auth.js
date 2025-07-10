@@ -253,3 +253,23 @@ export const getFirebaseErrorMessage = (error) => {
       return error.message || '알 수 없는 오류가 발생했습니다.';
   }
 }; 
+
+// 관리자 계정 생성 (개발용)
+export const createAdminUser = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // 관리자 프로필 생성
+    await createUserProfile(user, { 
+      displayName: 'Admin',
+      isAdmin: true,
+      role: 'admin' 
+    });
+
+    return { success: true, user };
+  } catch (error) {
+    console.error('관리자 계정 생성 실패:', error);
+    throw error;
+  }
+}; 

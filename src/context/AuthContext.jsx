@@ -40,7 +40,25 @@ export const AuthProvider = ({ children }) => {
         
         try {
           // Firestore에서 사용자 프로필 가져오기
-          const profile = await getUserProfile(firebaseUser.uid)
+          let profile = await getUserProfile(firebaseUser.uid)
+          
+          // 프로필이 없으면 자동 생성 (Firebase 콘솔에서 생성한 계정의 경우)
+          if (!profile) {
+            const { createUserProfile } = await import('../utils/firebase-auth')
+            const isAdmin = firebaseUser.email === 'admin@gmail.com'
+            
+            await createUserProfile(firebaseUser, {
+              displayName: isAdmin ? 'Admin' : firebaseUser.displayName || 'User',
+              isAdmin: isAdmin,
+              role: isAdmin ? 'admin' : 'user',
+              is_premium: isAdmin,
+              exchange_registered: false
+            })
+            
+            // 다시 프로필 가져오기
+            profile = await getUserProfile(firebaseUser.uid)
+          }
+          
           setUserProfile(profile)
           
           // 즐겨찾기 목록 로드
