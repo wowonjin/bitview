@@ -44,22 +44,87 @@ export const AuthProvider = ({ children }) => {
           
           // 프로필이 없으면 자동 생성 (Firebase 콘솔에서 생성한 계정의 경우)
           if (!profile) {
-            const { createUserProfile } = await import('../utils/firebase-auth')
-            const isAdmin = firebaseUser.email === 'admin@gmail.com'
-            
-            await createUserProfile(firebaseUser, {
-              displayName: isAdmin ? 'Admin' : firebaseUser.displayName || 'User',
-              isAdmin: isAdmin,
-              role: isAdmin ? 'admin' : 'user',
-              is_premium: isAdmin,
-              exchange_registered: false
-            })
-            
-            // 다시 프로필 가져오기
-            profile = await getUserProfile(firebaseUser.uid)
+            try {
+              const { createUserProfile } = await import('../utils/firebase-auth')
+              const isAdmin = firebaseUser.email === 'admin@gmail.com'
+              
+              await createUserProfile(firebaseUser, {
+                displayName: isAdmin ? 'Admin' : firebaseUser.displayName || 'User',
+                isAdmin: isAdmin,
+                role: isAdmin ? 'admin' : 'user',
+                is_premium: isAdmin,
+                exchange_registered: false
+              })
+              
+              // 다시 프로필 가져오기
+              profile = await getUserProfile(firebaseUser.uid)
+            } catch (profileError) {
+              console.error('프로필 생성 중 오류:', profileError)
+              
+              // 오프라인 오류인 경우 기본 프로필 생성
+              if (profileError.message?.includes('네트워크 연결을 확인해 주세요')) {
+                const isAdmin = firebaseUser.email === 'admin@gmail.com'
+                profile = {
+                  id: firebaseUser.uid,
+                  displayName: isAdmin ? 'Admin' : firebaseUser.displayName || 'User',
+                  email: firebaseUser.email,
+                  isAdmin: isAdmin,
+                  role: isAdmin ? 'admin' : 'user',
+                  is_premium: isAdmin,
+                  exchange_registered: false,
+                  createdAt: new Date(),
+                  last_login: new Date(),
+                  _isOfflineProfile: true // 오프라인 프로필임을 표시
+                }
+                console.log('🔧 오프라인 상태로 임시 프로필 생성:', profile)
+                
+                if (isAdmin) {
+                  console.log('✅ 오프라인 상태에서 관리자 권한 부여 완료')
+                }
+              }
+            }
+          }
+          
+          // 관리자 계정인 경우 권한 강제 부여
+          if (firebaseUser.email === 'admin@gmail.com' && profile) {
+            // 관리자 권한이 없는 경우 강제 부여
+            if (!profile.isAdmin || profile.role !== 'admin') {
+              console.log('🔧 관리자 권한 강제 부여 중...')
+              
+              profile = {
+                ...profile,
+                isAdmin: true,
+                role: 'admin',
+                is_premium: true,
+                displayName: profile.displayName || 'Admin'
+              }
+              
+              // Firestore 업데이트 시도 (오프라인 상태여도 로컬 상태는 업데이트)
+              try {
+                await updateUserProfile(firebaseUser.uid, {
+                  isAdmin: true,
+                  role: 'admin',
+                  is_premium: true
+                })
+                console.log('✅ 관리자 권한 Firestore 업데이트 완료')
+              } catch (updateError) {
+                console.log('⚠️ 관리자 권한 Firestore 업데이트 실패 (오프라인 상태일 수 있음):', updateError.message)
+              }
+            }
           }
           
           setUserProfile(profile)
+          
+          // 관리자 권한 디버깅 로그
+          if (firebaseUser.email === 'admin@gmail.com') {
+            console.log('🔧 관리자 계정 로그인 디버깅:', {
+              firebaseEmail: firebaseUser.email,
+              profileEmail: profile?.email,
+              isAdmin: profile?.isAdmin,
+              role: profile?.role,
+              profileData: profile
+            })
+          }
           
           // 즐겨찾기 목록 로드
           const favorites = await getUserFavorites(firebaseUser.uid)
@@ -112,10 +177,28 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // 관리자 권한 확인 (다중 조건)
+  const isAdmin = userProfile?.isAdmin || 
+                  userProfile?.role === 'admin' || 
+                  userProfile?.email === 'admin@gmail.com' ||
+                  user?.email === 'admin@gmail.com' ||
+                  false
+
+  // 관리자 권한 상태 디버깅 로그
+  if (user?.email === 'admin@gmail.com') {
+    console.log('🔧 관리자 권한 상태 확인:', {
+      isAdmin,
+      userProfileIsAdmin: userProfile?.isAdmin,
+      userProfileRole: userProfile?.role,
+      userProfileEmail: userProfile?.email,
+      firebaseEmail: user?.email
+    })
+  }
+
   // 프리미엄 상태 확인
   const isPremium = userProfile?.exchange_registered || 
                    userProfile?.is_premium || 
-                   userProfile?.email === 'admin@gmail.com' || 
+                   isAdmin || 
                    false
 
   // 프리미엄 활성화 (거래소 가입 완료 시 호출)
@@ -218,7 +301,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     isAuthenticated: !!user,
-    isAdmin: userProfile?.email === 'admin@gmail.com',
+    isAdmin,
     isPremium,
     activatePremium,
     favoriteCoins,
@@ -226,6 +309,25 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     changePassword,
     loadUserFavorites
+  }
+
+  // 개발 환경에서 브라우저 콘솔에서 관리자 권한 상태를 확인할 수 있는 전역 함수
+  if (process.env.NODE_ENV === 'development') {
+    window.checkAdminStatus = () => {
+      console.log('🔧 관리자 권한 상태 확인:', {
+        isAdmin,
+        isPremium,
+        isAuthenticated: !!user,
+        firebaseUser: user,
+        userProfile: userProfile,
+        adminConditions: {
+          profileIsAdmin: userProfile?.isAdmin,
+          profileRole: userProfile?.role,
+          profileEmail: userProfile?.email,
+          firebaseEmail: user?.email
+        }
+      })
+    }
   }
 
   return (

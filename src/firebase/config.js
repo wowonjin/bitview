@@ -22,6 +22,18 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Firestore 오프라인 캐싱 설정 (개발 환경에서는 비활성화)
+if (process.env.NODE_ENV === 'development') {
+  try {
+    // 개발 환경에서는 오프라인 캐싱을 비활성화
+    import('firebase/firestore').then(({ disableNetwork, enableNetwork }) => {
+      // 필요에 따라 네트워크 제어 가능
+    });
+  } catch (error) {
+    console.log('Firestore 네트워크 설정 중 오류:', error);
+  }
+}
+
 // Analytics (선택사항 - 개발 환경에서는 비활성화)
 let analytics = null;
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {

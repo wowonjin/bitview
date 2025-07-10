@@ -106,6 +106,13 @@ const Signup = () => {
 
     if (result.success) {
       setIsLoading(false)
+      
+      // 경고 메시지가 있는 경우 (네트워크 문제로 프로필 생성 실패)
+      if (result.warning) {
+        // 경고 메시지를 표시한 후 홈으로 이동
+        alert(result.warning)
+      }
+      
       navigate('/')
     } else {
       setError(result.message || '회원가입에 실패했습니다.')

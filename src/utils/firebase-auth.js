@@ -23,19 +23,55 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 
+// 네트워크 연결 상태 체크
+const checkNetworkConnection = () => {
+  return navigator.onLine;
+};
+
+// 재시도 헬퍼 함수
+const retryWithBackoff = async (fn, maxRetries = 3, delay = 1000) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const isOfflineError = error.code === 'unavailable' || 
+                           error.message.includes('offline') ||
+                           error.message.includes('Failed to get document') ||
+                           error.message.includes('client is offline');
+      
+      if (isOfflineError && i < maxRetries - 1) {
+        console.log(`재시도 ${i + 1}/${maxRetries} - 오프라인 오류:`, error.message);
+        
+        // 네트워크 연결 상태 확인
+        if (!checkNetworkConnection()) {
+          console.log('네트워크 연결이 끊어진 상태입니다.');
+          throw new Error('네트워크 연결을 확인해 주세요.');
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i))); // 지수 백오프
+        continue;
+      }
+      throw error;
+    }
+  }
+};
+
 // 사용자 프로필 생성 (회원가입 시)
 export const createUserProfile = async (user, additionalData = {}) => {
   if (!user) return;
 
   const userRef = doc(db, 'users', user.uid);
-  const userDoc = await getDoc(userRef);
+  
+  try {
+    const userDoc = await retryWithBackoff(async () => {
+      return await getDoc(userRef);
+    });
 
-  if (!userDoc.exists()) {
-    const { displayName, email, photoURL } = user;
-    const createdAt = serverTimestamp();
+    if (!userDoc.exists()) {
+      const { displayName, email, photoURL } = user;
+      const createdAt = serverTimestamp();
 
-    try {
-      await setDoc(userRef, {
+      const userData = {
         displayName,
         email,
         photoURL,
@@ -45,14 +81,34 @@ export const createUserProfile = async (user, additionalData = {}) => {
         premium_expires: null,
         last_login: serverTimestamp(),
         ...additionalData
-      });
-    } catch (error) {
-      console.error('사용자 프로필 생성 실패:', error);
-      throw error;
-    }
-  }
+      };
 
-  return userRef;
+      // 관리자 계정인 경우 디버깅 로그
+      if (email === 'admin@gmail.com') {
+        console.log('🔧 관리자 프로필 생성 중:', {
+          email,
+          userData,
+          isAdmin: userData.isAdmin,
+          role: userData.role
+        });
+      }
+
+      await retryWithBackoff(async () => {
+        await setDoc(userRef, userData);
+      });
+    }
+
+    return userRef;
+  } catch (error) {
+    console.error('사용자 프로필 생성 실패:', error);
+    
+    // 오프라인 오류인 경우 더 자세한 정보 제공
+    if (error.code === 'unavailable' || error.message.includes('offline')) {
+      throw new Error('네트워크 연결을 확인해 주세요. 잠시 후 다시 시도해 주세요.');
+    }
+    
+    throw error;
+  }
 };
 
 // 사용자 프로필 업데이트
@@ -79,7 +135,9 @@ export const getUserProfile = async (userId) => {
 
   try {
     const userRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userRef);
+    const userDoc = await retryWithBackoff(async () => {
+      return await getDoc(userRef);
+    });
     
     if (userDoc.exists()) {
       return { id: userDoc.id, ...userDoc.data() };
@@ -88,6 +146,13 @@ export const getUserProfile = async (userId) => {
     return null;
   } catch (error) {
     console.error('사용자 정보 가져오기 실패:', error);
+    
+    // 오프라인 오류인 경우 null 반환 (로그인 프로세스 중단 방지)
+    if (error.code === 'unavailable' || error.message.includes('offline')) {
+      console.log('오프라인 상태에서 사용자 정보 가져오기 실패 - null 반환');
+      return null;
+    }
+    
     throw error;
   }
 };
@@ -163,8 +228,25 @@ export const signUpUser = async (email, password, displayName) => {
       displayName: displayName
     });
 
-    // Firestore에 사용자 정보 저장
-    await createUserProfile(user, { displayName });
+    // Firestore에 사용자 정보 저장 (재시도 로직 포함)
+    try {
+      await createUserProfile(user, { displayName });
+    } catch (profileError) {
+      console.error('프로필 생성 중 오류:', profileError);
+      
+      // 오프라인 오류인 경우 경고 메시지와 함께 성공 처리
+      if (profileError.message?.includes('네트워크 연결을 확인해 주세요')) {
+        console.log('오프라인 상태에서 회원가입 완료 - 프로필은 다음 로그인 시 생성됩니다.');
+        return { 
+          success: true, 
+          user, 
+          warning: '회원가입이 완료되었습니다. 프로필 설정은 다음 로그인 시 완료됩니다.'
+        };
+      }
+      
+      // 다른 오류인 경우 재시도 권장
+      throw profileError;
+    }
 
     return { success: true, user };
   } catch (error) {
