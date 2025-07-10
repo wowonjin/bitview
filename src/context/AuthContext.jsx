@@ -10,8 +10,14 @@ import {
   getUserFavorites,
   addFavoriteCoin,
   removeFavoriteCoin,
-  getFirebaseErrorMessage
+  getFirebaseErrorMessage,
+  setPremiumMembership,
+  setVipMembership,
+  expireMembership,
+  updateExchangeRegistration,
+  checkMembershipStatus
 } from '../utils/firebase-auth'
+import { auth } from '../firebase/config'
 
 const AuthContext = createContext()
 
@@ -34,13 +40,31 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Firebase 인증 상태 변경 리스너
     const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      console.log('🔧 Firebase 인증 상태 변경:', firebaseUser ? `로그인: ${firebaseUser.email}` : '로그아웃')
+      
       if (firebaseUser) {
         // 사용자가 로그인된 경우
         setUser(firebaseUser)
+        console.log('✅ Firebase 사용자 상태 설정 완료')
+        
+        // 회원가입/로그인 페이지에 있으면 즉시 홈으로 이동
+        if (window.location.pathname === '/signup' || window.location.pathname === '/login') {
+          console.log('🔧 인증 완료 - 자동 홈 이동')
+          setTimeout(() => {
+            window.location.href = '/'
+          }, 100)
+        }
         
         try {
           // Firestore에서 사용자 프로필 가져오기
           let profile = await getUserProfile(firebaseUser.uid)
+          console.log('🔧 Firestore 프로필 조회 결과:', profile ? '프로필 존재' : '프로필 없음')
+          
+          // 프로필이 있지만 displayName이 없는 경우 Firebase Auth의 displayName 사용
+          if (profile && !profile.displayName && firebaseUser.displayName) {
+            profile.displayName = firebaseUser.displayName
+            console.log('🔧 Firebase Auth displayName으로 보완:', firebaseUser.displayName)
+          }
           
           // 프로필이 없으면 자동 생성 (Firebase 콘솔에서 생성한 계정의 경우)
           if (!profile) {
@@ -48,6 +72,7 @@ export const AuthProvider = ({ children }) => {
               const { createUserProfile } = await import('../utils/firebase-auth')
               const isAdmin = firebaseUser.email === 'admin@gmail.com'
               
+              console.log('🔧 새 프로필 생성 중...')
               await createUserProfile(firebaseUser, {
                 displayName: isAdmin ? 'Admin' : firebaseUser.displayName || 'User',
                 isAdmin: isAdmin,
@@ -58,6 +83,7 @@ export const AuthProvider = ({ children }) => {
               
               // 다시 프로필 가져오기
               profile = await getUserProfile(firebaseUser.uid)
+              console.log('✅ 새 프로필 생성 완료')
             } catch (profileError) {
               console.error('프로필 생성 중 오류:', profileError)
               
@@ -66,7 +92,7 @@ export const AuthProvider = ({ children }) => {
                 const isAdmin = firebaseUser.email === 'admin@gmail.com'
                 profile = {
                   id: firebaseUser.uid,
-                  displayName: isAdmin ? 'Admin' : firebaseUser.displayName || 'User',
+                  displayName: isAdmin ? 'Admin' : firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
                   email: firebaseUser.email,
                   isAdmin: isAdmin,
                   role: isAdmin ? 'admin' : 'user',
@@ -114,6 +140,12 @@ export const AuthProvider = ({ children }) => {
           }
           
           setUserProfile(profile)
+          console.log('✅ 사용자 프로필 상태 설정 완료:', {
+            profileDisplayName: profile?.displayName,
+            profileName: profile?.name,
+            profileEmail: profile?.email,
+            firebaseDisplayName: firebaseUser.displayName
+          })
           
           // 관리자 권한 디버깅 로그
           if (firebaseUser.email === 'admin@gmail.com') {
@@ -129,6 +161,8 @@ export const AuthProvider = ({ children }) => {
           // 즐겨찾기 목록 로드
           const favorites = await getUserFavorites(firebaseUser.uid)
           setFavoriteCoins(favorites)
+          console.log('✅ 즐겨찾기 목록 로드 완료')
+          
         } catch (error) {
           console.error('사용자 데이터 로드 실패:', error)
           setUserProfile(null)
@@ -136,11 +170,13 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         // 사용자가 로그아웃된 경우
+        console.log('🔧 사용자 로그아웃 처리 중...')
         setUser(null)
         setUserProfile(null)
         setFavoriteCoins([])
       }
       setLoading(false)
+      console.log('✅ 인증 상태 변경 처리 완료')
     })
 
     // 컴포넌트 언마운트 시 리스너 정리
@@ -159,8 +195,12 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      const { email, password, displayName } = userData
-      const result = await signUpUser(email, password, displayName)
+      const { email, password } = userData
+      console.log('🔧 AuthContext signup 시작:', { email })
+      
+      const result = await signUpUser(email, password)
+      console.log('✅ Firebase 회원가입 완료:', result)
+      
       return { success: true }
     } catch (error) {
       const errorMessage = getFirebaseErrorMessage(error)
@@ -254,7 +294,21 @@ export const AuthProvider = ({ children }) => {
     if (!user) return { success: false, message: '로그인이 필요합니다' }
 
     try {
+      // Firestore 업데이트
       await updateUserProfile(user.uid, updatedData)
+      
+      // displayName이 변경된 경우 Firebase Auth도 업데이트
+      if (updatedData.displayName && auth.currentUser) {
+        try {
+          const { updateProfile } = await import('firebase/auth')
+          await updateProfile(auth.currentUser, {
+            displayName: updatedData.displayName
+          })
+          console.log('✅ Firebase Auth displayName 업데이트 완료')
+        } catch (authError) {
+          console.log('⚠️ Firebase Auth displayName 업데이트 실패:', authError.message)
+        }
+      }
       
       // 로컬 상태 업데이트
       setUserProfile(prev => ({
@@ -293,6 +347,97 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // 프리미엄 회원 등급 설정
+  const setPremium = async (durationDays = 30) => {
+    if (!user) return { success: false, message: '로그인이 필요합니다' }
+
+    try {
+      const result = await setPremiumMembership(user.uid, durationDays)
+      
+      // 로컬 상태 업데이트
+      setUserProfile(prev => ({
+        ...prev,
+        is_premium: true,
+        premium_expires: result.expires.toISOString(),
+        membership_type: 'premium'
+      }))
+      
+      return { success: true, expires: result.expires }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error)
+      return { success: false, message: errorMessage }
+    }
+  }
+
+  // VIP 회원 등급 설정
+  const setVip = async (durationDays = 365) => {
+    if (!user) return { success: false, message: '로그인이 필요합니다' }
+
+    try {
+      const result = await setVipMembership(user.uid, durationDays)
+      
+      // 로컬 상태 업데이트
+      setUserProfile(prev => ({
+        ...prev,
+        is_premium: true,
+        is_vip: true,
+        premium_expires: result.expires.toISOString(),
+        membership_type: 'vip'
+      }))
+      
+      return { success: true, expires: result.expires }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error)
+      return { success: false, message: errorMessage }
+    }
+  }
+
+  // 거래소 등록 상태 업데이트
+  const updateExchangeStatus = async (exchangeEmail) => {
+    if (!user) return { success: false, message: '로그인이 필요합니다' }
+
+    try {
+      await updateExchangeRegistration(user.uid, exchangeEmail)
+      
+      // 로컬 상태 업데이트
+      setUserProfile(prev => ({
+        ...prev,
+        exchange_registered: true,
+        exchange_email: exchangeEmail
+      }))
+      
+      return { success: true }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error)
+      return { success: false, message: errorMessage }
+    }
+  }
+
+  // 회원 등급 상태 확인
+  const getMembershipStatus = async () => {
+    if (!user) return null
+
+    try {
+      const status = await checkMembershipStatus(user.uid)
+      
+      // 만료된 경우 로컬 상태도 업데이트
+      if (status?.expired) {
+        setUserProfile(prev => ({
+          ...prev,
+          is_premium: false,
+          is_vip: false,
+          premium_expires: null,
+          membership_type: 'basic'
+        }))
+      }
+      
+      return status
+    } catch (error) {
+      console.error('회원 등급 상태 확인 실패:', error)
+      return null
+    }
+  }
+
   const value = {
     user: userProfile, // Firestore의 사용자 프로필 정보
     firebaseUser: user, // Firebase 인증 사용자 정보
@@ -308,7 +453,12 @@ export const AuthProvider = ({ children }) => {
     toggleFavoriteCoin,
     updateUser,
     changePassword,
-    loadUserFavorites
+    loadUserFavorites,
+    // 회원 등급 관리 함수들
+    setPremium,
+    setVip,
+    updateExchangeStatus,
+    getMembershipStatus
   }
 
   // 개발 환경에서 브라우저 콘솔에서 관리자 권한 상태를 확인할 수 있는 전역 함수
@@ -326,6 +476,18 @@ export const AuthProvider = ({ children }) => {
           profileEmail: userProfile?.email,
           firebaseEmail: user?.email
         }
+      })
+    }
+    
+    // 사용자 이름 디버깅 함수 추가
+    window.checkUserName = () => {
+      console.log('🔧 사용자 이름 상태 확인:', {
+        firebaseUser: user,
+        userProfile: userProfile,
+        firebaseDisplayName: user?.displayName,
+        firestoreDisplayName: userProfile?.displayName,
+        firestoreName: userProfile?.name,
+        finalDisplayName: userProfile?.displayName || userProfile?.name || user?.displayName || user?.email?.split('@')[0] || 'User'
       })
     }
   }

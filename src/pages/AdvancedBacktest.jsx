@@ -1123,6 +1123,29 @@ const BacktestCalculator = () => {
             padding: 8px 12px;
             font-size: 13px;
           }
+          
+          /* 모바일 헤더 스타일 */
+                     .mobile-page-header {
+             display: block;
+             padding: 20px 16px;
+             margin-bottom: 20px;
+           }
+          
+          .mobile-page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+            text-align: center;
+          }
+          
+          .mobile-page-description {
+            font-size: 13px;
+            color: #9ca3af;
+            margin: 0;
+            text-align: center;
+            line-height: 1.5;
+          }
 
           table {
             font-size: 13px;

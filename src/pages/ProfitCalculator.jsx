@@ -1183,12 +1183,22 @@ const ProfitCalculator = () => {
             margin-bottom: 24px;
           }
 
-          .calculator-header h1 {
+          .calculator-header h1,
+          .mobile-page-title {
             font-size: 1.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+            text-align: center;
           }
 
-          .calculator-header p {
+          .calculator-header p,
+          .mobile-page-description {
             font-size: 0.9rem;
+            color: #9ca3af;
+            margin: 0 0 20px 0;
+            text-align: center;
+            line-height: 1.5;
           }
 
           .calculator-content {

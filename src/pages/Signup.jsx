@@ -1,12 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Sparkles, Check, X } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Check, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -14,29 +13,28 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState('')
-  const [nameError, setNameError] = useState('')
+
   const [isLoading, setIsLoading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const navigate = useNavigate()
-  const { login, signup } = useAuth()
+  const { signup } = useAuth()
 
-  // 닉네임 중복 검사 함수 (서버에서 처리하므로 클라이언트 측에서는 단순 검증만)
-  const checkNameDuplicate = (name) => {
-    if (!name.trim()) {
-      setNameError('')
-      return
+  // 개발 환경에서 브라우저 콘솔에서 강제 이동할 수 있는 함수
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      window.forceGoHome = () => {
+        console.log('🔧 강제 홈 이동 실행')
+        window.location.href = '/'
+        window.location.replace('/')
+      }
     }
+  }, [])
 
-    if (name.length < 2) {
-      setNameError('닉네임은 2자 이상이어야 합니다.')
-    } else if (name.length > 20) {
-      setNameError('닉네임은 20자 이하여야 합니다.')
-    } else {
-      setNameError('')
-    }
-  }
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -44,11 +42,6 @@ const Signup = () => {
       ...formData,
       [name]: value
     })
-    
-    // 닉네임 필드인 경우 실시간 중복 검사
-    if (name === 'name') {
-      checkNameDuplicate(value)
-    }
     
     if (error) setError('')
   }
@@ -67,8 +60,14 @@ const Signup = () => {
     setError('')
     setIsLoading(true)
 
-    // 로딩 애니메이션을 위한 지연
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('🔧 회원가입 폼 제출 시작:', formData.email)
+
+    // 안전장치: 10초 후 무조건 로딩 해제 (더 짧게 설정)
+    const safetyTimeout = setTimeout(() => {
+      console.error('⚠️ 회원가입 안전장치 발동 - 로딩 상태 강제 해제')
+      setIsLoading(false)
+      setError('회원가입 처리 중 문제가 발생했습니다. 다시 시도해 주세요.')
+    }, 10000)
 
     // 유효성 검사
     if (!agreedToTerms) {
@@ -89,33 +88,50 @@ const Signup = () => {
       return
     }
 
-    // 닉네임 중복 확인 (실시간 검사 결과 확인)
-    if (nameError) {
-      setError(nameError)
-      setIsLoading(false)
-      return
-    }
 
-    // Firebase를 통한 회원가입
-    const result = await signup({
-      displayName: formData.name,
-      email: formData.email,
-      password: formData.password,
-      confirmPassword: formData.confirmPassword
-    })
 
-    if (result.success) {
-      setIsLoading(false)
+    // 간단한 회원가입 처리 - Firebase 인증만 성공하면 바로 이동
+    try {
+      console.log('🔧 회원가입 시작:', { 
+        email: formData.email
+      })
       
-      // 경고 메시지가 있는 경우 (네트워크 문제로 프로필 생성 실패)
-      if (result.warning) {
-        // 경고 메시지를 표시한 후 홈으로 이동
-        alert(result.warning)
+      const result = await signup({
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      })
+      
+      // 성공하든 실패하든 안전장치 해제
+      clearTimeout(safetyTimeout)
+      
+      if (result.success) {
+        console.log('✅ 회원가입 성공 - 즉시 이동')
+        
+        // 즉시 로딩 해제
+        setIsLoading(false)
+        
+        // 경고 메시지가 있어도 바로 이동
+        if (result.warning) {
+          console.log('⚠️ 경고 메시지:', result.warning)
+        }
+        
+        // 즉시 강제 이동 (React Router 사용 안 함)
+        console.log('🔧 즉시 강제 이동 실행')
+        
+        // 여러 방법으로 확실하게 이동
+        window.location.href = '/'
+        window.location.replace('/')
+        
+      } else {
+        setError(result.message || '회원가입에 실패했습니다.')
+        setIsLoading(false)
       }
       
-      navigate('/')
-    } else {
-      setError(result.message || '회원가입에 실패했습니다.')
+    } catch (error) {
+      clearTimeout(safetyTimeout)
+      console.error('❌ 회원가입 오류:', error)
+      setError('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.')
       setIsLoading(false)
     }
   }
@@ -231,32 +247,7 @@ const Signup = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="form-group">
-              <label htmlFor="name">닉네임</label>
-              <div className="input-container">
-                <User size={20} className="input-icon" />
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="멋진닉네임"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-              {nameError && (
-                <motion.div
-                  className="name-error-message"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {nameError}
-                </motion.div>
-              )}
-            </div>
+
 
             <div className="form-group">
               <label htmlFor="email">이메일 주소</label>

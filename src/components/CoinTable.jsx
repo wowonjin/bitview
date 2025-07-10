@@ -445,6 +445,7 @@ const CoinTable = () => {
   }
 
   return (
+    <>
     <div className="coin-table-container">
       {/* 모바일에서만 보이는 페이지 헤더 */}
       <div className="mobile-page-header">
@@ -672,6 +673,103 @@ const CoinTable = () => {
         </div>
       )}
     </div>
+    
+    <style jsx global>{`
+      .mobile-page-header {
+        display: none;
+      }
+      
+      .mobile-page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0 0 8px 0;
+        text-align: center;
+      }
+      
+      .mobile-page-description {
+        font-size: 14px;
+        color: #9ca3af;
+        margin: 0 0 24px 0;
+        text-align: center;
+        line-height: 1.5;
+      }
+      
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      
+      .pagination-btn {
+        padding: 8px 16px;
+        border: 1px solid #374151;
+        background: #1f2937;
+        color: #ffffff;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+      
+      .pagination-btn:hover:not(:disabled) {
+        background: #374151;
+        border-color: #6b7280;
+      }
+      
+      .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .pagination-info {
+        color: #9ca3af;
+        font-size: 14px;
+        min-width: 60px;
+        text-align: center;
+      }
+      
+      /* 모바일에서 이전 버튼이 다음 버튼의 왼쪽에 위치하도록 설정 */
+      @media (max-width: 768px) {
+                 .mobile-page-header {
+           display: block !important;
+           padding: 0 16px 20px 16px;
+           margin-top: -80px;
+           margin-bottom: 20px;
+         }
+        
+        .mobile-page-title {
+          font-size: 20px;
+          margin-bottom: 8px;
+        }
+        
+        .mobile-page-description {
+          font-size: 13px;
+          margin-bottom: 0;
+        }
+        
+        .pagination {
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          margin-top: 16px;
+        }
+        
+        .pagination-btn {
+          padding: 6px 12px;
+          font-size: 13px;
+        }
+        
+        .pagination-info {
+          font-size: 13px;
+          min-width: 50px;
+        }
+      }
+    `}</style>
+    </>
   )
 }
 

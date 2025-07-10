@@ -38,7 +38,7 @@ const Chart = () => {
   const memoEditorRef = useRef(null)
 
   // 도구 패널 드래그 관련 상태
-  const [toolPanelPosition, setToolPanelPosition] = useState({ x: 30, y: 120 })
+  const [toolPanelPosition, setToolPanelPosition] = useState({ x: 30, y: 30 })
   const [isToolPanelDragging, setIsToolPanelDragging] = useState(false)
   const [toolPanelDragOffset, setToolPanelDragOffset] = useState({ x: 0, y: 0 })
   const toolPanelRef = useRef(null)
@@ -2819,7 +2819,7 @@ const Chart = () => {
         }
 
         /* 반응형 디자인 */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
           .login-required-modal {
             width: 90vw;
             margin: 20px;
@@ -2846,6 +2846,34 @@ const Chart = () => {
           .modal-login-btn {
             width: 100%;
             padding: 14px;
+          }
+          
+          /* 모바일에서 도구선택 컨테이너 숨기기 */
+          .tool-container {
+            display: none !important;
+          }
+          
+          /* 모바일 헤더 스타일 */
+                     .mobile-page-header {
+             display: block;
+             padding: 20px 16px;
+             margin-bottom: 20px;
+           }
+          
+          .mobile-page-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0 0 8px 0;
+            text-align: center;
+          }
+          
+          .mobile-page-description {
+            font-size: 13px;
+            color: #9ca3af;
+            margin: 0;
+            text-align: center;
+            line-height: 1.5;
           }
         }
       `}</style>

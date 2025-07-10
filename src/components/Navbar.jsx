@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, Edit2, Check, X as XIcon, TrendingUp, BarChart3, Calculator, DollarSign, Activity, UserPlus, Mail } from 'lucide-react'
+import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, TrendingUp, BarChart3, Calculator, DollarSign, Activity, UserPlus, Mail } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import logoImage from '../assets/logo.png'
 
@@ -10,9 +10,7 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [userInfoModalOpen, setUserInfoModalOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [isEditingName, setIsEditingName] = useState(false)
-  const [tempName, setTempName] = useState('')
-  const [nameError, setNameError] = useState('')
+
   const { user, logout, isAuthenticated, isAdmin, isPremium, updateUser } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -42,60 +40,13 @@ const Navbar = () => {
   const handleUserInfoClick = () => {
     setUserInfoModalOpen(true)
     setDropdownOpen(false)
-    setTempName(user?.name || '')
-    setNameError('')
   }
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
   }
 
-  const handleEditName = () => {
-    setIsEditingName(true)
-    setNameError('')
-  }
 
-  const handleSaveName = () => {
-    const trimmedName = tempName.trim()
-    
-    if (!trimmedName) {
-      setNameError('닉네임을 입력해주세요.')
-      return
-    }
-
-    // 기존 이름과 같다면 바로 저장
-    if (trimmedName.toLowerCase() === user?.name?.toLowerCase()) {
-      setIsEditingName(false)
-      setNameError('')
-      return
-    }
-
-    // 중복 이름 확인
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const existingName = users.find(u => u.name && u.name.toLowerCase() === trimmedName.toLowerCase())
-
-    if (existingName) {
-      setNameError('이미 사용 중인 닉네임입니다. 다른 닉네임을 선택해주세요.')
-      return
-    }
-
-    updateUser({ name: trimmedName })
-    setIsEditingName(false)
-    setNameError('')
-  }
-
-  const handleCancelEditName = () => {
-    setTempName(user?.name || '')
-    setIsEditingName(false)
-    setNameError('')
-  }
-
-  const handleNameChange = (e) => {
-    setTempName(e.target.value)
-    if (nameError) {
-      setNameError('')
-    }
-  }
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -165,7 +116,7 @@ const Navbar = () => {
                   <div className="user-menu" ref={dropdownRef}>
                     <button className="user-dropdown-btn" onClick={toggleDropdown}>
                       <User size={20} />
-                      <span className="user-display-name">{user?.name || user?.email}</span>
+                      <span className="user-display-name">{user?.email}</span>
                       {isAdmin && <span className="admin-badge">관리자</span>}
                       {isPremium && !isAdmin && <span className="vip-badge">💎 VIP</span>}
                       <ChevronDown size={16} className={`dropdown-arrow ${dropdownOpen ? 'open' : ''}`} />
@@ -176,10 +127,6 @@ const Navbar = () => {
                         {/* 사용자 정보 섹션 */}
                          <div className="dropdown-user-info">
                            <div className="user-info-details">
-                             <div className="user-name-display">
-                               <User size={16} />
-                               {user?.name || '이름 없음'}
-                             </div>
                              <div className="user-email-display">
                                <Mail size={16} />
                                {user?.email}
@@ -395,45 +342,7 @@ const Navbar = () => {
                   </button>
                 </div>
               </div>
-              <div className="user-info-item">
-                <label>닉네임:</label>
-                <div className="name-container">
-                  {isEditingName ? (
-                    <div className="name-edit-container">
-                      <div className="name-edit-input-container">
-                        <input
-                          type="text"
-                          value={tempName}
-                          onChange={handleNameChange}
-                          className="name-input"
-                          placeholder="닉네임을 입력하세요"
-                          autoFocus
-                        />
-                        <div className="name-edit-buttons">
-                          <button onClick={handleSaveName} className="save-btn" title="저장">
-                            <Check size={16} />
-                          </button>
-                          <button onClick={handleCancelEditName} className="cancel-btn" title="취소">
-                            <XIcon size={16} />
-                          </button>
-                        </div>
-                      </div>
-                      {nameError && (
-                        <div className="name-error">
-                          {nameError}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="name-display-container">
-                      <span>{user?.name || '닉네임 설정되지 않음'}</span>
-                      <button onClick={handleEditName} className="edit-btn" title="닉네임 변경">
-                        <Edit2 size={16} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+
               <div className="user-info-item">
                 <label>계정 유형:</label>
                 <span>
@@ -840,7 +749,7 @@ const Navbar = () => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.75rem 1rem;
+          padding: 0.65rem 0.9rem;
           color: #ffffff;
           text-decoration: none;
           font-weight: 500;
@@ -848,7 +757,7 @@ const Navbar = () => {
           margin-bottom: 0.5rem;
           transition: all 0.3s ease;
           text-align: left;
-          font-size: 0.9rem;
+          font-size: 0.85rem;
         }
 
         .mobile-sidebar-link:hover {

@@ -27,6 +27,11 @@ const AppContent = () => {
   const isPremiumPage = location.pathname === '/premium';
   const isAuthPage = ['/login', '/signup'].includes(location.pathname);
 
+  // 페이지 이동 시 스크롤을 상단으로 이동
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div className={isPremiumPage || isAuthPage ? "" : "container"}>
           <Routes>

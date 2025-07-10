@@ -28,10 +28,17 @@ const checkNetworkConnection = () => {
   return navigator.onLine;
 };
 
-// 재시도 헬퍼 함수
-const retryWithBackoff = async (fn, maxRetries = 3, delay = 1000) => {
+// 재시도 헬퍼 함수 (타임아웃 추가)
+const retryWithBackoff = async (fn, maxRetries = 3, delay = 1000, timeout = 30000) => {
+  const startTime = Date.now();
+  
   for (let i = 0; i < maxRetries; i++) {
     try {
+      // 타임아웃 체크
+      if (Date.now() - startTime > timeout) {
+        throw new Error('작업 시간이 초과되었습니다. 네트워크 연결을 확인해 주세요.');
+      }
+      
       return await fn();
     } catch (error) {
       const isOfflineError = error.code === 'unavailable' || 
@@ -48,7 +55,9 @@ const retryWithBackoff = async (fn, maxRetries = 3, delay = 1000) => {
           throw new Error('네트워크 연결을 확인해 주세요.');
         }
         
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i))); // 지수 백오프
+        const retryDelay = delay * Math.pow(2, i);
+        console.log(`${retryDelay}ms 후 재시도합니다...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
         continue;
       }
       throw error;
@@ -71,8 +80,11 @@ export const createUserProfile = async (user, additionalData = {}) => {
       const { displayName, email, photoURL } = user;
       const createdAt = serverTimestamp();
 
+      // additionalData에서 displayName이 전달되면 그것을 우선 사용
+      const finalDisplayName = additionalData.displayName || displayName || 'User';
+
       const userData = {
-        displayName,
+        displayName: finalDisplayName,
         email,
         photoURL,
         createdAt,
@@ -80,8 +92,20 @@ export const createUserProfile = async (user, additionalData = {}) => {
         is_premium: false,
         premium_expires: null,
         last_login: serverTimestamp(),
-        ...additionalData
+        ...additionalData,
+        // displayName은 마지막에 다시 설정해서 덮어쓰기 방지
+        displayName: finalDisplayName
       };
+
+      // 디버깅 로그 추가
+      console.log('🔧 Firestore 프로필 생성 데이터:', {
+        userId: user.uid,
+        email: userData.email,
+        displayName: userData.displayName,
+        additionalDisplayName: additionalData.displayName,
+        userDisplayName: displayName,
+        finalDisplayName: finalDisplayName
+      });
 
       // 관리자 계정인 경우 디버깅 로그
       if (email === 'admin@gmail.com') {
@@ -95,6 +119,11 @@ export const createUserProfile = async (user, additionalData = {}) => {
 
       await retryWithBackoff(async () => {
         await setDoc(userRef, userData);
+      });
+      
+      console.log('✅ Firestore 프로필 저장 완료:', {
+        userId: user.uid,
+        displayName: userData.displayName
       });
     }
 
@@ -140,9 +169,17 @@ export const getUserProfile = async (userId) => {
     });
     
     if (userDoc.exists()) {
-      return { id: userDoc.id, ...userDoc.data() };
+      const userData = { id: userDoc.id, ...userDoc.data() };
+      console.log('🔧 Firestore에서 가져온 사용자 데이터:', {
+        userId: userData.id,
+        displayName: userData.displayName,
+        name: userData.name,
+        email: userData.email
+      });
+      return userData;
     }
     
+    console.log('🔧 Firestore에서 사용자 프로필을 찾을 수 없음:', userId);
     return null;
   } catch (error) {
     console.error('사용자 정보 가져오기 실패:', error);
@@ -217,40 +254,41 @@ export const getUserFavorites = async (userId) => {
   }
 };
 
-// 사용자 회원가입
-export const signUpUser = async (email, password, displayName) => {
+// 사용자 회원가입 (Firebase 인증 + Firestore 프로필 생성)
+export const signUpUser = async (email, password) => {
+  console.log('🔧 회원가입 시작:', { email });
+  
   try {
+    // Firebase 인증
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log('✅ Firebase 인증 성공:', user.uid);
 
-    // 사용자 프로필 업데이트
-    await updateProfile(user, {
-      displayName: displayName
-    });
-
-    // Firestore에 사용자 정보 저장 (재시도 로직 포함)
+    // Firestore 프로필 생성 (권한 오류 시 무시)
     try {
-      await createUserProfile(user, { displayName });
-    } catch (profileError) {
-      console.error('프로필 생성 중 오류:', profileError);
+      console.log('🔧 Firestore 프로필 생성 시작:', { 
+        userId: user.uid
+      });
       
-      // 오프라인 오류인 경우 경고 메시지와 함께 성공 처리
-      if (profileError.message?.includes('네트워크 연결을 확인해 주세요')) {
-        console.log('오프라인 상태에서 회원가입 완료 - 프로필은 다음 로그인 시 생성됩니다.');
-        return { 
-          success: true, 
-          user, 
-          warning: '회원가입이 완료되었습니다. 프로필 설정은 다음 로그인 시 완료됩니다.'
-        };
+      await createUserProfile(user, { displayName: 'User' });
+      console.log('✅ Firestore 프로필 생성 완료');
+    } catch (firestoreError) {
+      console.log('⚠️ Firestore 프로필 생성 실패:', firestoreError.message);
+      
+      // 권한 오류인 경우 특별 처리
+      if (firestoreError.code === 'permission-denied') {
+        console.log('🔧 Firestore 권한 오류 - Firebase Console에서 보안 규칙 확인 필요');
+        console.log('임시로 Firebase Authentication만으로 회원가입 완료');
       }
       
-      // 다른 오류인 경우 재시도 권장
-      throw profileError;
+      // Firestore 실패해도 회원가입은 성공으로 처리 (Authentication은 성공했으므로)
     }
 
+    // Firebase 인증 성공하면 즉시 성공 반환
     return { success: true, user };
+    
   } catch (error) {
-    console.error('회원가입 실패:', error);
+    console.error('❌ 회원가입 실패:', error);
     throw error;
   }
 };
@@ -353,5 +391,137 @@ export const createAdminUser = async (email, password) => {
   } catch (error) {
     console.error('관리자 계정 생성 실패:', error);
     throw error;
+  }
+};
+
+// 프리미엄 회원 등급 설정
+export const setPremiumMembership = async (userId, durationDays = 30) => {
+  if (!userId) throw new Error('사용자 ID가 필요합니다');
+
+  try {
+    const premiumExpires = new Date();
+    premiumExpires.setDate(premiumExpires.getDate() + durationDays);
+
+    const updates = {
+      is_premium: true,
+      premium_expires: premiumExpires.toISOString(),
+      membership_type: 'premium',
+      premium_activated_at: serverTimestamp()
+    };
+
+    await updateUserProfile(userId, updates);
+    console.log(`✅ 프리미엄 회원 등급 설정 완료 (${durationDays}일)`);
+    
+    return { success: true, expires: premiumExpires };
+  } catch (error) {
+    console.error('프리미엄 회원 등급 설정 실패:', error);
+    throw error;
+  }
+};
+
+// VIP 회원 등급 설정
+export const setVipMembership = async (userId, durationDays = 365) => {
+  if (!userId) throw new Error('사용자 ID가 필요합니다');
+
+  try {
+    const vipExpires = new Date();
+    vipExpires.setDate(vipExpires.getDate() + durationDays);
+
+    const updates = {
+      is_premium: true,
+      is_vip: true,
+      premium_expires: vipExpires.toISOString(),
+      membership_type: 'vip',
+      vip_activated_at: serverTimestamp()
+    };
+
+    await updateUserProfile(userId, updates);
+    console.log(`✅ VIP 회원 등급 설정 완료 (${durationDays}일)`);
+    
+    return { success: true, expires: vipExpires };
+  } catch (error) {
+    console.error('VIP 회원 등급 설정 실패:', error);
+    throw error;
+  }
+};
+
+// 회원 등급 만료 처리
+export const expireMembership = async (userId) => {
+  if (!userId) throw new Error('사용자 ID가 필요합니다');
+
+  try {
+    const updates = {
+      is_premium: false,
+      is_vip: false,
+      premium_expires: null,
+      membership_type: 'basic',
+      membership_expired_at: serverTimestamp()
+    };
+
+    await updateUserProfile(userId, updates);
+    console.log('✅ 회원 등급 만료 처리 완료');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('회원 등급 만료 처리 실패:', error);
+    throw error;
+  }
+};
+
+// 거래소 등록 상태 업데이트
+export const updateExchangeRegistration = async (userId, exchangeEmail) => {
+  if (!userId) throw new Error('사용자 ID가 필요합니다');
+
+  try {
+    const updates = {
+      exchange_registered: true,
+      exchange_email: exchangeEmail,
+      exchange_registered_at: serverTimestamp()
+    };
+
+    await updateUserProfile(userId, updates);
+    console.log('✅ 거래소 등록 상태 업데이트 완료');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('거래소 등록 상태 업데이트 실패:', error);
+    throw error;
+  }
+};
+
+// 회원 등급 확인
+export const checkMembershipStatus = async (userId) => {
+  if (!userId) return null;
+
+  try {
+    const userProfile = await getUserProfile(userId);
+    if (!userProfile) return null;
+
+    const now = new Date();
+    const premiumExpires = userProfile.premium_expires ? new Date(userProfile.premium_expires) : null;
+    const isExpired = premiumExpires && now > premiumExpires;
+
+    // 만료된 경우 자동으로 등급 변경
+    if (isExpired && userProfile.is_premium) {
+      await expireMembership(userId);
+      return { 
+        membership_type: 'basic', 
+        is_premium: false, 
+        is_vip: false,
+        expired: true 
+      };
+    }
+
+    return {
+      membership_type: userProfile.membership_type || 'basic',
+      is_premium: userProfile.is_premium || false,
+      is_vip: userProfile.is_vip || false,
+      premium_expires: userProfile.premium_expires,
+      exchange_registered: userProfile.exchange_registered || false,
+      expired: false
+    };
+  } catch (error) {
+    console.error('회원 등급 확인 실패:', error);
+    return null;
   }
 }; 

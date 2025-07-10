@@ -22,6 +22,18 @@ const Login = () => {
   const location = useLocation()
   const { login } = useAuth()
 
+  // 개발 환경에서 브라우저 콘솔에서 강제 이동할 수 있는 함수
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      window.forceGoHome = () => {
+        console.log('🔧 강제 홈 이동 실행')
+        const redirectTo = location.state?.from || '/'
+        window.location.href = redirectTo
+        window.location.replace(redirectTo)
+      }
+    }
+  }, [location])
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -35,21 +47,36 @@ const Login = () => {
     setError('')
     setIsLoading(true)
 
-    // 로딩 애니메이션을 위한 지연
-    await new Promise(resolve => setTimeout(resolve, 800))
+    console.log('🔧 로그인 시작:', formData.email)
 
-    // API를 통한 로그인
-    const result = await login(formData.email, formData.password)
-    
-    if (result.success) {
-      // location.state에 from이 있으면 해당 페이지로, 없으면 홈으로 이동
-      const redirectTo = location.state?.from || '/'
-      navigate(redirectTo)
-    } else {
-      setError(result.message || '로그인에 실패했습니다.')
+    // 간단한 로그인 처리 - Firebase 인증만 성공하면 바로 이동
+    try {
+      const result = await login(formData.email, formData.password)
+      
+      if (result.success) {
+        console.log('✅ 로그인 성공 - 즉시 이동')
+        
+        // 즉시 로딩 해제하고 이동
+        setIsLoading(false)
+        
+        // 즉시 강제 이동 (React Router 사용 안 함)
+        const redirectTo = location.state?.from || '/'
+        console.log('🔧 즉시 강제 이동 실행:', redirectTo)
+        
+        // 여러 방법으로 확실하게 이동
+        window.location.href = redirectTo
+        window.location.replace(redirectTo)
+        
+      } else {
+        setError(result.message || '로그인에 실패했습니다.')
+        setIsLoading(false)
+      }
+      
+    } catch (error) {
+      console.error('❌ 로그인 오류:', error)
+      setError('로그인 중 오류가 발생했습니다. 다시 시도해 주세요.')
+      setIsLoading(false)
     }
-    
-    setIsLoading(false)
   }
 
   const handleForgotPassword = async (e) => {
