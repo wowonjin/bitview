@@ -419,7 +419,7 @@ const CoinTable = () => {
 
   if (loading && coins.length === 0) {
     return (
-      <div className="coin-table-container">
+      <div className="coin-table-container" style={{ paddingTop: '80px' }}>
         <div className="loading-spinner">
           <div className="spinner"></div>
           <p>코인 데이터를 불러오는 중...</p>
@@ -430,7 +430,7 @@ const CoinTable = () => {
 
   if (error && coins.length === 0) {
     return (
-      <div className="coin-table-container">
+      <div className="coin-table-container" style={{ paddingTop: '80px' }}>
         <div className="error-message">
           <p>{error}</p>
           <button 
@@ -446,7 +446,7 @@ const CoinTable = () => {
 
   return (
     <>
-    <div className="coin-table-container">
+    <div className="coin-table-container" style={{ paddingTop: '80px' }}>
       {/* 모바일에서만 보이는 페이지 헤더 */}
       <div className="mobile-page-header">
         <h1 className="mobile-page-title">실시간 코인 시세</h1>

@@ -64,9 +64,9 @@ const Premium = () => {
       blueText: ["20% 할인", "(평생 혜택)"]
     },
     {
-      text: "신규 가입자 전용 100 USDT (135,000KRW) 보너스",
+      text: "신규 가입자 전용 100 USDT<br />보너스",
       hasOnly: true,
-      blueText: ["100 USDT (135,000KRW)"]
+      blueText: ["100 USDT"]
     },
     {
       text: "바이낸스 론치패드 우선 참여 기회",
@@ -1967,7 +1967,7 @@ const Premium = () => {
           }
           
           .floating-card {
-            animation: none;
+            display: none;
           }
           
           .cta-button .w-5 {
@@ -2060,9 +2060,7 @@ const Premium = () => {
           }
 
           .floating-card {
-            width: 280px;
-            padding: 1.5rem;
-            animation: none;
+            display: none;
           }
           
           .cta-button .w-5 {
@@ -2104,6 +2102,11 @@ const Premium = () => {
 
           .exchange-card {
             padding: 1rem;
+            text-align: left !important;
+          }
+
+          .benefits-container {
+            text-align: left !important;
           }
 
           .exchange-header {
@@ -2129,6 +2132,35 @@ const Premium = () => {
             font-size: 0.75rem;
           }
 
+          .benefit-text {
+            text-align: left !important;
+            justify-self: flex-start !important;
+            text-indent: 0 !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+          }
+
+          .benefit-content {
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+          }
+
+          .benefit-content span {
+            text-indent: 0 !important;
+            padding-left: 0 !important;
+            margin-left: 0 !important;
+            display: block !important;
+            text-align: left !important;
+          }
+
+          .benefit-row {
+            text-align: left !important;
+            justify-content: flex-start !important;
+          }
+
           .cta-button {
             padding: 0.6rem 1rem;
             font-size: 0.8rem;
@@ -2136,6 +2168,7 @@ const Premium = () => {
           
           .benefits-container {
             margin-bottom: 1rem;
+            text-align: left !important;
           }
           
           .benefit-check {

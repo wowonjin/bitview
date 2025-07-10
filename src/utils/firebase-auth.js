@@ -524,4 +524,58 @@ export const checkMembershipStatus = async (userId) => {
     console.error('회원 등급 확인 실패:', error);
     return null;
   }
+};
+
+// 모든 사용자 목록 가져오기 (관리자 전용)
+export const getAllUsers = async () => {
+  try {
+    const usersRef = collection(db, 'users');
+    const querySnapshot = await retryWithBackoff(async () => {
+      return await getDocs(usersRef);
+    });
+    
+    const users = [];
+    querySnapshot.forEach((doc) => {
+      users.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return users;
+  } catch (error) {
+    console.error('사용자 목록 가져오기 실패:', error);
+    throw error;
+  }
+};
+
+// 사용자 삭제 (관리자 전용)
+export const deleteUserFromFirestore = async (userId) => {
+  if (!userId) throw new Error('사용자 ID가 필요합니다');
+
+  try {
+    const userRef = doc(db, 'users', userId);
+    await deleteDoc(userRef);
+    
+    return { success: true };
+  } catch (error) {
+    console.error('사용자 삭제 실패:', error);
+    throw error;
+  }
+};
+
+// 사용자 권한 업데이트 (관리자 전용)
+export const updateUserRole = async (userId, role, isPremium = false) => {
+  if (!userId || !role) throw new Error('사용자 ID와 역할이 필요합니다');
+
+  try {
+    const userRef = doc(db, 'users', userId);
+    await updateDoc(userRef, {
+      role,
+      is_premium: isPremium,
+      updated_at: serverTimestamp()
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error('사용자 권한 업데이트 실패:', error);
+    throw error;
+  }
 }; 

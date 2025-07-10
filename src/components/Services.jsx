@@ -11,7 +11,8 @@ import {
   Crown,
   Activity,
   Target,
-  DollarSign
+  DollarSign,
+  Shield
 } from 'lucide-react'
 
 // Intersection Observer 커스텀 훅
@@ -165,11 +166,16 @@ const Services = () => {
       <section className={`services-section ${isMobile ? 'mobile-extra-spacing' : ''}`}>
         <div className="services-container">
           <div className={`services-header fade-in-up-delay-4 ${headerVisible ? 'visible' : ''}`} ref={headerRef}>
+            <div className="hero-badge">
+              <Shield className="w-4 h-4" />
+              <span>Premium Experience</span>
+            </div>
             <h2 className="services-title">
               빗뷰에서 제공하는 서비스
             </h2>
             <p className="services-subtitle">
-              암호화폐 투자에 필요한 모든 도구를 한 곳에서 만나보세요
+              암호화폐 투자에 필요한 모든 도구를<br />
+              한 곳에서 만나보세요
             </p>
           </div>
 
@@ -243,6 +249,21 @@ const Services = () => {
         .services-header {
           text-align: center;
           margin-bottom: 64px;
+        }
+
+        .hero-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          backdrop-filter: blur(10px);
+          margin-bottom: 2rem;
+          color: #e2e8f0;
         }
 
         .services-title {
@@ -363,6 +384,12 @@ const Services = () => {
           .services-section {
             padding: 60px 0;
             min-height: auto;
+          }
+
+          .hero-badge {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            margin-bottom: 1.5rem;
           }
 
           .services-container {

@@ -248,15 +248,7 @@ const Hero = () => {
               더 스마트한 투자 결정을 내리세요.
             </p>
 
-            {/* 모바일 전용 로그인 버튼 */}
-            {isMobile && !isAuthenticated && (
-              <div className={`mobile-login-button fade-in-up-delay-1-5 ${descVisible ? 'visible' : ''}`}>
-                <Link to="/login" className="hero-mobile-login-btn">
-                  <LogIn size={20} />
-                  <span>로그인 하기</span>
-                </Link>
-              </div>
-            )}
+
 
             <div className={`hero-stats fade-in-up-delay-2 ${statsVisible ? 'visible' : ''}`} ref={statsRef}>
               <div className="stat-box">

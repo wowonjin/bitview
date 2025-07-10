@@ -1,56 +1,105 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-
 import { 
-  Users, Trash2, Crown, Search, Filter, Download, ChevronDown, ChevronUp, ExternalLink
+  Users, 
+  Trash2, 
+  Crown, 
+  Search, 
+  Filter, 
+  Download, 
+  Edit, 
+  Shield, 
+  UserCheck, 
+  UserX,
+  RefreshCw,
+  AlertTriangle,
+  Calendar,
+  Mail,
+  MapPin,
+  Award
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { useAuth } from '../context/AuthContext'
+import { 
+  getAllUsers, 
+  deleteUserFromFirestore, 
+  updateUserRole, 
+  setPremiumMembership, 
+  setVipMembership, 
+  expireMembership 
+} from '../utils/firebase-auth'
 
 const Admin = () => {
   const [users, setUsers] = useState([])
   const [filteredUsers, setFilteredUsers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [showPremiumOnly, setShowPremiumOnly] = useState(false)
-  const [showChart, setShowChart] = useState(false)
-  const [exchangeFilter, setExchangeFilter] = useState('all') // 'all', 'binance', 'bybit'
-  const [isMobile, setIsMobile] = useState(false)
-  const [showStats, setShowStats] = useState(false)
+  const [roleFilter, setRoleFilter] = useState('all')
+  const [membershipFilter, setMembershipFilter] = useState('all')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    premiumUsers: 0,
+    vipUsers: 0,
+    todaySignups: 0
+  })
   
   const navigate = useNavigate()
-  const { user: currentUser, isAdmin } = useAuth()
+  const { user: currentUser, userProfile } = useAuth()
 
   useEffect(() => {
-    document.body.classList.add('admin-body')
-    
+    // 관리자 권한 확인
+    if (!currentUser) {
+      navigate('/login')
+      return
+    }
+
+    if (currentUser.email !== 'admin@gmail.com' && !userProfile?.isAdmin) {
+      alert('관리자 권한이 필요합니다.')
+      navigate('/')
+      return
+    }
+
+    document.title = 'BitView - 회원 관리'
     loadUsers()
-    
-    // 모바일 감지
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    
-    // 주기적으로 사용자 데이터 새로고침 (VIP 상태 변경 감지)
-    const interval = setInterval(() => {
-      loadUsers()
-    }, 5000) // 5초마다 새로고침
-    
-    return () => {
-      document.body.classList.remove('admin-body')
-      window.removeEventListener('resize', checkMobile)
-      clearInterval(interval)
-    }
-  }, [])
+  }, [currentUser, userProfile, navigate])
 
   useEffect(() => {
     filterUsers()
-  }, [users, searchTerm, showPremiumOnly, exchangeFilter])
+  }, [users, searchTerm, roleFilter, membershipFilter])
 
-  const loadUsers = () => {
-    const usersData = JSON.parse(localStorage.getItem('users') || '[]')
-    setUsers(usersData)
+  const loadUsers = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      
+      const usersData = await getAllUsers()
+      setUsers(usersData)
+      
+      // 통계 계산
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      const todaySignups = usersData.filter(user => {
+        const createdAt = user.createdAt?.toDate() || new Date(user.createdAt)
+        return createdAt >= today
+      }).length
+      
+      setStats({
+        totalUsers: usersData.length,
+        premiumUsers: usersData.filter(user => user.is_premium).length,
+        vipUsers: usersData.filter(user => user.is_vip).length,
+        todaySignups
+      })
+      
+    } catch (err) {
+      console.error('사용자 목록 로딩 실패:', err)
+      setError('사용자 목록을 불러오는데 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const filterUsers = () => {
@@ -58,54 +107,110 @@ const Admin = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(user => {
-        const name = user.name || ''
+        const name = user.displayName || user.name || ''
         const email = user.email || ''
-        const username = user.username || ''
         
         return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               username.toLowerCase().includes(searchTerm.toLowerCase())
+               email.toLowerCase().includes(searchTerm.toLowerCase())
       })
     }
 
-    if (showPremiumOnly) {
-      filtered = filtered.filter(user => user.exchangeRegistered === true)
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(user => user.role === roleFilter || (!user.role && roleFilter === 'user'))
     }
 
-    if (exchangeFilter === 'binance') {
-      filtered = filtered.filter((user, index) => user.exchangeRegistered && index % 2 === 0)
-    } else if (exchangeFilter === 'bybit') {
-      filtered = filtered.filter((user, index) => user.exchangeRegistered && index % 2 === 1)
+    if (membershipFilter !== 'all') {
+      if (membershipFilter === 'premium') {
+        filtered = filtered.filter(user => user.is_premium && !user.is_vip)
+      } else if (membershipFilter === 'vip') {
+        filtered = filtered.filter(user => user.is_vip)
+      } else if (membershipFilter === 'basic') {
+        filtered = filtered.filter(user => !user.is_premium)
+      }
     }
 
     setFilteredUsers(filtered)
   }
 
-  const deleteUser = (userId, userName) => {
+  const handleDeleteUser = async (userId, userName) => {
+    if (userId === currentUser.uid) {
+      alert('자신의 계정은 삭제할 수 없습니다.')
+      return
+    }
+
     if (window.confirm(`정말로 "${userName}" 사용자를 삭제하시겠습니까?`)) {
-      const updatedUsers = users.filter(user => user.id !== userId)
-      setUsers(updatedUsers)
-      localStorage.setItem('users', JSON.stringify(updatedUsers))
-      
-      // 삭제된 사용자가 현재 로그인한 사용자와 같다면 로그아웃 처리
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
-      if (currentUser.id === userId) {
-        localStorage.removeItem('user')
-        window.location.reload()
+      try {
+        await deleteUserFromFirestore(userId)
+        await loadUsers()
+        alert('사용자가 성공적으로 삭제되었습니다.')
+      } catch (err) {
+        console.error('사용자 삭제 실패:', err)
+        alert('사용자 삭제에 실패했습니다.')
       }
+    }
+  }
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user)
+    setShowEditModal(true)
+  }
+
+  const handleUpdateUser = async (userId, updates) => {
+    try {
+      await updateUserRole(userId, updates.role, updates.is_premium)
+      await loadUsers()
+      setShowEditModal(false)
+      setSelectedUser(null)
+      alert('사용자 정보가 성공적으로 업데이트되었습니다.')
+    } catch (err) {
+      console.error('사용자 업데이트 실패:', err)
+      alert('사용자 정보 업데이트에 실패했습니다.')
+    }
+  }
+
+  const handleSetPremium = async (userId, duration) => {
+    try {
+      await setPremiumMembership(userId, duration)
+      await loadUsers()
+      alert(`프리미엄 회원으로 설정되었습니다. (${duration}일)`)
+    } catch (err) {
+      console.error('프리미엄 설정 실패:', err)
+      alert('프리미엄 설정에 실패했습니다.')
+    }
+  }
+
+  const handleSetVip = async (userId, duration) => {
+    try {
+      await setVipMembership(userId, duration)
+      await loadUsers()
+      alert(`VIP 회원으로 설정되었습니다. (${duration}일)`)
+    } catch (err) {
+      console.error('VIP 설정 실패:', err)
+      alert('VIP 설정에 실패했습니다.')
+    }
+  }
+
+  const handleExpireMembership = async (userId) => {
+    try {
+      await expireMembership(userId)
+      await loadUsers()
+      alert('회원 등급이 만료되었습니다.')
+    } catch (err) {
+      console.error('회원 등급 만료 실패:', err)
+      alert('회원 등급 만료에 실패했습니다.')
     }
   }
 
   const exportToExcel = () => {
     const exportData = filteredUsers.map(user => ({
-      '이름': user.name,
-      '사용자명': user.username,
-      '이메일': user.email,
-      '비밀번호': user.password,
-      '프리미엄 이메일': user.exchangeEmail || '',
-      '가입일': formatDate(user.joinDate),
-      '회원등급': user.exchangeRegistered ? '프리미엄' : '일반',
-      '관리자 여부': user.role === 'admin' ? '예' : '아니오'
+      '이름': user.displayName || user.name || '',
+      '이메일': user.email || '',
+      '역할': user.role || 'user',
+      '프리미엄': user.is_premium ? '예' : '아니오',
+      'VIP': user.is_vip ? '예' : '아니오',
+      '가입일': user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString('ko-KR') : '',
+      '최근 로그인': user.last_login ? new Date(user.last_login.toDate()).toLocaleDateString('ko-KR') : '',
+      '거래소 등록': user.exchange_registered ? '예' : '아니오'
     }))
 
     const ws = XLSX.utils.json_to_sheet(exportData)
@@ -116,1125 +221,784 @@ const Admin = () => {
     XLSX.writeFile(wb, fileName)
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '-'
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+    return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      month: 'short',
+      day: 'numeric'
     })
   }
 
-  // 오늘 가입한 회원 계산
-  const getTodayJoinedCount = () => {
-    const today = new Date().toDateString()
-    return users.filter(user => {
-      const joinDate = new Date(user.joinDate).toDateString()
-      return joinDate === today
-    }).length
-  }
-
-  // 오늘 가입한 프리미엄 회원 계산
-  const getTodayJoinedPremiumCount = () => {
-    const today = new Date().toDateString()
-    return users.filter(user => {
-      const joinDate = new Date(user.joinDate).toDateString()
-      return joinDate === today && user.exchangeRegistered
-    }).length
-  }
-
-  const getTodayPremiumByExchange = () => {
-    const today = new Date().toDateString()
-    const todayPremium = users.filter(user => {
-      const joinDate = new Date(user.joinDate).toDateString()
-      return joinDate === today && user.exchangeRegistered
-    })
-    // 임시로 랜덤하게 바이낸스/바이비트 분배 (실제로는 사용자 데이터에서 가져와야 함)
-    const binanceCount = Math.floor(todayPremium.length * 0.6)
-    const bybitCount = todayPremium.length - binanceCount
-    return { binance: binanceCount, bybit: bybitCount }
-  }
-
-  const getTotalPremiumByExchange = () => {
-    const totalPremium = users.filter(user => user.exchangeRegistered)
-    // 임시로 랜덤하게 바이낸스/바이비트 분배 (실제로는 사용자 데이터에서 가져와야 함)
-    const binanceCount = Math.floor(totalPremium.length * 0.7)
-    const bybitCount = totalPremium.length - binanceCount
-    return { binance: binanceCount, bybit: bybitCount }
-  }
-
-  const getChartData = () => {
-    // 최근 7일간의 데이터 생성
-    const data = []
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date()
-      date.setDate(date.getDate() - i)
-      const dateStr = date.toDateString()
-      
-      const dayUsers = users.filter(user => {
-        const joinDate = new Date(user.joinDate).toDateString()
-        return joinDate === dateStr
-      }).length
-      
-      data.push({
-        date: date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
-        users: dayUsers
-      })
+  const getMembershipBadge = (user) => {
+    if (user.is_vip) {
+      return <span className="vip-badge">VIP</span>
+    } else if (user.is_premium) {
+      return <span className="premium-badge">프리미엄</span>
     }
-    return data
+    return <span className="basic-badge">일반</span>
   }
 
-  const UserCard = ({ user, index }) => (
-    <div className="user-card">
-      <div className="user-card-header">
-        <div className="user-card-info">
-          <div className="user-name">{user.name}</div>
-          <div className="user-email">{user.email}</div>
+  const getRoleBadge = (role) => {
+    if (role === 'admin') {
+      return <span className="admin-badge">관리자</span>
+    }
+    return <span className="user-badge">사용자</span>
+  }
+
+  if (loading) {
+    return (
+      <div className="admin-container">
+        <div className="loading-spinner">
+          <RefreshCw className="spin" />
+          <p>사용자 목록을 불러오는 중...</p>
         </div>
-        <div className="user-card-actions">
-          <button 
-            className="delete-btn"
-            onClick={() => deleteUser(user.id, user.name)}
-          >
-            <Trash2 size={16} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="admin-container">
+      <div className="admin-header">
+        <div className="admin-title">
+          <Users size={28} />
+          <h1>회원 관리</h1>
+        </div>
+        <div className="admin-actions">
+          <button className="refresh-btn" onClick={loadUsers}>
+            <RefreshCw size={16} />
+            새로고침
+          </button>
+          <button className="export-btn" onClick={exportToExcel}>
+            <Download size={16} />
+            엑셀 다운로드
           </button>
         </div>
       </div>
-      <div className="user-card-body">
-        <div className="user-card-row">
-          <span className="label">비밀번호:</span>
-          <span className="password-text">{user.password}</span>
-        </div>
-        <div className="user-card-row">
-          <span className="label">가입일:</span>
-          <span>{new Date(user.joinDate).toLocaleDateString('ko-KR')}</span>
-        </div>
-        <div className="user-card-row">
-          <span className="label">회원등급:</span>
-          <div className="premium-status">
-            {user.exchangeRegistered ? (
-              <span className="premium-badge">
-                <Crown size={12} />
-                프리미엄
-              </span>
-            ) : (
-              <span className="regular-badge">일반</span>
-            )}
-          </div>
-        </div>
-        {user.exchangeRegistered && (
-          <div className="user-card-row">
-            <span className="label">거래소:</span>
-            <span className={`exchange-badge ${index % 2 === 0 ? 'binance' : 'bybit'}`}>
-              {index % 2 === 0 ? '바이낸스' : '바이비트'}
-            </span>
-          </div>
-        )}
-        {user.exchangeEmail && (
-          <div className="user-card-row">
-            <span className="label">프리미엄 이메일:</span>
-            <span className="premium-email">{user.exchangeEmail}</span>
-          </div>
-        )}
-      </div>
-    </div>
-  )
 
-  return (
-    <div className="admin-page">
-      <div className="admin-container">
-        <div className="admin-header">
-          <div className="admin-title-section">
-            <h1>관리자 페이지</h1>
-            {!isMobile && (
-              <div className="referral-links">
-                <a href="https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true" target="_blank" rel="noopener noreferrer">
-                  바이낸스 <ExternalLink size={16} />
-                </a>
-                <a href="https://www.bybit.com/en/referral/dashboard/?utm_source=uj_header" target="_blank" rel="noopener noreferrer">
-                  바이비트 <ExternalLink size={16} />
-                </a>
-              </div>
-            )}
+      {error && (
+        <div className="error-message">
+          <AlertTriangle size={16} />
+          {error}
+        </div>
+      )}
+
+      {/* 통계 카드 */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Users size={24} />
           </div>
-          
-          {isMobile ? (
-            <div className="mobile-stats">
-              <button 
-                className="stats-toggle"
-                onClick={() => setShowStats(!showStats)}
-              >
-                통계 {showStats ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
-              {showStats && (
-                <div className="stats-dropdown">
-                  <div className="stat-item">
-                    <span className="stat-label">오늘 가입 회원</span>
-                    <span className="stat-value">{getTodayJoinedCount()}명</span>
+          <div className="stat-info">
+            <div className="stat-value">{stats.totalUsers}</div>
+            <div className="stat-label">총 회원</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Crown size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{stats.premiumUsers}</div>
+            <div className="stat-label">프리미엄 회원</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Award size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{stats.vipUsers}</div>
+            <div className="stat-label">VIP 회원</div>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">
+            <Calendar size={24} />
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{stats.todaySignups}</div>
+            <div className="stat-label">오늘 가입</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 필터 및 검색 */}
+      <div className="filters-container">
+        <div className="search-box">
+          <Search size={16} />
+          <input
+            type="text"
+            placeholder="이름 또는 이메일로 검색..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="filter-group">
+          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+            <option value="all">모든 역할</option>
+            <option value="admin">관리자</option>
+            <option value="user">사용자</option>
+          </select>
+          <select value={membershipFilter} onChange={(e) => setMembershipFilter(e.target.value)}>
+            <option value="all">모든 등급</option>
+            <option value="basic">일반</option>
+            <option value="premium">프리미엄</option>
+            <option value="vip">VIP</option>
+          </select>
+        </div>
+      </div>
+
+      {/* 사용자 목록 */}
+      <div className="users-grid">
+        {filteredUsers.map((user) => (
+          <div key={user.id} className="user-card">
+            <div className="user-card-header">
+              <div className="user-avatar">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName} />
+                ) : (
+                  <div className="avatar-placeholder">
+                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
                   </div>
-                  <div className="stat-item">
-                    <span className="stat-label">오늘 가입 프리미엄</span>
-                    <span className="stat-value">{getTodayJoinedPremiumCount()}명</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">전체 회원</span>
-                    <span className="stat-value">{users.length}명</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">프리미엄 회원</span>
-                    <span className="stat-value">{users.filter(u => u.exchangeRegistered).length}명</span>
-                  </div>
-                  <div className="referral-links mobile-referral">
-                    <a href="https://www.binance.com/en/activity/referral/offers?stopRedirectToActivity=true" target="_blank" rel="noopener noreferrer">
-                      바이낸스 <ExternalLink size={14} />
-                    </a>
-                    <a href="https://www.bybit.com/en/referral/dashboard/?utm_source=uj_header" target="_blank" rel="noopener noreferrer">
-                      바이비트 <ExternalLink size={14} />
-                    </a>
-                  </div>
+                )}
+              </div>
+              <div className="user-info">
+                <div className="user-name">{user.displayName || user.name || '이름 없음'}</div>
+                <div className="user-email">{user.email}</div>
+                <div className="user-badges">
+                  {getRoleBadge(user.role)}
+                  {getMembershipBadge(user)}
+                </div>
+              </div>
+            </div>
+            
+            <div className="user-details">
+              <div className="detail-row">
+                <Calendar size={14} />
+                <span>가입일: {formatDate(user.createdAt)}</span>
+              </div>
+              <div className="detail-row">
+                <MapPin size={14} />
+                <span>최근 접속: {formatDate(user.last_login)}</span>
+              </div>
+              {user.exchange_registered && (
+                <div className="detail-row">
+                  <Mail size={14} />
+                  <span>거래소 이메일: {user.exchange_email || '등록됨'}</span>
                 </div>
               )}
             </div>
-          ) : (
-            <div className="admin-stats">
-              <div className="stat-item">
-                <span className="stat-label">오늘 가입한 회원</span>
-                <span className="stat-value">{getTodayJoinedCount()}명</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">오늘 가입한 프리미엄 회원</span>
-                <span className="stat-value">{getTodayJoinedPremiumCount()}명</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">전체 회원</span>
-                <span className="stat-value">{users.length}명</span>
-              </div>
-              <div 
-                className="stat-item clickable-stat"
-                onClick={() => setShowChart(!showChart)}
+
+            <div className="user-actions">
+              <button
+                className="edit-btn"
+                onClick={() => handleEditUser(user)}
               >
-                <span className="stat-label premium-label-container">
-                  프리미엄 회원
-                  <div className="tooltip-right">
-                    <div className="tooltip-row">
-                      <strong className="tooltip-label">오늘 가입</strong>
-                      <div className="tooltip-data">
-                        바이낸스: {getTodayPremiumByExchange().binance}명<br />
-                        바이비트: {getTodayPremiumByExchange().bybit}명
-                      </div>
-                    </div>
-                    <div className="tooltip-row">
-                      <strong className="tooltip-label">전체</strong>
-                      <div className="tooltip-data">
-                        바이낸스: {getTotalPremiumByExchange().binance}명<br />
-                        바이비트: {getTotalPremiumByExchange().bybit}명
-                      </div>
-                    </div>
-                  </div>
-                </span>
-                <span className="stat-value">{users.filter(u => u.exchangeRegistered).length}명</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="admin-divider"></div>
-
-        {showChart && (
-          <div className="chart-section">
-            <div className="chart-header">
-              <h3>일자별 총 회원 가입 현황</h3>
-              <button className="close-chart" onClick={() => setShowChart(false)}>✕</button>
-            </div>
-            <div className="chart-container">
-              <div className="chart-area">
-                {getChartData().map((data, index) => (
-                  <div key={index} className="chart-bar-container">
-                    <div 
-                      className="chart-bar" 
-                      style={{ height: `${Math.max(data.users * 20, 10)}px` }}
-                    ></div>
-                    <div className="chart-value">{data.users}</div>
-                    <div className="chart-label">{data.date}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="users-section">
-          <div className="users-header">
-            <h2>회원 목록</h2>
-            <div className="users-controls">
-              <div className="search-box">
-                <Search size={20} />
-                <input
-                  type="text"
-                  placeholder="이름, 이메일로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="control-buttons">
+                <Edit size={14} />
+                수정
+              </button>
+              
+              {!user.is_premium && (
                 <button
-                  className={`filter-btn ${showPremiumOnly ? 'active' : ''}`}
-                  onClick={() => setShowPremiumOnly(!showPremiumOnly)}
+                  className="premium-btn"
+                  onClick={() => handleSetPremium(user.id, 30)}
                 >
-                  <Filter size={18} />
-                  {isMobile ? (showPremiumOnly ? '전체' : '프리미엄') : (showPremiumOnly ? '전체 보기' : '프리미엄만')}
+                  <Crown size={14} />
+                  프리미엄
                 </button>
-                <button className="export-btn" onClick={exportToExcel}>
-                  <Download size={18} />
-                  {isMobile ? 'Excel' : '엑셀 내보내기'}
+              )}
+              
+              {!user.is_vip && (
+                <button
+                  className="vip-btn"
+                  onClick={() => handleSetVip(user.id, 365)}
+                >
+                  <Award size={14} />
+                  VIP
                 </button>
-              </div>
+              )}
+              
+              {(user.is_premium || user.is_vip) && (
+                <button
+                  className="expire-btn"
+                  onClick={() => handleExpireMembership(user.id)}
+                >
+                  <UserX size={14} />
+                  등급 해제
+                </button>
+              )}
+              
+              {user.id !== currentUser.uid && (
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDeleteUser(user.id, user.displayName || user.email)}
+                >
+                  <Trash2 size={14} />
+                  삭제
+                </button>
+              )}
             </div>
           </div>
-          
-          <div className="users-list">
-            {filteredUsers.length === 0 ? (
-              <div className="no-users">
-                <Users size={48} />
-                <p>조건에 맞는 사용자가 없습니다.</p>
-              </div>
-            ) : (
-              <>
-                {isMobile ? (
-                  <div className="mobile-users-list">
-                    {filteredUsers.map((user, index) => (
-                      <UserCard key={user.id} user={user} index={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="users-table">
-                    <div className="table-header">
-                      <div className="table-cell">번호</div>
-                      <div className="table-cell">이름</div>
-                      <div className="table-cell">이메일</div>
-                      <div className="table-cell">비밀번호</div>
-                      <div className="table-cell">가입일</div>
-                      <div className="table-cell">프리미엄</div>
-                      <div className="table-cell clickable-header" onClick={() => {
-                        const nextFilter = exchangeFilter === 'all' ? 'binance' : 
-                                         exchangeFilter === 'binance' ? 'bybit' : 'all'
-                        setExchangeFilter(nextFilter)
-                      }}>
-                        가입 거래소 {exchangeFilter === 'all' ? '(전체)' : 
-                                    exchangeFilter === 'binance' ? '(바이낸스)' : '(바이비트)'}
-                      </div>
-                      <div className="table-cell">삭제</div>
-                    </div>
-                    <div className="table-body">
-                      {filteredUsers.map((user, index) => (
-                        <div
-                          key={user.id}
-                          className="table-row"
-                        >
-                          <div className="table-cell">
-                            {index + 1}
-                          </div>
-                          <div className="table-cell">
-                            <div className="user-name">
-                              <span>{user.name}</span>
-                            </div>
-                          </div>
-                          <div className="table-cell">
-                            <div className="email-info">
-                              <div className="email-id">{user.email}</div>
-                              <div className="premium-email">{user.exchangeEmail || '-'}</div>
-                            </div>
-                          </div>
-                          <div className="table-cell">
-                            <span className="password-text">{user.password}</span>
-                          </div>
-                          <div className="table-cell">
-                            {new Date(user.joinDate).toLocaleDateString('ko-KR')}
-                          </div>
-                          <div className="table-cell">
-                            <div className="premium-status">
-                              {user.exchangeRegistered ? (
-                                <span className="premium-badge">
-                                  <Crown size={14} />
-                                  프리미엄
-                                </span>
-                              ) : (
-                                <span className="regular-badge">일반</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="table-cell">
-                            <div className="exchange-info">
-                              {user.exchangeRegistered ? (
-                                <span className={`exchange-badge ${index % 2 === 0 ? 'binance' : 'bybit'}`}>
-                                  {/* 임시로 인덱스 기반으로 거래소 배정 */}
-                                  {index % 2 === 0 ? '바이낸스' : '바이비트'}
-                                </span>
-                              ) : (
-                                <span className="no-exchange">-</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="table-cell">
-                            <button 
-                              className="delete-btn"
-                              onClick={() => deleteUser(user.id, user.name)}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+        ))}
       </div>
 
-      <style jsx>{`
-        .admin-page {
-          min-height: 100vh;
-          padding: 120px 20px 20px;
-          position: relative;
-          z-index: 2;
-        }
+      {filteredUsers.length === 0 && (
+        <div className="no-users">
+          <Users size={48} />
+          <p>표시할 사용자가 없습니다.</p>
+        </div>
+      )}
 
-        body.admin-body::before,
-        body.admin-body::after {
-          display: none !important;
-        }
-        
+      {/* 사용자 수정 모달 */}
+      {showEditModal && selectedUser && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>사용자 정보 수정</h3>
+            <div className="modal-body">
+              <div className="form-group">
+                <label>이름:</label>
+                <input
+                  type="text"
+                  value={selectedUser.displayName || ''}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label>이메일:</label>
+                <input
+                  type="email"
+                  value={selectedUser.email || ''}
+                  readOnly
+                />
+              </div>
+              <div className="form-group">
+                <label>역할:</label>
+                <select
+                  value={selectedUser.role || 'user'}
+                  onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
+                >
+                  <option value="user">사용자</option>
+                  <option value="admin">관리자</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>프리미엄 회원:</label>
+                <input
+                  type="checkbox"
+                  checked={selectedUser.is_premium || false}
+                  onChange={(e) => setSelectedUser({...selectedUser, is_premium: e.target.checked})}
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button
+                className="save-btn"
+                onClick={() => handleUpdateUser(selectedUser.id, {
+                  role: selectedUser.role,
+                  is_premium: selectedUser.is_premium
+                })}
+              >
+                저장
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => {
+                  setShowEditModal(false)
+                  setSelectedUser(null)
+                }}
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
         .admin-container {
           max-width: 1200px;
           margin: 0 auto;
+          padding: 20px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         .admin-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 3rem;
+          margin-bottom: 30px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid #eee;
         }
 
-        .admin-header h1 {
-          color: #f9fafb;
-          font-size: 2rem;
-          font-weight: 700;
-          margin: 0;
-        }
-
-        .admin-stats {
-          display: flex;
-          gap: 2rem;
-          flex-wrap: wrap;
-        }
-
-        .admin-divider {
-          height: 1px;
-          background: #374151;
-          margin: 2rem 0;
-        }
-
-        .admin-title-section {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 0.5rem;
-        }
-
-        .referral-links {
-          display: flex;
-          gap: 2rem;
-        }
-
-        .referral-links a {
-          color: #f9fafb;
-          text-decoration: none;
-          font-size: 1rem;
-          font-weight: 500;
+        .admin-title {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-        }
-
-        .referral-links a:hover {
-          text-decoration: underline;
-        }
-
-        .mobile-referral {
-          margin-top: 1rem;
-          padding-top: 1rem;
-          border-top: 1px solid #374151;
-        }
-
-        .mobile-referral a {
-          font-size: 0.9rem;
-        }
-
-        .stat-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .stat-label {
-          color: #9ca3af;
-          font-size: 0.875rem;
-          font-weight: 500;
-        }
-
-        .stat-value {
-          color: #f9fafb;
-          font-size: 1.5rem;
-          font-weight: 700;
-        }
-
-        .clickable-stat {
-          cursor: pointer;
-        }
-
-        .premium-label-container {
-          position: relative;
-          cursor: pointer;
-        }
-
-        .tooltip-right {
-          position: absolute;
-          left: 100%;
-          top: 100%;
-          transform: translateY(-50%);
-          color: #f9fafb;
-          padding: 12px 16px;
-          border-radius: 8px;
-          font-size: 0.875rem;
-          white-space: nowrap;
-          border: 1px solid #374151;
-          z-index: 9999;
-          margin-left: 10px;
-          min-width: 200px;
-          background: #1f2937;
-        }
-
-        .tooltip-right::before {
-          content: '';
-          position: absolute;
-          right: 100%;
-          top: 50%;
-          transform: translateY(-50%);
-          border: 6px solid transparent;
-          border-right-color: #374151;
-        }
-
-        .tooltip-row {
-          display: flex;
-          align-items: flex-start;
-          margin-bottom: 8px;
           gap: 12px;
         }
 
-        .tooltip-row:last-child {
-          margin-bottom: 0;
-        }
-
-        .tooltip-label {
-          color: #f9fafb;
-          font-weight: 600;
-          min-width: 60px;
-          flex-shrink: 0;
-        }
-
-        .tooltip-data {
-          flex: 1;
-          color: #9ca3af;
-        }
-
-        .mobile-stats {
-          position: relative;
-        }
-
-        .stats-toggle {
-          background: #1f2937;
-          border: 1px solid #374151;
-          color: #f9fafb;
-          padding: 0.75rem 1rem;
-          border-radius: 8px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-weight: 500;
-        }
-
-        .stats-toggle:hover {
-          background: #374151;
-        }
-
-        .stats-dropdown {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          width: 280px;
-          background: #1f2937;
-          border: 1px solid #374151;
-          border-radius: 8px;
-          padding: 1rem;
-          margin-top: 0.5rem;
-          z-index: 10;
-        }
-
-        .stats-dropdown .stat-item {
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.5rem 0;
-          border-bottom: 1px solid #374151;
-        }
-
-        .stats-dropdown .stat-item:last-child {
-          border-bottom: none;
-        }
-
-        .stats-dropdown .stat-label {
-          font-size: 0.875rem;
-        }
-
-        .stats-dropdown .stat-value {
-          font-size: 1.1rem;
-        }
-
-        .chart-section {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid #374151;
-          border-radius: 8px;
-          padding: 1.5rem;
-          margin-bottom: 2rem;
-        }
-
-        .chart-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.5rem;
-        }
-
-        .chart-header h3 {
-          color: #f9fafb;
-          font-size: 1.25rem;
-          font-weight: 600;
+        .admin-title h1 {
           margin: 0;
+          color: #333;
+          font-size: 28px;
+          font-weight: 600;
         }
 
-        .close-chart {
-          background: none;
-          border: none;
-          color: #9ca3af;
-          font-size: 1.5rem;
-          cursor: pointer;
-          padding: 0;
-          width: 24px;
-          height: 24px;
+        .admin-actions {
+          display: flex;
+          gap: 12px;
+        }
+
+        .refresh-btn, .export-btn {
           display: flex;
           align-items: center;
-          justify-content: center;
-          border-radius: 50%;
+          gap: 8px;
+          padding: 10px 16px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
           transition: all 0.2s;
         }
 
-        .close-chart:hover {
-          background: #374151;
-          color: #f9fafb;
+        .refresh-btn {
+          background: #f8f9fa;
+          color: #495057;
         }
 
-        .chart-container {
-          height: 200px;
-          display: flex;
-          align-items: end;
-          justify-content: center;
-        }
-
-        .chart-area {
-          display: flex;
-          align-items: end;
-          gap: 1rem;
-        }
-
-        .chart-bar-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .chart-bar {
-          width: 40px;
-          background: linear-gradient(to top, #3b82f6, #60a5fa);
-          border-radius: 4px 4px 0 0;
-          transition: all 0.3s;
-        }
-
-        .chart-bar:hover {
-          background: linear-gradient(to top, #2563eb, #3b82f6);
-        }
-
-        .chart-value {
-          color: #f9fafb;
-          font-size: 0.875rem;
-          font-weight: 600;
-        }
-
-        .chart-label {
-          color: #9ca3af;
-          font-size: 0.75rem;
-        }
-
-        .users-section {
-          margin-top: 2rem;
-        }
-
-        .users-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 2rem;
-          flex-wrap: wrap;
-          gap: 1rem;
-        }
-
-        .users-header h2 {
-          color: #f9fafb;
-          font-size: 2rem;
-          font-weight: 600;
-        }
-
-        .users-controls {
-          display: flex;
-          gap: 1rem;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .search-box {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          background: #1f2937;
-          border: 1px solid #374151;
-          border-radius: 4px;
-          padding: 0.5rem 0.75rem;
-          min-width: 250px;
-        }
-
-        .search-box svg {
-          color: #9ca3af;
-        }
-
-        .search-box input {
-          background: transparent;
-          border: none;
-          color: #f9fafb;
-          outline: none;
-          width: 100%;
-        }
-
-        .search-box input::placeholder {
-          color: #6b7280;
-        }
-
-        .control-buttons {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .filter-btn, .export-btn {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: #1f2937;
-          border: 1px solid #374151;
-          color: #f9fafb;
-          padding: 0.5rem 0.75rem;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .filter-btn:hover, .export-btn:hover {
-          background: #374151;
-        }
-
-        .filter-btn.active {
-          background: #1e40af;
-          border-color: #3b82f6;
-          color: #dbeafe;
+        .refresh-btn:hover {
+          background: #e9ecef;
         }
 
         .export-btn {
-          background: #059669;
-          border-color: #059669;
+          background: #007bff;
           color: white;
         }
 
         .export-btn:hover {
-          background: #047857;
-          border-color: #047857;
+          background: #0056b3;
         }
 
-        .mobile-users-list {
+        .loading-spinner {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          align-items: center;
+          justify-content: center;
+          padding: 60px;
+          text-align: center;
+        }
+
+        .spin {
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 16px;
+          background: #f8d7da;
+          color: #721c24;
+          border-radius: 8px;
+          margin-bottom: 20px;
+        }
+
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+
+        .stat-card {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 20px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+          padding: 12px;
+          border-radius: 10px;
+          background: #f8f9fa;
+          color: #495057;
+        }
+
+        .stat-value {
+          font-size: 24px;
+          font-weight: 700;
+          color: #333;
+        }
+
+        .stat-label {
+          font-size: 14px;
+          color: #6c757d;
+        }
+
+        .filters-container {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 30px;
+          flex-wrap: wrap;
+        }
+
+        .search-box {
+          position: relative;
+          flex: 1;
+          min-width: 250px;
+        }
+
+        .search-box svg {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #6c757d;
+        }
+
+        .search-box input {
+          width: 100%;
+          padding: 12px 12px 12px 40px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+        }
+
+        .filter-group {
+          display: flex;
+          gap: 12px;
+        }
+
+        .filter-group select {
+          padding: 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+          min-width: 120px;
+        }
+
+        .users-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+          gap: 20px;
         }
 
         .user-card {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid #374151;
-          border-radius: 8px;
-          padding: 1rem;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          padding: 20px;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .user-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
         }
 
         .user-card-header {
           display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 1rem;
-        }
-
-        .user-card-info .user-name {
-          color: #f9fafb;
-          font-size: 1rem;
-          font-weight: 600;
-          margin-bottom: 0.25rem;
-        }
-
-        .user-card-info .user-email {
-          color: #9ca3af;
-          font-size: 0.875rem;
-        }
-
-        .user-card-body {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .user-card-row {
-          display: flex;
-          justify-content: space-between;
           align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
         }
 
-        .user-card-row .label {
-          color: #9ca3af;
-          font-size: 0.875rem;
-          font-weight: 500;
+        .user-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          overflow: hidden;
         }
 
-        .users-table {
-          border-collapse: collapse;
+        .user-avatar img {
           width: 100%;
-          background: transparent;
+          height: 100%;
+          object-fit: cover;
         }
 
-        .users-table .table-header {
-          display: grid;
-          grid-template-columns: 0.5fr 1.5fr 3fr 2fr 1.5fr 1.5fr 1.5fr 1fr;
-          background: transparent;
-          border-bottom: 2px solid #374151;
-        }
-
-        .users-table .table-header .table-cell {
-          background: transparent;
-          color: #f9fafb;
-          font-weight: 600;
-          font-size: 0.875rem;
-          padding: 0.75rem 0.5rem;
-          text-align: center;
-        }
-
-        .clickable-header {
-          cursor: pointer;
-          user-select: none;
-          transition: background-color 0.2s;
-        }
-
-        .clickable-header:hover {
-          background: rgba(55, 65, 81, 0.5);
-        }
-
-        .table-body .table-row {
-          display: grid;
-          grid-template-columns: 0.5fr 1.5fr 3fr 2fr 1.5fr 1.5fr 1.5fr 1fr;
-          border-bottom: 1px solid #374151;
-          background: transparent;
-        }
-
-        .table-body .table-row:nth-child(even) {
-          background: transparent;
-        }
-
-        .table-body .table-row .table-cell {
-          background: inherit;
-          color: #f9fafb;
-          padding: 0.75rem 0.5rem;
+        .avatar-placeholder {
+          width: 100%;
+          height: 100%;
+          background: #007bff;
+          color: white;
           display: flex;
           align-items: center;
           justify-content: center;
-          text-align: center;
-          font-size: 0.875rem;
+          font-size: 18px;
+          font-weight: 600;
         }
 
         .user-name {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .premium-status {
-          display: flex;
-          justify-content: center;
-        }
-
-        .email-info {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .email-id {
-          color: #f9fafb;
-          font-size: 0.875rem;
-          font-weight: 500;
-        }
-
-        .premium-email {
-          color: #9ca3af;
-          font-size: 0.75rem;
-          font-style: italic;
-        }
-
-        .exchange-info {
-          display: flex;
-          justify-content: center;
-        }
-
-        .exchange-badge {
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          font-size: 0.75rem;
+          font-size: 16px;
           font-weight: 600;
-          color: white;
+          color: #333;
         }
 
-        .exchange-badge.binance {
-          background: #f59e0b;
-          border: 1px solid #d97706;
+        .user-email {
+          font-size: 14px;
+          color: #6c757d;
         }
 
-        .exchange-badge.bybit {
-          background: #ea580c;
-          border: 1px solid #dc2626;
-        }
-
-        .no-exchange {
-          color: #6b7280;
-          font-size: 0.875rem;
-        }
-
-        .premium-badge, .regular-badge {
-          padding: 0.25rem 0.5rem;
-          border-radius: 2px;
-          font-size: 0.75rem;
-          font-weight: 500;
+        .user-badges {
           display: flex;
-          align-items: center;
-          gap: 0.25rem;
+          gap: 6px;
+          margin-top: 4px;
+        }
+
+        .admin-badge {
+          background: #dc3545;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 500;
+        }
+
+        .user-badge {
+          background: #6c757d;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 500;
+        }
+
+        .vip-badge {
+          background: #ff6b35;
+          color: white;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 500;
         }
 
         .premium-badge {
-          background: #451a03;
-          color: #fbbf24;
-          border: 1px solid #92400e;
-        }
-
-        .regular-badge {
-          background: #374151;
-          color: #9ca3af;
-          border: 1px solid #4b5563;
-        }
-
-        .delete-btn {
-          background: #dc2626;
-          border: 1px solid #b91c1c;
-          color: white;
-          padding: 0.5rem;
+          background: #ffc107;
+          color: #212529;
+          padding: 2px 6px;
           border-radius: 4px;
-          cursor: pointer;
+          font-size: 10px;
+          font-weight: 500;
+        }
+
+        .basic-badge {
+          background: #e9ecef;
+          color: #495057;
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 500;
+        }
+
+        .user-details {
+          margin-bottom: 16px;
+        }
+
+        .detail-row {
           display: flex;
           align-items: center;
-          justify-content: center;
+          gap: 8px;
+          font-size: 12px;
+          color: #6c757d;
+          margin-bottom: 4px;
+        }
+
+        .user-actions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .user-actions button {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 6px 10px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 500;
           transition: all 0.2s;
         }
 
-        .delete-btn:hover {
-          background: #b91c1c;
-          transform: scale(1.05);
+        .edit-btn {
+          background: #f8f9fa;
+          color: #495057;
         }
 
-        .password-text {
-          font-family: monospace;
-          font-size: 0.8rem;
-          color: #9ca3af;
-          background: rgba(31, 41, 55, 0.5);
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          border: 1px solid #374151;
+        .edit-btn:hover {
+          background: #e9ecef;
+        }
+
+        .premium-btn {
+          background: #ffc107;
+          color: #212529;
+        }
+
+        .premium-btn:hover {
+          background: #e0a800;
+        }
+
+        .vip-btn {
+          background: #ff6b35;
+          color: white;
+        }
+
+        .vip-btn:hover {
+          background: #e55a2b;
+        }
+
+        .expire-btn {
+          background: #6c757d;
+          color: white;
+        }
+
+        .expire-btn:hover {
+          background: #5a6268;
+        }
+
+        .delete-btn {
+          background: #dc3545;
+          color: white;
+        }
+
+        .delete-btn:hover {
+          background: #c82333;
         }
 
         .no-users {
           text-align: center;
-          padding: 4rem 2rem;
-          color: #9ca3af;
+          padding: 60px 20px;
+          color: #6c757d;
         }
 
         .no-users svg {
-          margin-bottom: 1rem;
+          margin-bottom: 16px;
           opacity: 0.5;
         }
 
-        @media (max-width: 1024px) {
-          .admin-header {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-          }
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
 
-          .admin-stats {
-            justify-content: center;
-            gap: 1rem;
-          }
+        .modal-content {
+          background: white;
+          border-radius: 12px;
+          padding: 24px;
+          width: 400px;
+          max-width: 90vw;
+        }
 
-          .stat-item {
-            min-width: 120px;
-          }
+        .modal-content h3 {
+          margin: 0 0 20px 0;
+          color: #333;
+        }
 
-          .users-header {
-            flex-direction: column;
-            align-items: flex-start;
-          }
+        .form-group {
+          margin-bottom: 16px;
+        }
 
-          .users-controls {
-            width: 100%;
-            justify-content: flex-start;
-          }
+        .form-group label {
+          display: block;
+          margin-bottom: 4px;
+          font-weight: 500;
+          color: #333;
+        }
 
-          .search-box {
-            min-width: 200px;
-          }
+        .form-group input,
+        .form-group select {
+          width: 100%;
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-size: 14px;
+        }
 
-          .referral-links {
-            gap: 1rem;
-          }
+        .form-group input[type="checkbox"] {
+          width: auto;
+        }
+
+        .modal-actions {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-top: 24px;
+        }
+
+        .save-btn {
+          background: #007bff;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        .save-btn:hover {
+          background: #0056b3;
+        }
+
+        .cancel-btn {
+          background: #6c757d;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        .cancel-btn:hover {
+          background: #5a6268;
         }
 
         @media (max-width: 768px) {
-          .admin-page {
-            padding: 80px 16px 20px;
+          .admin-container {
+            padding: 10px;
           }
 
           .admin-header {
+            flex-direction: column;
+            gap: 16px;
             align-items: stretch;
           }
 
-          .admin-header h1 {
-            font-size: 1.5rem;
-          }
-
-          .users-header {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .users-header h2 {
-            font-size: 1.5rem;
-          }
-
-          .users-controls {
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          .search-box {
-            min-width: auto;
-            width: 100%;
-          }
-
-          .control-buttons {
+          .admin-actions {
             justify-content: center;
           }
 
-          .chart-container {
-            height: 150px;
-          }
-
-          .chart-area {
-            gap: 0.5rem;
-          }
-
-          .chart-bar {
-            width: 30px;
-          }
-
-          .tooltip-right {
-            display: none;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .admin-page {
-            padding: 70px 12px 20px;
-          }
-
-          .admin-header h1 {
-            font-size: 1.25rem;
-          }
-
-          .users-header h2 {
-            font-size: 1.25rem;
-          }
-
-          .control-buttons {
+          .filters-container {
             flex-direction: column;
-            width: 100%;
           }
 
-          .filter-btn, .export-btn {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .user-card {
-            padding: 0.75rem;
-          }
-
-          .user-card-header {
+          .filter-group {
             flex-direction: column;
-            gap: 0.5rem;
           }
 
-          .user-card-actions {
-            align-self: flex-end;
-          }
-
-          .stats-dropdown {
-            width: 100vw;
-            left: 50%;
-            transform: translateX(-50%);
-            right: auto;
+          .users-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
