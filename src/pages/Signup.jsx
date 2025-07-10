@@ -96,9 +96,9 @@ const Signup = () => {
       return
     }
 
-    // API를 통한 회원가입
+    // Firebase를 통한 회원가입
     const result = await signup({
-      name: formData.name,
+      displayName: formData.name,
       email: formData.email,
       password: formData.password,
       confirmPassword: formData.confirmPassword

@@ -37,6 +37,12 @@ const Chart = () => {
   const [memoEditorDragOffset, setMemoEditorDragOffset] = useState({ x: 0, y: 0 })
   const memoEditorRef = useRef(null)
 
+  // 도구 패널 드래그 관련 상태
+  const [toolPanelPosition, setToolPanelPosition] = useState({ x: 30, y: 120 })
+  const [isToolPanelDragging, setIsToolPanelDragging] = useState(false)
+  const [toolPanelDragOffset, setToolPanelDragOffset] = useState({ x: 0, y: 0 })
+  const toolPanelRef = useRef(null)
+
   // 향상된 펜 설정 상태들
   const [penSize, setPenSize] = useState(2)
   const [eraserSize, setEraserSize] = useState(4)
@@ -561,6 +567,73 @@ const Chart = () => {
     }
   }, [isMemoEditorDragging, handleMemoEditorMouseMove, handleMemoEditorMouseUp])
 
+  // 도구 패널 드래그 핸들러들
+  const handleToolPanelMouseDown = useCallback((e) => {
+    if (e.button !== 0) return // 오직 왼쪽 버튼만
+    if (e.target.closest('.main-btn') || e.target.closest('.detail-options')) {
+      return // 버튼이나 세부 옵션 클릭 시 드래그 방지
+    }
+    
+    setIsToolPanelDragging(true)
+    setToolPanelDragOffset({
+      x: e.clientX - toolPanelPosition.x,
+      y: e.clientY - toolPanelPosition.y
+    })
+  }, [toolPanelPosition.x, toolPanelPosition.y])
+
+  const handleToolPanelMouseMove = useCallback((e) => {
+    if (isToolPanelDragging) {
+      const newX = e.clientX - toolPanelDragOffset.x
+      const newY = e.clientY - toolPanelDragOffset.y
+      
+      const panelWidth = 280
+      const minVisibleWidth = 10 // 최소 보이는 너비를 아주 작게
+      const minVisibleHeight = 10 // 최소 보이는 높이를 아주 작게
+      
+      // 거의 무제한 경계 설정
+      const minX = -300 // 왼쪽으로 300px까지 이동 가능 (거의 완전히 숨김)
+      const maxX = window.innerWidth - minVisibleWidth // 오른쪽으로 거의 완전히 숨길 수 있음
+      const minY = -200 // 상단으로 훨씬 더 많이 이동 가능
+      const maxY = window.innerHeight - minVisibleHeight // 하단으로 거의 완전히 숨길 수 있음
+      
+      const finalX = Math.max(minX, Math.min(newX, maxX))
+      const finalY = Math.max(minY, Math.min(newY, maxY))
+      
+      // 디버깅을 위한 로그 (개발 시에만)
+      console.log('Move values:', { 
+        newX, 
+        newY, 
+        minX, 
+        maxX, 
+        finalX, 
+        finalY, 
+        windowWidth: window.innerWidth 
+      })
+      
+      setToolPanelPosition({
+        x: finalX,
+        y: finalY
+      })
+    }
+  }, [isToolPanelDragging, toolPanelDragOffset.x, toolPanelDragOffset.y])
+
+  const handleToolPanelMouseUp = useCallback(() => {
+    setIsToolPanelDragging(false)
+  }, [])
+
+  // 도구 패널 드래그 이벤트 리스너
+  useEffect(() => {
+    if (isToolPanelDragging) {
+      document.addEventListener('mousemove', handleToolPanelMouseMove)
+      document.addEventListener('mouseup', handleToolPanelMouseUp)
+      
+      return () => {
+        document.removeEventListener('mousemove', handleToolPanelMouseMove)
+        document.removeEventListener('mouseup', handleToolPanelMouseUp)
+      }
+    }
+  }, [isToolPanelDragging, handleToolPanelMouseMove, handleToolPanelMouseUp])
+
   // 툴팁 함수들
   const handleButtonMouseEnter = (buttonType, event) => {
     const rect = event.target.getBoundingClientRect()
@@ -631,9 +704,23 @@ const Chart = () => {
       {/* 메인 컨테이너 */}
       <div className="main-container">
         {/* 좌측 도구 패널 */}
-        <div className="tool-container">
+        <div 
+          ref={toolPanelRef}
+          className="tool-container draggable-tool-panel"
+          style={{
+            position: 'absolute',
+            left: `${toolPanelPosition.x}px`,
+            top: `${toolPanelPosition.y}px`,
+            cursor: isToolPanelDragging ? 'grabbing' : 'grab',
+            zIndex: 1000
+          }}
+          onMouseDown={handleToolPanelMouseDown}
+        >
           {/* 제목 */}
-          <div className="tool-container-title">도구 선택</div>
+          <div className="tool-container-title">
+            도구 선택
+            <span className="drag-handle">⋮⋮</span>
+          </div>
           
           {/* 메인 카테고리 버튼들 */}
           <div className="main-buttons">
@@ -1045,9 +1132,7 @@ const Chart = () => {
         }
 
         .tool-container {
-          position: fixed;
-          top: 120px;
-          left: 30px;
+          position: absolute;
           width: 280px;
           max-height: calc(100vh - 140px);
           z-index: 10000;
@@ -1060,6 +1145,14 @@ const Chart = () => {
           overflow: hidden;
         }
 
+        .tool-container.draggable-tool-panel {
+          cursor: grab;
+        }
+
+        .tool-container.draggable-tool-panel:active {
+          cursor: grabbing;
+        }
+
         .tool-container-title {
           color: #ffffff;
           font-size: 16px;
@@ -1067,6 +1160,25 @@ const Chart = () => {
           padding: 20px 20px 8px 20px;
           text-align: left;
           letter-spacing: 0.5px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .drag-handle {
+          color: #9ca3af;
+          font-size: 16px;
+          cursor: grab;
+          user-select: none;
+          transition: color 0.2s ease;
+        }
+
+        .drag-handle:hover {
+          color: #ffffff;
+        }
+
+        .drag-handle:active {
+          cursor: grabbing;
         }
 
         .chart-section-title {
@@ -1099,6 +1211,7 @@ const Chart = () => {
           justify-content: center;
           transition: all 0.3s ease;
           backdrop-filter: blur(10px);
+          user-select: none;
         }
 
         .main-btn .material-icons {
@@ -1120,6 +1233,7 @@ const Chart = () => {
           padding: 0 20px 20px 20px;
           max-height: calc(100vh - 280px);
           overflow-y: auto;
+          user-select: none;
         }
 
         .detail-options.has-border {

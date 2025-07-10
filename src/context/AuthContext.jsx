@@ -1,6 +1,17 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { authAPI, getToken, setToken, removeToken, handleAPIError } from '../utils/api'
-import { getMigrationStatus, runMigration } from '../utils/migration'
+import { 
+  onAuthStateChange, 
+  signUpUser, 
+  signInUser, 
+  signOutUser, 
+  changeUserPassword,
+  getUserProfile,
+  updateUserProfile,
+  getUserFavorites,
+  addFavoriteCoin,
+  removeFavoriteCoin,
+  getFirebaseErrorMessage
+} from '../utils/firebase-auth'
 
 const AuthContext = createContext()
 
@@ -16,147 +27,143 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [favoriteCoins, setFavoriteCoins] = useState([])
 
   useEffect(() => {
-    // 페이지 로드 시 토큰으로 사용자 정보 확인 및 마이그레이션 실행
-    const initializeAuth = async () => {
-      // 마이그레이션 상태 확인
-      const migrationStatus = getMigrationStatus()
-      
-      if (migrationStatus.needsMigration) {
-        console.log('기존 데이터 마이그레이션을 시작합니다...')
+    // Firebase 인증 상태 변경 리스너
+    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      if (firebaseUser) {
+        // 사용자가 로그인된 경우
+        setUser(firebaseUser)
+        
         try {
-          const migrationResult = await runMigration()
-          if (migrationResult.success) {
-            console.log('마이그레이션이 완료되었습니다.', migrationResult)
-          } else {
-            console.error('마이그레이션 실패:', migrationResult.message)
-          }
-        } catch (error) {
-          console.error('마이그레이션 중 오류 발생:', error)
-        }
-      }
-
-      // 인증 초기화
-      const token = getToken()
-      if (token) {
-        try {
-          const response = await authAPI.getMe()
-          setUser(response.user)
+          // Firestore에서 사용자 프로필 가져오기
+          const profile = await getUserProfile(firebaseUser.uid)
+          setUserProfile(profile)
+          
           // 즐겨찾기 목록 로드
-          loadUserFavorites()
+          const favorites = await getUserFavorites(firebaseUser.uid)
+          setFavoriteCoins(favorites)
         } catch (error) {
-          console.error('사용자 정보 로드 실패:', error)
-          removeToken()
-          setUser(null)
+          console.error('사용자 데이터 로드 실패:', error)
+          setUserProfile(null)
+          setFavoriteCoins([])
         }
-      }
-      setLoading(false)
-    }
-
-    initializeAuth()
-  }, [])
-
-  // 사용자별 관심 코인 로드
-  const loadUserFavorites = async () => {
-    if (user) {
-      try {
-        const response = await authAPI.getFavorites()
-        setFavoriteCoins(response.favorites)
-      } catch (error) {
-        console.error('즐겨찾기 로드 실패:', error)
+      } else {
+        // 사용자가 로그아웃된 경우
+        setUser(null)
+        setUserProfile(null)
         setFavoriteCoins([])
       }
-    }
-  }
+      setLoading(false)
+    })
+
+    // 컴포넌트 언마운트 시 리스너 정리
+    return () => unsubscribe()
+  }, [])
 
   const login = async (email, password) => {
     try {
-      const response = await authAPI.login({ email, password })
-      setToken(response.token)
-      setUser(response.user)
-      // 로그인 시 관심 코인 로드
-      loadUserFavorites()
+      const result = await signInUser(email, password)
       return { success: true }
     } catch (error) {
-      const errorMessage = handleAPIError(error)
+      const errorMessage = getFirebaseErrorMessage(error)
       return { success: false, message: errorMessage }
     }
   }
 
   const signup = async (userData) => {
     try {
-      const response = await authAPI.signup(userData)
-      setToken(response.token)
-      setUser(response.user)
-      // 회원가입 시 관심 코인 로드
-      loadUserFavorites()
+      const { email, password, displayName } = userData
+      const result = await signUpUser(email, password, displayName)
       return { success: true }
     } catch (error) {
-      const errorMessage = handleAPIError(error)
+      const errorMessage = getFirebaseErrorMessage(error)
       return { success: false, message: errorMessage }
     }
   }
 
-  const logout = () => {
-    setUser(null)
-    setFavoriteCoins([])
-    removeToken()
+  const logout = async () => {
+    try {
+      await signOutUser()
+      // 상태는 onAuthStateChange에서 자동으로 업데이트됨
+    } catch (error) {
+      console.error('로그아웃 실패:', error)
+    }
   }
 
-  // 프리미엄 상태 확인 (거래소 가입 여부로 판단)
-  const isPremium = user?.exchange_registered || user?.is_premium || user?.email === 'admin@gmail.com' || false
+  // 프리미엄 상태 확인
+  const isPremium = userProfile?.exchange_registered || 
+                   userProfile?.is_premium || 
+                   userProfile?.email === 'admin@gmail.com' || 
+                   false
 
   // 프리미엄 활성화 (거래소 가입 완료 시 호출)
   const activatePremium = async (exchangeEmail = null) => {
-    if (user) {
-      try {
-        const response = await authAPI.updateProfile({
-          exchangeRegistered: true,
-          ...(exchangeEmail && { exchangeEmail })
-        })
-        setUser(response.user)
-        return { success: true }
-      } catch (error) {
-        const errorMessage = handleAPIError(error)
-        return { success: false, message: errorMessage }
+    if (!user) return { success: false, message: '로그인이 필요합니다' }
+
+    try {
+      const updates = {
+        exchange_registered: true,
+        is_premium: true,
+        ...(exchangeEmail && { exchange_email: exchangeEmail })
       }
+      
+      await updateUserProfile(user.uid, updates)
+      
+      // 로컬 상태 업데이트
+      setUserProfile(prev => ({
+        ...prev,
+        ...updates
+      }))
+      
+      return { success: true }
+    } catch (error) {
+      const errorMessage = getFirebaseErrorMessage(error)
+      return { success: false, message: errorMessage }
     }
   }
 
   // 관심 코인 추가/제거
   const toggleFavoriteCoin = async (coinId) => {
-    if (!user) return
+    if (!user) return { success: false, message: '로그인이 필요합니다' }
 
-    const action = favoriteCoins.includes(coinId) ? 'remove' : 'add'
+    const isCurrentlyFavorite = favoriteCoins.includes(coinId)
     
     try {
-      await authAPI.toggleFavorite(coinId, action)
+      if (isCurrentlyFavorite) {
+        await removeFavoriteCoin(user.uid, coinId)
+        setFavoriteCoins(prev => prev.filter(id => id !== coinId))
+      } else {
+        await addFavoriteCoin(user.uid, coinId)
+        setFavoriteCoins(prev => [...prev, coinId])
+      }
       
-      const newFavorites = action === 'add'
-        ? [...favoriteCoins, coinId]
-        : favoriteCoins.filter(id => id !== coinId)
-      
-      setFavoriteCoins(newFavorites)
       return { success: true }
     } catch (error) {
       console.error('즐겨찾기 토글 실패:', error)
-      return { success: false, message: handleAPIError(error) }
+      return { success: false, message: getFirebaseErrorMessage(error) }
     }
   }
 
   // 사용자 정보 업데이트
   const updateUser = async (updatedData) => {
-    if (!user) return
+    if (!user) return { success: false, message: '로그인이 필요합니다' }
 
     try {
-      const response = await authAPI.updateProfile(updatedData)
-      setUser(response.user)
+      await updateUserProfile(user.uid, updatedData)
+      
+      // 로컬 상태 업데이트
+      setUserProfile(prev => ({
+        ...prev,
+        ...updatedData
+      }))
+      
       return { success: true }
     } catch (error) {
-      const errorMessage = handleAPIError(error)
+      const errorMessage = getFirebaseErrorMessage(error)
       return { success: false, message: errorMessage }
     }
   }
@@ -164,22 +171,36 @@ export const AuthProvider = ({ children }) => {
   // 비밀번호 변경
   const changePassword = async (passwordData) => {
     try {
-      await authAPI.changePassword(passwordData)
+      const { newPassword } = passwordData
+      await changeUserPassword(newPassword)
       return { success: true }
     } catch (error) {
-      const errorMessage = handleAPIError(error)
+      const errorMessage = getFirebaseErrorMessage(error)
       return { success: false, message: errorMessage }
     }
   }
 
+  // 즐겨찾기 새로고침
+  const loadUserFavorites = async () => {
+    if (!user) return
+
+    try {
+      const favorites = await getUserFavorites(user.uid)
+      setFavoriteCoins(favorites)
+    } catch (error) {
+      console.error('즐겨찾기 로드 실패:', error)
+    }
+  }
+
   const value = {
-    user,
+    user: userProfile, // Firestore의 사용자 프로필 정보
+    firebaseUser: user, // Firebase 인증 사용자 정보
     login,
     signup,
     logout,
     loading,
     isAuthenticated: !!user,
-    isAdmin: user?.email === 'admin@gmail.com',
+    isAdmin: userProfile?.email === 'admin@gmail.com',
     isPremium,
     activatePremium,
     favoriteCoins,

@@ -4,10 +4,10 @@
 1. [프로젝트 개요](#프로젝트-개요)
 2. [기술 스택](#기술-스택)
 3. [프로젝트 구조](#프로젝트-구조)
-4. [주요 기능](#주요-기능)
-5. [알고리즘 및 핵심 로직](#알고리즘-및-핵심-로직)
-6. [API 설계](#api-설계)
-7. [데이터베이스 설계](#데이터베이스-설계)
+4. [Firebase 클라우드 아키텍처](#firebase-클라우드-아키텍처)
+5. [주요 기능](#주요-기능)
+6. [알고리즘 및 핵심 로직](#알고리즘-및-핵심-로직)
+7. [Firebase 데이터베이스 설계](#firebase-데이터베이스-설계)
 8. [성능 최적화](#성능-최적화)
 9. [보안 구현](#보안-구현)
 10. [배포 환경](#배포-환경)
@@ -18,15 +18,16 @@
 
 ## 📊 프로젝트 개요
 
-**BitView**는 전문가급 암호화폐 분석 플랫폼으로, 실시간 시세 조회, 차트 분석, 고급 백테스트 기능을 제공하는 React 기반 웹 애플리케이션입니다.
+**BitView**는 전문가급 암호화폐 분석 플랫폼으로, 실시간 시세 조회, 차트 분석, 고급 백테스트 기능을 제공하는 React + Firebase 기반 웹 애플리케이션입니다.
 
 ### 주요 특징
-- 실시간 암호화폐 시세 추적
-- 전문가급 차트 분석 도구
-- 고급 백테스트 시뮬레이션
-- 리플레이 기능으로 실시간 전략 검증
-- 다양한 기술적 지표 제공
-- 반응형 디자인 및 PWA 지원
+- 🔥 **Firebase 클라우드 네이티브** 아키텍처
+- 📊 실시간 암호화폐 시세 추적
+- 📈 전문가급 차트 분석 도구
+- 🧮 고급 백테스트 시뮬레이션
+- 🔄 리플레이 기능으로 실시간 전략 검증
+- 📱 반응형 디자인 및 PWA 지원
+- 🌐 글로벌 접근성 및 실시간 동기화
 
 ---
 
@@ -41,20 +42,14 @@
 - **TradingView Embed**: 3.0.6 (전문 차트)
 - **Lucide React**: 0.517.0 (아이콘)
 
-### Backend
-- **Node.js**: Express 5.1.0
-- **Socket.io**: 4.8.1 (실시간 통신)
-- **WebSocket**: 8.18.3 (실시간 데이터)
-- **CORS**: 2.8.5 (보안)
-- **bcryptjs**: 3.0.2 (비밀번호 암호화)
-- **jsonwebtoken**: 9.0.2 (JWT 인증)
-
-### 데이터베이스
-- **Prisma**: ORM (PostgreSQL/MySQL 지원)
+### 🔥 Firebase 클라우드
+- **Firebase Authentication**: 사용자 인증
+- **Cloud Firestore**: NoSQL 데이터베이스
+- **Firebase Analytics**: 사용자 분석
+- **Firebase Hosting**: 정적 호스팅
 
 ### 개발 도구
 - **ESLint**: 9.25.0 (코드 품질)
-- **TypeScript**: 타입 안정성
 - **Vite**: 개발 서버 및 빌드
 
 ### 외부 API
@@ -67,78 +62,137 @@
 
 ```
 bitview/
-├── frontend/
-│   ├── src/
-│   │   ├── components/         # 재사용 가능한 컴포넌트
-│   │   │   ├── layout/        # 레이아웃 컴포넌트
-│   │   │   ├── ui/            # UI 컴포넌트
-│   │   │   ├── ChartViewWidget.jsx
-│   │   │   ├── CoinTable.jsx
-│   │   │   ├── TradingViewChart.jsx
-│   │   │   └── ...
-│   │   ├── pages/             # 페이지 컴포넌트
-│   │   │   ├── AdvancedBacktest.jsx
-│   │   │   ├── Chart.jsx
-│   │   │   ├── LiveCoins.jsx
-│   │   │   ├── Premium.jsx
-│   │   │   └── ...
-│   │   ├── context/           # React Context
-│   │   │   └── AuthContext.jsx
-│   │   ├── utils/             # 유틸리티 함수
-│   │   │   ├── advancedBacktest.js
-│   │   │   ├── replayBacktest.js
-│   │   │   └── backtest.js
-│   │   ├── App.jsx           # 메인 앱 컴포넌트
-│   │   └── main.jsx          # 엔트리 포인트
-│   ├── public/               # 정적 파일
-│   │   ├── robots.txt
-│   │   ├── sitemap.xml
-│   │   └── site.webmanifest
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
-├── backend/
-│   ├── src/
-│   │   └── auth/             # 인증 관련
-│   ├── prisma/               # 데이터베이스 스키마
-│   ├── server.js             # 메인 서버
-│   ├── websocket-server.js   # 웹소켓 서버
-│   └── package.json
-├── README.md
-└── TECHNICAL_DOCUMENTATION.md
+├── src/
+│   ├── components/            # 재사용 가능한 컴포넌트
+│   │   ├── ChartViewWidget.jsx
+│   │   ├── CoinTable.jsx
+│   │   ├── TradingViewChart.jsx
+│   │   ├── AdvancedBacktestPanel.jsx
+│   │   ├── CryptoCards.jsx
+│   │   ├── Features.jsx
+│   │   ├── Footer.jsx
+│   │   ├── Hero.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── PremiumModal.jsx
+│   │   ├── Services.jsx
+│   │   ├── SimpleTradingViewChart.jsx
+│   │   ├── Statistics.jsx
+│   │   └── TradingViewWidget.jsx
+│   ├── pages/                 # 페이지 컴포넌트
+│   │   ├── AdvancedBacktest.jsx
+│   │   ├── Chart.jsx
+│   │   ├── LiveCoins.jsx
+│   │   ├── Login.jsx
+│   │   ├── Signup.jsx
+│   │   ├── Premium.jsx
+│   │   ├── ProfitCalculator.jsx
+│   │   ├── FundingCalculator.jsx
+│   │   ├── Admin.jsx
+│   │   ├── Terms.jsx
+│   │   └── Privacy.jsx
+│   ├── context/               # React Context
+│   │   └── AuthContext.jsx
+│   ├── firebase/              # Firebase 설정
+│   │   └── config.js
+│   ├── utils/                 # 유틸리티 함수
+│   │   ├── firebase-auth.js   # Firebase 인증 유틸리티
+│   │   ├── advancedBacktest.js
+│   │   ├── replayBacktest.js
+│   │   └── backtest.js
+│   ├── App.jsx               # 메인 앱 컴포넌트
+│   └── main.jsx              # 엔트리 포인트
+├── public/                   # 정적 파일
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   └── site.webmanifest
+├── index.html
+├── package.json
+├── vite.config.js
+└── README.md
 ```
+
+---
+
+## 🔥 Firebase 클라우드 아키텍처
+
+### 인증 시스템
+```javascript
+// Firebase Authentication 설정
+import { getAuth } from "firebase/auth";
+import { auth } from "../firebase/config";
+
+// 사용자 인증 상태 관리
+const onAuthStateChange = (callback) => {
+  return onAuthStateChanged(auth, callback);
+};
+```
+
+### 데이터베이스 구조
+```javascript
+// Firestore 데이터베이스 설계
+firestore: {
+  users: {
+    [userId]: {
+      displayName: string,
+      email: string,
+      createdAt: timestamp,
+      exchange_registered: boolean,
+      is_premium: boolean,
+      last_login: timestamp
+    }
+  },
+  favorites: {
+    [docId]: {
+      userId: string,
+      coinId: string,
+      createdAt: timestamp
+    }
+  }
+}
+```
+
+### 실시간 동기화
+- **사용자 상태**: 자동 동기화
+- **즐겨찾기**: 실시간 업데이트
+- **프리미엄 상태**: 즉시 반영
 
 ---
 
 ## 🎯 주요 기능
 
-### 1. 실시간 코인 모니터링 (`/live-coins`)
+### 1. 🔐 Firebase 인증 시스템
+- 이메일/비밀번호 인증
+- 비밀번호 재설정 이메일
+- 실시간 인증 상태 동기화
+- 자동 로그인 유지
+
+### 2. 📊 실시간 코인 모니터링 (`/live-coins`)
 - 실시간 가격 업데이트
 - 24시간 변동률 표시
-- 즐겨찾기 기능
+- 개인화된 즐겨찾기 (Firebase 동기화)
 - 정렬 및 필터링
 - 페이지네이션
 
-### 2. 차트 분석 (`/chart`)
+### 3. 📈 차트 분석 (`/chart`)
 - TradingView 통합 차트
 - 다양한 시간 간격 (1분~1개월)
 - 기술적 지표 표시
 - 마우스 줌/드래그 기능
 
-### 3. 고급 백테스트 (`/advanced-backtest`)
+### 4. 🧮 고급 백테스트 (`/advanced-backtest`)
 - 4가지 고급 전략
 - 리플레이 기능
 - 실시간 성과 분석
 - 위험 관리 도구
 
-### 4. 계산기 도구
+### 5. 🔧 계산기 도구
 - 수익률 계산기 (`/profit-calculator`)
 - 펀딩 수수료 계산기 (`/funding-calculator`)
 
-### 5. 사용자 관리
-- 회원가입/로그인 (`/login`, `/signup`)
-- 프리미엄 기능 (`/premium`)
-- 관리자 대시보드 (`/admin`)
+### 6. 👑 프리미엄 기능 (`/premium`)
+- 거래소 연동 프리미엄
+- 고급 분석 도구
+- 무제한 백테스트
 
 ---
 
@@ -207,24 +261,6 @@ const calculateSMA = (data, period) => {
 };
 ```
 
-#### 지수이동평균 (EMA)
-```javascript
-const calculateEMA = (data, period) => {
-  const multiplier = 2 / (period + 1);
-  const ema = [];
-  
-  for (let i = 0; i < data.length; i++) {
-    if (i === 0) {
-      ema.push(data[i].close);
-    } else {
-      ema.push((data[i].close * multiplier) + (ema[i - 1] * (1 - multiplier)));
-    }
-  }
-  
-  return ema;
-};
-```
-
 #### RSI (Relative Strength Index)
 ```javascript
 const calculateRSI = (data, period = 14) => {
@@ -249,9 +285,11 @@ const calculateRSI = (data, period = 14) => {
       continue;
     }
 
-    const avgGain = gains.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period;
-    const avgLoss = losses.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period;
-
+    const avgGain = gains.slice(i - period + 1, i + 1)
+      .reduce((a, b) => a + b) / period;
+    const avgLoss = losses.slice(i - period + 1, i + 1)
+      .reduce((a, b) => a + b) / period;
+    
     if (avgLoss === 0) {
       rsi.push(100);
     } else {
@@ -259,1014 +297,329 @@ const calculateRSI = (data, period = 14) => {
       rsi.push(100 - (100 / (1 + rs)));
     }
   }
-
   return rsi;
-};
-```
-
-#### 볼린저 밴드
-```javascript
-export const calculateBollingerBands = (data, period = 20, multiplier = 2) => {
-  const sma = calculateSMA(data, period);
-  const bands = [];
-  
-  for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) {
-      bands.push({ upper: null, middle: null, lower: null });
-      continue;
-    }
-    
-    const slice = data.slice(i - period + 1, i + 1);
-    const mean = sma[i];
-    const variance = slice.reduce((acc, val) => acc + Math.pow(val.close - mean, 2), 0) / period;
-    const stdDev = Math.sqrt(variance);
-    
-    bands.push({
-      upper: mean + (stdDev * multiplier),
-      middle: mean,
-      lower: mean - (stdDev * multiplier)
-    });
-  }
-  
-  return bands;
 };
 ```
 
 ### 3. 리플레이 시스템
 
-#### 실시간 포지션 계산
+#### 실시간 백테스트 재생
 ```javascript
-export const calculateCurrentPosition = (data, signals, currentIndex, initialCapital) => {
-  let capital = initialCapital;
-  let shares = 0;
-  let position = null;
-  let totalTrades = 0;
-  let winningTrades = 0;
-  let losingTrades = 0;
-  let totalProfit = 0;
+export const startReplayBacktest = (
+  data, 
+  config, 
+  onProgress,
+  onComplete,
+  speed = 100
+) => {
+  let currentIndex = 50;
+  const results = [];
   
-  const currentSignals = signals.filter((_, index) => index <= currentIndex);
-  
-  for (let i = 0; i < currentSignals.length; i++) {
-    const signal = currentSignals[i];
-    const signalIndex = data.findIndex(d => d.time === signal.date);
-    
-    if (signalIndex >= 0 && signalIndex <= currentIndex) {
-      const price = data[signalIndex].close;
-      
-      if (signal.action === 'BUY' && !position && capital > 0) {
-        // 매수 로직
-        const maxShares = Math.floor(capital / price);
-        const commission = capital * 0.001;
-        
-        if (capital >= (maxShares * price) + commission) {
-          shares = maxShares;
-          capital = capital - (shares * price) - commission;
-          position = {
-            entryPrice: price,
-            entryIndex: signalIndex,
-            shares: shares
-          };
-        }
-      } else if (signal.action === 'SELL' && position && shares > 0) {
-        // 매도 로직
-        const tradeValue = shares * price;
-        const commission = tradeValue * 0.001;
-        const profit = tradeValue - (position.shares * position.entryPrice) - commission;
-        
-        capital = capital + tradeValue - commission;
-        totalTrades++;
-        totalProfit += profit;
-        
-        if (profit > 0) {
-          winningTrades++;
-        } else {
-          losingTrades++;
-        }
-        
-        shares = 0;
-        position = null;
-      }
+  const playNextCandle = () => {
+    if (currentIndex >= data.length) {
+      onComplete(results);
+      return;
     }
-  }
-  
-  const currentPrice = data[currentIndex]?.close || 0;
-  const currentValue = capital + (shares * currentPrice);
-  const totalReturn = ((currentValue - initialCapital) / initialCapital) * 100;
-  const winRate = totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0;
-  
-  return {
-    capital,
-    shares,
-    position,
-    currentValue,
-    totalReturn,
-    totalTrades,
-    winningTrades,
-    losingTrades,
-    totalProfit,
-    winRate,
-    currentPrice
+    
+    // 현재 캔들까지의 백테스트 실행
+    const partialData = data.slice(0, currentIndex + 1);
+    const result = runAdvancedBacktest(partialData, config);
+    
+    results.push(result);
+    onProgress(result, currentIndex, data.length);
+    
+    currentIndex++;
+    setTimeout(playNextCandle, speed);
   };
-};
-```
-
-### 4. 위험 분석 알고리즘
-
-#### 최대 손실폭 (Maximum Drawdown)
-```javascript
-export const analyzeRisk = (portfolio, initialCapital) => {
-  let maxDrawdown = 0;
-  let peak = initialCapital;
-  let currentDrawdown = 0;
-  let volatility = 0;
   
-  const returns = [];
-  
-  for (let i = 0; i < portfolio.length; i++) {
-    const currentValue = portfolio[i].totalValue;
-    
-    if (currentValue > peak) {
-      peak = currentValue;
-    }
-    
-    currentDrawdown = ((peak - currentValue) / peak) * 100;
-    if (currentDrawdown > maxDrawdown) {
-      maxDrawdown = currentDrawdown;
-    }
-    
-    if (i > 0) {
-      const dailyReturn = (currentValue - portfolio[i-1].totalValue) / portfolio[i-1].totalValue;
-      returns.push(dailyReturn);
-    }
-  }
-  
-  // 변동성 계산
-  if (returns.length > 0) {
-    const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-    const variance = returns.reduce((acc, ret) => acc + Math.pow(ret - mean, 2), 0) / returns.length;
-    volatility = Math.sqrt(variance) * Math.sqrt(252) * 100; // 연율화
-  }
-  
-  return {
-    maxDrawdown,
-    volatility,
-    sharpeRatio: calculateSharpeRatio(returns),
-    sortinoRatio: calculateSortinoRatio(returns),
-    var95: calculateVaR(returns, 0.95),
-    var99: calculateVaR(returns, 0.99)
-  };
+  playNextCandle();
 };
 ```
 
 ---
 
-## 🔌 API 설계
+## 🔥 Firebase 데이터베이스 설계
 
-### 1. 인증 API
-
-#### POST `/api/forgot-password`
-비밀번호 재설정 요청
+### 1. 사용자 컬렉션 (users)
 ```javascript
-// Request
 {
-  "email": "user@example.com"
-}
-
-// Response
-{
-  "success": true,
-  "message": "비밀번호 재설정 링크가 이메일로 발송되었습니다.",
-  "token": "123456" // 개발환경에서만
-}
-```
-
-#### POST `/api/verify-reset-token`
-재설정 토큰 검증
-```javascript
-// Request
-{
-  "email": "user@example.com",
-  "token": "123456"
-}
-
-// Response
-{
-  "success": true,
-  "message": "토큰이 유효합니다."
+  [userId]: {
+    displayName: "사용자명",
+    email: "user@example.com",
+    photoURL: "profile_image_url",
+    createdAt: serverTimestamp(),
+    exchange_registered: false,
+    is_premium: false,
+    premium_expires: null,
+    last_login: serverTimestamp(),
+    updated_at: serverTimestamp()
+  }
 }
 ```
 
-### 2. 실시간 데이터 API
-
-#### WebSocket 연결
+### 2. 즐겨찾기 컬렉션 (favorites)
 ```javascript
-// 실시간 시세 스트림
-const tickerWs = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`);
-
-// 캔들스틱 데이터 스트림
-const candleWs = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`);
+{
+  [docId]: {
+    userId: "user_uid",
+    coinId: "BTCUSDT",
+    createdAt: serverTimestamp()
+  }
+}
 ```
 
-#### REST API
+### 3. 데이터 접근 패턴
 ```javascript
-// 초기 캔들 데이터 가져오기
-const response = await fetch(
-  `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=500`
-);
+// 사용자 즐겨찾기 조회
+const getUserFavorites = async (userId) => {
+  const favoritesRef = collection(db, 'favorites');
+  const q = query(favoritesRef, where('userId', '==', userId));
+  const querySnapshot = await getDocs(q);
+  
+  const favorites = [];
+  querySnapshot.forEach((doc) => {
+    favorites.push(doc.data().coinId);
+  });
+  
+  return favorites;
+};
 ```
 
 ---
 
-## 🗄️ 데이터베이스 설계
-
-### 1. 사용자 테이블 (Users)
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  nickname VARCHAR(100),
-  profile_image VARCHAR(255),
-  is_premium BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### 2. 백테스트 결과 테이블 (Backtest_Results)
-```sql
-CREATE TABLE backtest_results (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  strategy_name VARCHAR(100),
-  symbol VARCHAR(20),
-  interval VARCHAR(10),
-  start_date DATE,
-  end_date DATE,
-  initial_capital DECIMAL(15,2),
-  final_capital DECIMAL(15,2),
-  total_return DECIMAL(10,4),
-  max_drawdown DECIMAL(10,4),
-  total_trades INTEGER,
-  win_rate DECIMAL(10,4),
-  sharpe_ratio DECIMAL(10,4),
-  config JSON,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### 3. 거래 내역 테이블 (Trades)
-```sql
-CREATE TABLE trades (
-  id SERIAL PRIMARY KEY,
-  backtest_id INTEGER REFERENCES backtest_results(id),
-  trade_type VARCHAR(10), -- 'BUY' or 'SELL'
-  symbol VARCHAR(20),
-  price DECIMAL(15,8),
-  quantity DECIMAL(15,8),
-  commission DECIMAL(15,8),
-  timestamp TIMESTAMP,
-  pnl DECIMAL(15,2),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### 4. 사용자 설정 테이블 (User_Settings)
-```sql
-CREATE TABLE user_settings (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  favorite_symbols TEXT[], -- 즐겨찾기 심볼 배열
-  default_interval VARCHAR(10),
-  theme VARCHAR(20),
-  notification_settings JSON,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
----
-
-## ⚡ 성능 최적화
+## 🚀 성능 최적화
 
 ### 1. 프론트엔드 최적화
+- **Code Splitting**: React.lazy로 페이지별 분할
+- **Memoization**: React.memo로 불필요한 리렌더링 방지
+- **Virtual Scrolling**: 대용량 코인 목록 가상화
+- **Image Optimization**: WebP 형식 및 lazy loading
 
-#### 번들 분할 (Code Splitting)
+### 2. Firebase 최적화
+- **쿼리 최적화**: 복합 인덱스 활용
+- **실시간 리스너**: 필요한 경우만 구독
+- **캐싱**: 중복 요청 방지
+- **배치 작업**: 여러 작업을 하나의 트랜잭션으로
+
+### 3. 차트 성능
+- **Canvas 렌더링**: 고성능 차트 그리기
+- **데이터 샘플링**: 큰 데이터셋 간소화
+- **메모리 관리**: 차트 인스턴스 적절한 정리
+
+---
+
+## 🛡️ 보안 구현
+
+### 1. Firebase 보안 규칙
 ```javascript
-// vite.config.js
-export default defineConfig({
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          charts: ['recharts', 'react-tradingview-embed'],
-          utils: ['framer-motion', 'lucide-react']
-        }
-      }
+// Firestore 보안 규칙
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 사용자는 자신의 데이터만 읽고 쓸 수 있음
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-  }
-});
-```
-
-#### 컴포넌트 최적화
-```javascript
-// React.memo를 사용한 불필요한 리렌더링 방지
-const CandlestickChart = React.memo(({ data, offset }) => {
-  // 차트 렌더링 로직
-}, (prevProps, nextProps) => {
-  return prevProps.data === nextProps.data && prevProps.offset === nextProps.offset;
-});
-
-// useMemo를 사용한 계산 최적화
-const visibleData = useMemo(() => {
-  const maxOffset = Math.max(0, data.length - displayRange);
-  const actualOffset = Math.min(offset || 0, maxOffset);
-  const startIndex = Math.max(0, data.length - displayRange - actualOffset);
-  const endIndex = Math.min(data.length, startIndex + displayRange);
-  return data.slice(startIndex, endIndex);
-}, [data, displayRange, offset]);
-```
-
-### 2. 백테스트 성능 최적화
-
-#### 지표 캐싱
-```javascript
-const indicatorCache = new Map();
-
-const getIndicators = (data, strategy) => {
-  const cacheKey = `${strategy}_${data.length}_${data[data.length-1].timestamp}`;
-  
-  if (indicatorCache.has(cacheKey)) {
-    return indicatorCache.get(cacheKey);
-  }
-  
-  const indicators = calculateIndicators(data, strategy);
-  indicatorCache.set(cacheKey, indicators);
-  
-  return indicators;
-};
-```
-
-#### 워커 스레드 활용
-```javascript
-// 백테스트 계산을 별도 워커에서 실행
-const worker = new Worker('/js/backtest-worker.js');
-
-worker.postMessage({
-  data: historicalData,
-  config: backtestConfig
-});
-
-worker.onmessage = (event) => {
-  const { results, progress } = event.data;
-  setBacktestResults(results);
-  setProgress(progress);
-};
-```
-
-### 3. 실시간 데이터 최적화
-
-#### WebSocket 연결 관리
-```javascript
-class WebSocketManager {
-  constructor() {
-    this.connections = new Map();
-    this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
-  }
-
-  connect(symbol, callback) {
-    const key = `${symbol}_ticker`;
     
-    if (this.connections.has(key)) {
-      return this.connections.get(key);
-    }
-
-    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`);
-    
-    ws.onopen = () => {
-      this.reconnectAttempts = 0;
-      console.log(`WebSocket connected: ${symbol}`);
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      callback(data);
-    };
-
-    ws.onclose = () => {
-      this.connections.delete(key);
-      this.reconnect(symbol, callback);
-    };
-
-    this.connections.set(key, ws);
-    return ws;
-  }
-
-  reconnect(symbol, callback) {
-    if (this.reconnectAttempts < this.maxReconnectAttempts) {
-      this.reconnectAttempts++;
-      setTimeout(() => {
-        this.connect(symbol, callback);
-      }, Math.pow(2, this.reconnectAttempts) * 1000);
+    // 즐겨찾기는 소유자만 관리 가능
+    match /favorites/{docId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
     }
   }
 }
 ```
 
----
-
-## 🔒 보안 구현
-
-### 1. 인증 및 권한 관리
-
-#### JWT 토큰 구조
-```javascript
-// JWT 생성
-const generateToken = (user) => {
-  return jwt.sign(
-    { 
-      userId: user.id, 
-      email: user.email, 
-      isPremium: user.isPremium 
-    },
-    process.env.JWT_SECRET,
-    { 
-      expiresIn: '24h',
-      issuer: 'bitview',
-      audience: 'bitview-users'
-    }
-  );
-};
-
-// JWT 검증 미들웨어
-const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ message: '인증 토큰이 필요합니다.' });
-  }
-  
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
-  }
-};
-```
-
-#### 비밀번호 암호화
-```javascript
-const bcrypt = require('bcryptjs');
-
-// 비밀번호 해싱
-const hashPassword = async (password) => {
-  const saltRounds = 12;
-  return await bcrypt.hash(password, saltRounds);
-};
-
-// 비밀번호 검증
-const verifyPassword = async (password, hash) => {
-  return await bcrypt.compare(password, hash);
-};
-```
-
-### 2. CORS 설정
-
-#### 동적 CORS 설정
-```javascript
-const allowedOrigins = [
-  'http://localhost:5178',
-  'https://bitview.vercel.app',
-  /^https:\/\/.*\.vercel\.app$/,
-  process.env.CUSTOM_DOMAIN
-].filter(Boolean);
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.some(allowedOrigin => {
-      if (typeof allowedOrigin === 'string') {
-        return allowedOrigin === origin;
-      }
-      return allowedOrigin.test(origin);
-    })) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS 정책에 의해 차단됨'));
-    }
-  },
-  credentials: true
-}));
-```
-
-### 3. 입력 검증
-
-#### 데이터 유효성 검사
-```javascript
-const validateBacktestConfig = (config) => {
-  const errors = [];
-  
-  if (!config.strategy || !ADVANCED_STRATEGIES[config.strategy]) {
-    errors.push('유효하지 않은 전략입니다.');
-  }
-  
-  if (!config.initialCapital || config.initialCapital < 1000000) {
-    errors.push('초기 자본은 최소 1,000,000원 이상이어야 합니다.');
-  }
-  
-  if (config.commission < 0 || config.commission > 0.01) {
-    errors.push('수수료는 0% ~ 1% 범위여야 합니다.');
-  }
-  
-  return errors;
-};
-```
-
-### 4. 보안 헤더
-
-#### HTML 보안 헤더
-```html
-<!-- XSS 방지 -->
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="X-Frame-Options" content="DENY">
-<meta http-equiv="X-XSS-Protection" content="1; mode=block">
-
-<!-- HTTPS 강제 -->
-<meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
-```
+### 2. 클라이언트 보안
+- **입력 검증**: 모든 사용자 입력 검증
+- **XSS 방지**: 적절한 이스케이핑
+- **CSRF 방지**: Firebase 기본 보안 기능 활용
+- **API 키 보호**: 환경 변수 사용
 
 ---
 
-## 🚀 배포 환경
+## 🌐 배포 환경
 
-### 1. Vercel 배포 설정
-
-#### vercel.json 설정
-```json
-{
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://your-backend-url.onrender.com/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://your-backend-url.onrender.com/api/$1"
-    }
-  ]
-}
-```
-
-### 2. 환경 변수 설정
-
-#### 프론트엔드 (.env)
+### 1. Netlify 배포
 ```bash
-VITE_API_URL=https://your-backend-url.onrender.com
-VITE_WEBSOCKET_URL=wss://your-websocket-url.onrender.com
-VITE_BINANCE_API_URL=https://api.binance.com
+# 빌드 명령어
+npm run build
+
+# 배포 설정 (netlify.toml)
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 ```
 
-#### 백엔드 (.env)
+### 2. Firebase 호스팅 (선택적)
 ```bash
-# 데이터베이스
-DATABASE_URL=postgresql://user:password@localhost:5432/bitview
-
-# JWT
-JWT_SECRET=your-super-secret-jwt-key
-
-# 이메일
-EMAIL_SERVICE=gmail
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-
-# 프론트엔드
-FRONTEND_URL=https://bitview.vercel.app
-CUSTOM_DOMAIN=https://your-domain.com
-
-# 서버
-PORT=3001
-NODE_ENV=production
+# Firebase 호스팅 설정
+firebase init hosting
+firebase deploy
 ```
 
-### 3. CI/CD 파이프라인
-
-#### GitHub Actions
-```yaml
-name: Deploy to Vercel
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm ci
-      - name: Build project
-        run: npm run build
-      - name: Deploy to Vercel
-        uses: vercel/action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
+### 3. 환경 변수
+```javascript
+// .env.local
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 ```
 
 ---
 
 ## 🛠️ 개발 환경 설정
 
-### 1. 필요 조건
-- Node.js 18.0.0 이상
-- npm 9.0.0 이상
-- PostgreSQL 13 이상 (운영 환경)
-
-### 2. 설치 및 실행
-
-#### 프로젝트 클론
+### 1. 프로젝트 초기화
 ```bash
-git clone https://github.com/yourusername/bitview.git
+# 저장소 클론
+git clone https://github.com/your-username/bitview.git
 cd bitview
-```
 
-#### 프론트엔드 설정
-```bash
 # 의존성 설치
 npm install
 
 # 개발 서버 실행
 npm run dev
-
-# 빌드
-npm run build
-
-# 빌드 미리보기
-npm run preview
 ```
 
-#### 백엔드 설정
+### 2. Firebase 설정
 ```bash
-cd backend
+# Firebase CLI 설치
+npm install -g firebase-tools
 
-# 의존성 설치
-npm install
+# Firebase 로그인
+firebase login
 
-# 데이터베이스 마이그레이션
-npx prisma migrate dev
-
-# 서버 실행
-npm start
+# 프로젝트 설정
+firebase init
 ```
 
-### 3. 개발 도구
+### 3. 환경 변수 설정
+```bash
+# .env.local 파일 생성
+touch .env.local
 
-#### ESLint 설정
-```javascript
-// eslint.config.js
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-
-export default [
-  { ignores: ['dist'] },
-  {
-    files: ['**/*.{js,jsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-    },
-  },
-]
-```
-
-#### Vite 설정
-```javascript
-// vite.config.js
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-export default defineConfig({
-  plugins: [react()],
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom']
-        }
-      }
-    },
-    assetsDir: 'assets',
-    cssCodeSplit: true,
-    chunkSizeWarningLimit: 1000
-  },
-  server: {
-    proxy: {
-      '/api/binance': {
-        target: 'https://api.binance.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/binance/, ''),
-        secure: true,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      }
-    }
-  }
-})
+# Firebase 설정 정보 추가
+echo "VITE_FIREBASE_API_KEY=your_api_key" >> .env.local
+# ... 기타 설정
 ```
 
 ---
 
-## 🏛️ 코드 구조 및 아키텍처
+## 📚 코드 구조 및 아키텍처
 
-### 1. 컴포넌트 아키텍처
-
-#### 계층적 구조
-```
-App
-├── Router
-│   ├── AuthProvider
-│   ├── Layout Components
-│   │   ├── Navbar
-│   │   ├── Footer
-│   │   └── Sidebar
-│   └── Page Components
-│       ├── Home
-│       ├── LiveCoins
-│       ├── AdvancedBacktest
-│       └── Premium
-└── Global Styles
-```
-
-#### 상태 관리 패턴
+### 1. 컴포넌트 구조
 ```javascript
-// Context API 사용
-const AuthContext = createContext();
-
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const login = async (email, password) => {
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setUser(data.user);
-        setIsAuthenticated(true);
-        setIsPremium(data.user.isPremium);
-        localStorage.setItem('token', data.token);
-        return { success: true };
-      }
-      
-      return { success: false, message: data.message };
-    } catch (error) {
-      return { success: false, message: '로그인 중 오류가 발생했습니다.' };
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    setIsPremium(false);
-    localStorage.removeItem('token');
-  };
-
-  const value = {
-    user,
-    isAuthenticated,
-    isPremium,
-    loading,
-    login,
-    logout
-  };
-
+// 기본 컴포넌트 구조
+const Component = () => {
+  const [state, setState] = useState(initialState);
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    // 초기화 로직
+  }, []);
+  
   return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+    <motion.div>
+      {/* JSX */}
+    </motion.div>
   );
 };
 ```
 
-### 2. 데이터 플로우
-
-#### 실시간 데이터 흐름
-```
-WebSocket API → State Management → Component Update → UI Render
-     ↓
-  Binance API
-     ↓
-  Data Processing
-     ↓
-  React State
-     ↓
-  Component Re-render
-```
-
-#### 백테스트 데이터 흐름
-```
-User Input → Config Validation → Algorithm Execution → Results Processing → UI Update
-     ↓              ↓                    ↓                   ↓              ↓
-  Form Data    Parameter Check    Calculate Indicators  Format Results  Chart/Table
-     ↓              ↓                    ↓                   ↓              ↓
-  Strategy      Risk Management    Signal Generation    Performance     Visualization
-```
-
-### 3. 모듈화 구조
-
-#### 유틸리티 모듈
+### 2. Firebase 인증 플로우
 ```javascript
-// utils/index.js
-export { default as backtest } from './backtest';
-export { default as advancedBacktest } from './advancedBacktest';
-export { default as replayBacktest } from './replayBacktest';
-export { default as indicators } from './indicators';
-export { default as risk } from './risk';
-export { default as formatting } from './formatting';
+// AuthContext.jsx
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChange(async (firebaseUser) => {
+      if (firebaseUser) {
+        // 사용자 프로필 로드
+        const profile = await getUserProfile(firebaseUser.uid);
+        setUser(profile);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+    
+    return unsubscribe;
+  }, []);
+  
+  // ... 기타 로직
+};
 ```
 
-#### 컴포넌트 모듈
+### 3. 상태 관리
+- **Context API**: 전역 상태 관리
+- **useState**: 컴포넌트 로컬 상태
+- **useEffect**: 사이드 이펙트 처리
+- **Firebase 실시간 리스너**: 서버 상태 동기화
+
+---
+
+## 📈 성능 모니터링
+
+### 1. Firebase Analytics
 ```javascript
-// components/index.js
-export { default as Navbar } from './Navbar';
-export { default as Footer } from './Footer';
-export { default as CoinTable } from './CoinTable';
-export { default as ChartViewWidget } from './ChartViewWidget';
-export { default as TradingViewChart } from './TradingViewChart';
-export { default as PremiumModal } from './PremiumModal';
+// 사용자 이벤트 추적
+import { analytics } from '../firebase/config';
+import { logEvent } from "firebase/analytics";
+
+// 백테스트 실행 추적
+logEvent(analytics, 'backtest_run', {
+  strategy: 'TRIPLE_MA',
+  duration: 'session'
+});
 ```
 
-### 4. 에러 처리
-
-#### 전역 에러 바운더리
-```javascript
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
-    // 에러 로깅 서비스에 전송
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="error-fallback">
-          <h2>문제가 발생했습니다</h2>
-          <button onClick={() => window.location.reload()}>
-            페이지 새로고침
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-```
+### 2. 성능 메트릭
+- **페이지 로드 시간**: Lighthouse 점수
+- **상호작용 지연**: Firebase Performance
+- **에러 추적**: Firebase Crashlytics
+- **사용자 플로우**: Firebase Analytics
 
 ---
 
-## 📊 성능 지표
+## 🔮 향후 계획
 
-### 1. 핵심 웹 지표 (Core Web Vitals)
-- **LCP (Largest Contentful Paint)**: < 2.5초
-- **FID (First Input Delay)**: < 100ms
-- **CLS (Cumulative Layout Shift)**: < 0.1
+### 1. 기능 확장
+- 더 많은 백테스트 전략 추가
+- 실시간 알림 시스템
+- 모바일 앱 개발
+- 소셜 기능 (커뮤니티)
 
-### 2. 백테스트 성능
-- **처리 속도**: 1,000개 데이터 포인트 < 1초
-- **메모리 사용량**: < 100MB
-- **동시 처리**: 최대 10개 백테스트
+### 2. 성능 향상
+- GraphQL 도입
+- PWA 기능 강화
+- 오프라인 지원
+- 다국어 지원
 
-### 3. 실시간 데이터
-- **지연 시간**: < 100ms
-- **업데이트 빈도**: 1초당 1회
-- **연결 안정성**: 99.9% 업타임
-
----
-
-## 🎯 개발 로드맵
-
-### Phase 1: 기본 기능 완성 (완료)
-- [x] 실시간 코인 모니터링
-- [x] 기본 차트 분석
-- [x] 고급 백테스트 시스템
-- [x] 리플레이 기능
-
-### Phase 2: 사용자 경험 향상 (진행중)
-- [x] 차트 줌/드래그 기능
-- [x] SEO 최적화
-- [ ] 모바일 최적화
-- [ ] PWA 기능 완성
-
-### Phase 3: 고급 기능 추가 (계획)
-- [ ] 사용자 정의 전략 생성
-- [ ] 소셜 트레이딩 기능
-- [ ] AI 기반 전략 추천
-- [ ] 알림 시스템
-
-### Phase 4: 확장 (계획)
-- [ ] 모바일 앱 개발
-- [ ] 다국어 지원
-- [ ] 추가 거래소 연동
-- [ ] 기관 투자자 도구
+### 3. 사업 확장
+- 프리미엄 기능 확대
+- API 제공 서비스
+- 교육 콘텐츠
+- 파트너십 확대
 
 ---
 
-## 🤝 팀 구성
+## 📞 문의 및 지원
 
-### 필요 역할
-1. **Frontend Developer** (React/TypeScript)
-2. **Backend Developer** (Node.js/Python)
-3. **DevOps Engineer** (AWS/Docker)
-4. **QA Engineer** (Test Automation)
-5. **UI/UX Designer** (Figma/Adobe)
-
-### 협업 도구
-- **코드 관리**: GitHub
-- **프로젝트 관리**: Notion/Jira
-- **커뮤니케이션**: Slack/Discord
-- **디자인**: Figma
-- **문서화**: Gitbook/Confluence
+개발 관련 문의: [GitHub Issues](https://github.com/your-username/bitview/issues)  
+사업 문의: contact@bitview.com
 
 ---
 
-## 📝 참고 자료
-
-### 외부 문서
-- [Binance API Documentation](https://binance-docs.github.io/apidocs/)
-- [TradingView Charting Library](https://www.tradingview.com/charting-library/)
-- [React Documentation](https://react.dev/)
-- [Vite Documentation](https://vitejs.dev/)
-
-### 내부 문서
-- API 명세서
-- 코딩 컨벤션
-- 배포 가이드
-- 트러블슈팅 가이드
-
----
-
-**작성일**: 2024년 1월
-**작성자**: BitView 개발팀
-**문서 버전**: v1.0 
+**BitView** - 전문가급 암호화폐 분석 플랫폼 🚀 

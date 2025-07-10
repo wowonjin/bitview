@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Mail, Lock, Eye, EyeOff, Check, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { sendPasswordReset, getFirebaseErrorMessage } from '../utils/firebase-auth'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -62,40 +63,13 @@ const Login = () => {
     setForgotPasswordMessage('')
 
     try {
-      // 먼저 이메일이 실제로 가입되어 있는지 확인
-      const users = JSON.parse(localStorage.getItem('users') || '[]')
-      const userExists = users.find(u => u.email === forgotPasswordEmail)
-      
-      if (!userExists) {
-        setForgotPasswordMessage('등록되지 않은 이메일 주소입니다.')
-        setIsEmailSending(false)
-        return
-      }
-
-      // 백엔드 API 호출
-      const response = await fetch('http://localhost:3001/api/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: forgotPasswordEmail })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setForgotPasswordMessage('비밀번호 재설정 링크가 이메일로 발송되었습니다. 이메일을 확인해주세요.')
-        // 개발 환경에서는 토큰을 콘솔에 출력
-        if (data.token) {
-          console.log('🔐 개발용 인증 코드:', data.token)
-          setForgotPasswordMessage(`비밀번호 재설정 링크가 이메일로 발송되었습니다.\n개발 환경 - 인증 코드: ${data.token}`)
-        }
-      } else {
-        setForgotPasswordMessage(data.message || '이메일 전송 중 오류가 발생했습니다.')
-      }
+      // Firebase 비밀번호 재설정 이메일 발송
+      await sendPasswordReset(forgotPasswordEmail)
+      setForgotPasswordMessage('비밀번호 재설정 링크가 이메일로 발송되었습니다. 이메일을 확인해주세요.')
     } catch (error) {
-      console.error('API 호출 오류:', error)
-      setForgotPasswordMessage('서버 연결에 실패했습니다. 백엔드 서버가 실행 중인지 확인해주세요.')
+      console.error('비밀번호 재설정 이메일 발송 실패:', error)
+      const errorMessage = getFirebaseErrorMessage(error)
+      setForgotPasswordMessage(errorMessage)
     } finally {
       setIsEmailSending(false)
     }
