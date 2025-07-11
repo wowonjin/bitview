@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 관리자 권한 확인 함수
+    function isAdmin() {
+      return request.auth != null && 
+             (request.auth.token.email == 'admin@gmail.com' ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    }
+    
+    // 사용자 자신의 데이터인지 확인
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // 인증된 사용자인지 확인
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // 사용자 컬렉션 규칙
+    match /users/{userId} {
+      // 읽기: 본인 데이터 또는 관리자
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // 생성: 본인 계정 생성 또는 관리자
+      allow create: if isAuthenticated() && 
+                    (isOwner(userId) || isAdmin()) &&
+                    request.auth.uid == userId;
+      
+      // 업데이트: 본인 데이터 업데이트 또는 관리자
+      allow update: if isOwner(userId) || isAdmin();
+      
+      // 삭제: 관리자만 가능
+      allow delete: if isAdmin();
+    }
+    
+    // 즐겨찾기 컬렉션 규칙
+    match /users/{userId}/favorites/{favoriteId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // 관리자 전용 컬렉션 (필요한 경우)
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // 공개 데이터 (코인 정보 등)
+    match /coins/{coinId} {
+      allow read: if true; // 모든 사용자가 읽기 가능
+      allow write: if isAdmin(); // 관리자만 수정 가능
+    }
+    
+    // 백테스트 결과 (사용자별)
+    match /backtests/{userId}/{document=**} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+    
+    // 사용자 활동 로그
+    match /user_logs/{userId}/{document=**} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+    
+    // 시스템 설정 (관리자 전용)
+    match /system/{document=**} {
+      allow read, write: if isAdmin();
+    }
+    
+    // 통계 데이터 (읽기 전용)
+    match /statistics/{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // 기본 규칙: 다른 모든 문서는 관리자만 접근 가능
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+} 

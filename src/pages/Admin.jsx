@@ -52,16 +52,38 @@ const Admin = () => {
   useEffect(() => {
     // 관리자 권한 확인
     if (!currentUser) {
+      console.log('🔧 Admin 페이지 - 로그인 필요')
       navigate('/login')
       return
     }
 
-    if (currentUser.email !== 'admin@gmail.com' && !userProfile?.isAdmin) {
-      alert('관리자 권한이 필요합니다.')
+    console.log('🔧 Admin 페이지 - 권한 확인 중:', {
+      currentUserEmail: currentUser.email,
+      userProfileIsAdmin: userProfile?.isAdmin,
+      userProfileRole: userProfile?.role,
+      userProfileExists: !!userProfile
+    })
+
+    const isAdminUser = currentUser.email === 'admin@gmail.com' || 
+                       userProfile?.isAdmin || 
+                       userProfile?.role === 'admin'
+
+    if (!isAdminUser) {
+      console.warn('⚠️ Admin 페이지 - 관리자 권한 없음')
+      console.warn('현재 사용자:', currentUser.email)
+      console.warn('사용자 프로필:', userProfile)
+      
+      if (currentUser.email === 'admin@gmail.com' && !userProfile?.isAdmin) {
+        alert('관리자 권한이 설정되지 않았습니다. 브라우저 콘솔에서 setupAdminAccount()를 실행하거나 URL에 ?setup=admin을 추가하세요.')
+      } else {
+        alert('관리자 권한이 필요합니다.')
+      }
+      
       navigate('/')
       return
     }
 
+    console.log('✅ Admin 페이지 - 관리자 권한 확인 완료')
     document.title = 'BitView - 회원 관리'
     loadUsers()
   }, [currentUser, userProfile, navigate])
@@ -350,104 +372,144 @@ const Admin = () => {
         </div>
       </div>
 
-      {/* 사용자 목록 */}
-      <div className="users-grid">
-        {filteredUsers.map((user) => (
-          <div key={user.id} className="user-card">
-            <div className="user-card-header">
-              <div className="user-avatar">
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt={user.displayName} />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="user-info">
-                <div className="user-name">{user.displayName || user.name || '이름 없음'}</div>
-                <div className="user-email">{user.email}</div>
-                <div className="user-badges">
-                  {getRoleBadge(user.role)}
-                  {getMembershipBadge(user)}
-                </div>
-              </div>
-            </div>
-            
-            <div className="user-details">
-              <div className="detail-row">
-                <Calendar size={14} />
-                <span>가입일: {formatDate(user.createdAt)}</span>
-              </div>
-              <div className="detail-row">
-                <MapPin size={14} />
-                <span>최근 접속: {formatDate(user.last_login)}</span>
-              </div>
-              {user.exchange_registered && (
-                <div className="detail-row">
-                  <Mail size={14} />
-                  <span>거래소 이메일: {user.exchange_email || '등록됨'}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="user-actions">
-              <button
-                className="edit-btn"
-                onClick={() => handleEditUser(user)}
-              >
-                <Edit size={14} />
-                수정
-              </button>
-              
-              {!user.is_premium && (
-                <button
-                  className="premium-btn"
-                  onClick={() => handleSetPremium(user.id, 30)}
-                >
-                  <Crown size={14} />
-                  프리미엄
-                </button>
-              )}
-              
-              {!user.is_vip && (
-                <button
-                  className="vip-btn"
-                  onClick={() => handleSetVip(user.id, 365)}
-                >
-                  <Award size={14} />
-                  VIP
-                </button>
-              )}
-              
-              {(user.is_premium || user.is_vip) && (
-                <button
-                  className="expire-btn"
-                  onClick={() => handleExpireMembership(user.id)}
-                >
-                  <UserX size={14} />
-                  등급 해제
-                </button>
-              )}
-              
-              {user.id !== currentUser.uid && (
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDeleteUser(user.id, user.displayName || user.email)}
-                >
-                  <Trash2 size={14} />
-                  삭제
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+      {/* 사용자 목록 테이블 */}
+      <div className="users-table-container">
+        <div className="table-wrapper">
+          <table className="users-table">
+            <thead>
+              <tr>
+                <th>사용자</th>
+                <th>이메일</th>
+                <th>역할</th>
+                <th>등급</th>
+                <th>가입일</th>
+                <th>최근 접속</th>
+                <th>거래소 등록</th>
+                <th>관리</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id}>
+                  <td>
+                    <div className="user-cell">
+                      <div className="user-avatar">
+                        {user.photoURL ? (
+                          <img src={user.photoURL} alt={user.displayName} />
+                        ) : (
+                          <div className="avatar-placeholder">
+                            {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+                      <div className="user-info">
+                        <div className="user-name">{user.displayName || user.name || '이름 없음'}</div>
+                        <div className="user-id">ID: {user.id.slice(0, 8)}...</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="email-cell">{user.email}</div>
+                  </td>
+                  <td>
+                    <div className="role-cell">
+                      {getRoleBadge(user.role)}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="membership-cell">
+                      {getMembershipBadge(user)}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="date-cell">
+                      {formatDate(user.createdAt)}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="date-cell">
+                      {formatDate(user.last_login)}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="exchange-cell">
+                      {user.exchange_registered ? (
+                        <div className="exchange-registered">
+                          <UserCheck size={16} />
+                          <span>등록됨</span>
+                        </div>
+                      ) : (
+                        <div className="exchange-not-registered">
+                          <UserX size={16} />
+                          <span>미등록</span>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="actions-cell">
+                      <button
+                        className="action-btn edit-btn"
+                        onClick={() => handleEditUser(user)}
+                        title="수정"
+                      >
+                        <Edit size={14} />
+                      </button>
+                      
+                      {!user.is_premium && (
+                        <button
+                          className="action-btn premium-btn"
+                          onClick={() => handleSetPremium(user.id, 30)}
+                          title="프리미엄으로 변경"
+                        >
+                          <Crown size={14} />
+                        </button>
+                      )}
+                      
+                      {!user.is_vip && (
+                        <button
+                          className="action-btn vip-btn"
+                          onClick={() => handleSetVip(user.id, 365)}
+                          title="VIP로 변경"
+                        >
+                          <Award size={14} />
+                        </button>
+                      )}
+                      
+                      {(user.is_premium || user.is_vip) && (
+                        <button
+                          className="action-btn expire-btn"
+                          onClick={() => handleExpireMembership(user.id)}
+                          title="등급 해제"
+                        >
+                          <UserX size={14} />
+                        </button>
+                      )}
+                      
+                      {user.id !== currentUser.uid && (
+                        <button
+                          className="action-btn delete-btn"
+                          onClick={() => handleDeleteUser(user.id, user.displayName || user.email)}
+                          title="삭제"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {filteredUsers.length === 0 && (
-        <div className="no-users">
-          <Users size={48} />
-          <p>표시할 사용자가 없습니다.</p>
+        <div className="users-table-container">
+          <div className="empty-table">
+            <Users size={48} />
+            <p>표시할 사용자가 없습니다.</p>
+          </div>
         </div>
       )}
 
@@ -688,37 +750,62 @@ const Admin = () => {
           min-width: 120px;
         }
 
-        .users-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-          gap: 20px;
-        }
-
-        .user-card {
+        .users-table-container {
           background: white;
           border-radius: 12px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          padding: 20px;
-          transition: transform 0.2s, box-shadow 0.2s;
+          overflow: hidden;
         }
 
-        .user-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        .table-wrapper {
+          overflow-x: auto;
         }
 
-        .user-card-header {
+        .users-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 14px;
+        }
+
+        .users-table thead {
+          background: #f8f9fa;
+          border-bottom: 2px solid #dee2e6;
+        }
+
+        .users-table th {
+          padding: 16px 12px;
+          text-align: left;
+          font-weight: 600;
+          color: #495057;
+          white-space: nowrap;
+        }
+
+        .users-table tbody tr {
+          border-bottom: 1px solid #dee2e6;
+          transition: background-color 0.2s;
+        }
+
+        .users-table tbody tr:hover {
+          background-color: #f8f9fa;
+        }
+
+        .users-table td {
+          padding: 16px 12px;
+          vertical-align: middle;
+        }
+
+        .user-cell {
           display: flex;
           align-items: center;
           gap: 12px;
-          margin-bottom: 16px;
         }
 
         .user-avatar {
-          width: 48px;
-          height: 48px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           overflow: hidden;
+          flex-shrink: 0;
         }
 
         .user-avatar img {
@@ -735,25 +822,82 @@ const Admin = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 600;
+        }
+
+        .user-info {
+          min-width: 0;
         }
 
         .user-name {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 600;
           color: #333;
+          margin-bottom: 2px;
         }
 
-        .user-email {
-          font-size: 14px;
+        .user-id {
+          font-size: 12px;
           color: #6c757d;
         }
 
-        .user-badges {
+        .email-cell {
+          font-size: 14px;
+          color: #495057;
+          max-width: 200px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .role-cell, .membership-cell {
+          text-align: center;
+        }
+
+        .date-cell {
+          font-size: 13px;
+          color: #6c757d;
+          white-space: nowrap;
+        }
+
+        .exchange-cell {
+          text-align: center;
+        }
+
+        .exchange-registered {
           display: flex;
-          gap: 6px;
-          margin-top: 4px;
+          align-items: center;
+          gap: 4px;
+          color: #28a745;
+          font-size: 12px;
+        }
+
+        .exchange-not-registered {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          color: #6c757d;
+          font-size: 12px;
+        }
+
+        .actions-cell {
+          display: flex;
+          gap: 4px;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        .action-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s;
+          padding: 0;
         }
 
         .admin-badge {
@@ -801,93 +945,152 @@ const Admin = () => {
           font-weight: 500;
         }
 
-        .user-details {
-          margin-bottom: 16px;
-        }
-
-        .detail-row {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 12px;
-          color: #6c757d;
-          margin-bottom: 4px;
-        }
-
-        .user-actions {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .user-actions button {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          padding: 6px 10px;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .edit-btn {
+        .action-btn.edit-btn {
           background: #f8f9fa;
           color: #495057;
         }
 
-        .edit-btn:hover {
+        .action-btn.edit-btn:hover {
           background: #e9ecef;
         }
 
-        .premium-btn {
+        .action-btn.premium-btn {
           background: #ffc107;
           color: #212529;
         }
 
-        .premium-btn:hover {
+        .action-btn.premium-btn:hover {
           background: #e0a800;
         }
 
-        .vip-btn {
+        .action-btn.vip-btn {
           background: #ff6b35;
           color: white;
         }
 
-        .vip-btn:hover {
+        .action-btn.vip-btn:hover {
           background: #e55a2b;
         }
 
-        .expire-btn {
+        .action-btn.expire-btn {
           background: #6c757d;
           color: white;
         }
 
-        .expire-btn:hover {
+        .action-btn.expire-btn:hover {
           background: #5a6268;
         }
 
-        .delete-btn {
+        .action-btn.delete-btn {
           background: #dc3545;
           color: white;
         }
 
-        .delete-btn:hover {
+        .action-btn.delete-btn:hover {
           background: #c82333;
         }
 
-        .no-users {
+        /* 테이블 반응형 스타일 */
+        @media (max-width: 1024px) {
+          .users-table th,
+          .users-table td {
+            padding: 12px 8px;
+          }
+          
+          .email-cell {
+            max-width: 150px;
+          }
+          
+          .actions-cell {
+            flex-direction: column;
+            gap: 2px;
+          }
+          
+          .action-btn {
+            width: 28px;
+            height: 28px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .users-table {
+            font-size: 12px;
+          }
+          
+          .users-table th,
+          .users-table td {
+            padding: 8px 4px;
+          }
+          
+          .user-avatar {
+            width: 32px;
+            height: 32px;
+          }
+          
+          .avatar-placeholder {
+            font-size: 14px;
+          }
+          
+          .user-name {
+            font-size: 12px;
+          }
+          
+          .user-id {
+            font-size: 10px;
+          }
+          
+          .email-cell {
+            max-width: 120px;
+            font-size: 12px;
+          }
+          
+          .date-cell {
+            font-size: 11px;
+          }
+          
+          .exchange-registered,
+          .exchange-not-registered {
+            font-size: 10px;
+          }
+          
+          .action-btn {
+            width: 24px;
+            height: 24px;
+          }
+          
+          .action-btn svg {
+            width: 12px;
+            height: 12px;
+          }
+        }
+
+        /* 테이블 줄무늬 효과 */
+        .users-table tbody tr:nth-child(even) {
+          background-color: #f8f9fa;
+        }
+
+        .users-table tbody tr:nth-child(even):hover {
+          background-color: #e9ecef;
+        }
+
+        /* 테이블 헤더 그림자 */
+        .users-table thead {
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 빈 테이블 상태 */
+        .empty-table {
           text-align: center;
           padding: 60px 20px;
           color: #6c757d;
         }
 
-        .no-users svg {
+        .empty-table svg {
           margin-bottom: 16px;
           opacity: 0.5;
         }
+
+
 
         .modal-overlay {
           position: fixed;

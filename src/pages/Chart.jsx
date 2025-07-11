@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import SimpleTradingViewChart from '../components/SimpleTradingViewChart'
+import MobileTradingViewChart from '../components/MobileTradingViewChart'
+import { isMobileDevice, addResizeListener } from '../utils/deviceDetection'
 
 const Chart = () => {
   const { user } = useAuth()
@@ -12,6 +14,9 @@ const Chart = () => {
   const [drawingColor, setDrawingColor] = useState('#ffffff')
   const canvasRef = useRef(null)
   const [isDrawing, setIsDrawing] = useState(false)
+  
+  // 모바일 감지 상태
+  const [isMobile, setIsMobile] = useState(isMobileDevice())
   
   const popupRef = useRef(null)
 
@@ -196,6 +201,19 @@ const Chart = () => {
   }, [selectedCategory, drawingMode, drawingTool])
 
   // 차트 모드 변경 시 iframe 새로고침 제거 (모든 차트를 미리 로딩하므로 불필요)
+
+  // 모바일 감지 및 화면 크기 변화 감지
+  useEffect(() => {
+    const removeResizeListener = addResizeListener(({ isMobile: newIsMobile }) => {
+      setIsMobile(newIsMobile)
+      // 모바일로 변경될 때 차트 모드를 1로 고정
+      if (newIsMobile) {
+        setChartMode(1)
+      }
+    })
+
+    return removeResizeListener
+  }, [])
 
   // 그리기 시작
   const startDrawing = (e) => {
@@ -666,6 +684,13 @@ const Chart = () => {
     if (mode !== 1 && checkLoginRequired()) {
       return
     }
+    
+    // 모바일에서는 차트 모드를 1로 고정
+    if (isMobile) {
+      setChartMode(1)
+      return
+    }
+    
     setChartMode(mode)
   }
 
@@ -797,30 +822,39 @@ const Chart = () => {
                   <rect x="2" y="2" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
                 </svg>
               </button>
-              <button 
+              {!isMobile && (
+                <>
+                  <button 
                     className={`chart-btn ${chartMode === 2 ? 'active' : ''}`}
-                onClick={() => handleChartModeChange(2)}
-                onMouseEnter={(e) => handleButtonMouseEnter('chart2', e)}
-                onMouseLeave={handleButtonMouseLeave}
-              >
-                <svg width="20" height="16" viewBox="0 0 24 20" fill="none">
-                  <rect x="2" y="2" width="9" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <rect x="13" y="2" width="9" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                </svg>
-              </button>
-              <button 
+                    onClick={() => handleChartModeChange(2)}
+                    onMouseEnter={(e) => handleButtonMouseEnter('chart2', e)}
+                    onMouseLeave={handleButtonMouseLeave}
+                  >
+                    <svg width="20" height="16" viewBox="0 0 24 20" fill="none">
+                      <rect x="2" y="2" width="9" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <rect x="13" y="2" width="9" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                    </svg>
+                  </button>
+                  <button 
                     className={`chart-btn ${chartMode === 4 ? 'active' : ''}`}
-                onClick={() => handleChartModeChange(4)}
-                onMouseEnter={(e) => handleButtonMouseEnter('chart4', e)}
-                onMouseLeave={handleButtonMouseLeave}
-              >
-                <svg width="20" height="16" viewBox="0 0 24 20" fill="none">
-                  <rect x="2" y="2" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <rect x="13" y="2" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <rect x="2" y="11" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                  <rect x="13" y="11" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-                </svg>
-              </button>
+                    onClick={() => handleChartModeChange(4)}
+                    onMouseEnter={(e) => handleButtonMouseEnter('chart4', e)}
+                    onMouseLeave={handleButtonMouseLeave}
+                  >
+                    <svg width="20" height="16" viewBox="0 0 24 20" fill="none">
+                      <rect x="2" y="2" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <rect x="13" y="2" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <rect x="2" y="11" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                      <rect x="13" y="11" width="9" height="7" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                    </svg>
+                  </button>
+                </>
+              )}
+              {isMobile && (
+                <p style={{ color: '#9ca3af', fontSize: '14px', margin: '10px 0' }}>
+                  모바일에서는 1개 차트만 지원됩니다.
+                </p>
+              )}
             </div>
               </div>
             )}
@@ -974,11 +1008,19 @@ const Chart = () => {
                 key={`${chart.symbol}_${index}`} 
                 className={`chart-item ${chartVisibility[chartMode].includes(index) ? 'visible' : 'hidden'}`}
               >
-                <SimpleTradingViewChart
-                  symbol={chart.symbol}
-                  width="100%"
-                  height="100%"
-                />
+                {isMobile ? (
+                  <MobileTradingViewChart
+                    symbol={chart.symbol}
+                    width="100%"
+                    height="100%"
+                  />
+                ) : (
+                  <SimpleTradingViewChart
+                    symbol={chart.symbol}
+                    width="100%"
+                    height="100%"
+                  />
+                )}
               </div>
             ))}
           </div>

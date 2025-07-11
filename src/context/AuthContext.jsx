@@ -224,15 +224,25 @@ export const AuthProvider = ({ children }) => {
                   user?.email === 'admin@gmail.com' ||
                   false
 
-  // 관리자 권한 상태 디버깅 로그
+  // 관리자 권한 상태 디버깅 로그 (상세)
   if (user?.email === 'admin@gmail.com') {
-    console.log('🔧 관리자 권한 상태 확인:', {
+    console.log('🔧 관리자 권한 상태 확인 (상세):', {
       isAdmin,
       userProfileIsAdmin: userProfile?.isAdmin,
       userProfileRole: userProfile?.role,
       userProfileEmail: userProfile?.email,
-      firebaseEmail: user?.email
+      firebaseEmail: user?.email,
+      userProfileExists: !!userProfile,
+      userProfileData: userProfile
     })
+    
+    // 관리자 권한이 없는 경우 경고
+    if (!isAdmin) {
+      console.warn('⚠️ admin@gmail.com 계정이지만 관리자 권한이 없습니다!')
+      console.warn('다음 중 하나를 실행해주세요:')
+      console.warn('1. setupAdminAccount("admin@gmail.com", "admin123!")')
+      console.warn('2. URL에 ?setup=admin 추가')
+    }
   }
 
   // 프리미엄 상태 확인

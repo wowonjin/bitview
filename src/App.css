@@ -263,6 +263,13 @@ main {
   margin-top: 6rem;
 }
 
+/* PC 버전에서 실시간 코인 페이지 상단 여백 제거 */
+@media (min-width: 769px) {
+  .live-coins-page {
+    margin-top: 1rem;
+  }
+}
+
 /* CoinTable 스타일 */
 .coin-table-container {
   background: transparent;
@@ -271,6 +278,13 @@ main {
   margin: 2rem auto;
   max-width: 1400px;
   padding: 0;
+}
+
+/* PC 버전에서 coin-table-container 상단 패딩 제거 */
+@media (min-width: 769px) {
+  .coin-table-container {
+    padding-top: 0 !important;
+  }
 }
 
 .coin-table-controls {
@@ -1992,6 +2006,13 @@ main {
     font-size: 0.85rem;
     line-height: 1.4;
     margin: 0;
+  }
+}
+
+/* PC 버전에서 mobile-page-description 내부의 br 태그 숨기기 */
+@media (min-width: 769px) {
+  .mobile-page-description br {
+    display: none;
   }
 }
 

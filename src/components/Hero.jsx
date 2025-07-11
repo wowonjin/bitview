@@ -242,6 +242,19 @@ const Hero = () => {
               </span>에서는 <span className="free-text">전부 무료!</span>
             </h1>
 
+            {/* 모바일 전용 로그인/회원가입 버튼 */}
+            {isMobile && (
+              <div className={`mobile-auth-buttons fade-in-up-delay-1 ${descVisible ? 'visible' : ''}`}>
+                <Link to="/signup" className="mobile-auth-btn signup-btn">
+                  회원가입
+                </Link>
+                <Link to="/login" className="mobile-auth-btn login-btn">
+                  <LogIn size={16} />
+                  로그인
+                </Link>
+              </div>
+            )}
+
             <p className={`hero-description fade-in-up-delay-1 ${descVisible ? 'visible' : ''}`} ref={descRef}>
               실시간 차트 분석과 백테스트 기능으로
               <br />
@@ -613,6 +626,108 @@ const Hero = () => {
           color: var(--text-secondary);
           line-height: 1.6;
           margin-bottom: 2.5rem;
+        }
+
+        .mobile-auth-buttons {
+          display: flex;
+          gap: 1rem;
+          margin-bottom: 3rem;
+          justify-content: center;
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 0.8s ease;
+        }
+
+        .mobile-auth-buttons.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .mobile-auth-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 1rem 1.5rem;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(128, 128, 128, 0.01));
+          border: 1px solid #374151;
+          border-radius: 16px;
+          color: #ffffff;
+          font-size: 0.9rem;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.4s ease;
+          position: relative;
+          overflow: hidden;
+          backdrop-filter: blur(20px);
+          box-shadow: 
+            0 4px 12px rgba(0, 0, 0, 0.15),
+            0 0 20px rgba(59, 130, 246, 0.15),
+            0 0 40px rgba(59, 130, 246, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .mobile-auth-btn::before {
+          content: '';
+          position: absolute;
+          top: -1px;
+          left: -1px;
+          right: -1px;
+          bottom: -1px;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.1) 50%, rgba(6, 182, 212, 0.08) 100%);
+          border-radius: 17px;
+          z-index: -1;
+          opacity: 0.6;
+          filter: blur(0.5px);
+        }
+
+        .mobile-auth-btn:hover {
+          transform: translateY(-2px);
+          background: rgba(255, 255, 255, 0.04);
+          border-color: rgba(255, 255, 255, 0.2);
+          box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.25),
+            0 0 30px rgba(59, 130, 246, 0.2),
+            0 0 60px rgba(59, 130, 246, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .mobile-auth-btn:active {
+          transform: translateY(-1px);
+        }
+
+        .mobile-auth-btn.signup-btn {
+          color: #10b981;
+          border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .mobile-auth-btn.signup-btn::before {
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 50%, rgba(4, 120, 87, 0.08) 100%);
+        }
+
+        .mobile-auth-btn.signup-btn:hover {
+          color: #34d399;
+          border-color: rgba(16, 185, 129, 0.4);
+          box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.25),
+            0 0 30px rgba(16, 185, 129, 0.2),
+            0 0 60px rgba(16, 185, 129, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .mobile-auth-btn.login-btn {
+          color: #3b82f6;
+          border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .mobile-auth-btn.login-btn:hover {
+          color: #60a5fa;
+          border-color: rgba(59, 130, 246, 0.4);
+          box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.25),
+            0 0 30px rgba(59, 130, 246, 0.2),
+            0 0 60px rgba(59, 130, 246, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .mobile-login-button {
@@ -1470,6 +1585,17 @@ const Hero = () => {
 
           .mobile-login-button {
             width: calc(110px * 3 + 0.4rem * 2);
+          }
+
+          .mobile-auth-buttons {
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+          }
+
+          .mobile-auth-btn {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.8rem;
+            border-radius: 12px;
           }
         }
       `}</style>

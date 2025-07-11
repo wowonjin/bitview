@@ -196,7 +196,6 @@ const Services = () => {
                   
                   <div 
                     className="service-icon"
-                    style={{ background: service.gradient }}
                   >
                     {service.icon}
                   </div>
@@ -352,9 +351,30 @@ const Services = () => {
           width: 48px;
           height: 48px;
           border-radius: 12px;
-          color: white;
+          background: transparent;
+          border: 1px solid #374151;
+          color: #3b82f6;
           margin-bottom: 16px;
-          transition: transform 0.3s ease;
+          transition: all 0.3s ease;
+          position: relative;
+          box-shadow: 
+            0 0 20px rgba(59, 130, 246, 0.15),
+            0 0 40px rgba(59, 130, 246, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .service-icon::before {
+          content: '';
+          position: absolute;
+          top: -1px;
+          left: -1px;
+          right: -1px;
+          bottom: -1px;
+          background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(14, 165, 233, 0.1) 50%, rgba(6, 182, 212, 0.08) 100%);
+          border-radius: 13px;
+          z-index: -1;
+          opacity: 0.6;
+          filter: blur(0.5px);
         }
 
         .service-title {
@@ -447,6 +467,7 @@ const Services = () => {
           .service-icon {
             width: 40px;
             height: 40px;
+            color: #3b82f6;
           }
 
           .service-title {
@@ -496,6 +517,7 @@ const Services = () => {
           .service-icon {
             width: 36px;
             height: 36px;
+            color: #3b82f6;
           }
 
           .service-title {
