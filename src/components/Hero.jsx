@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, TrendingUp, Shield, Zap, BarChart3, Target, Sparkles, Check, LogIn } from 'lucide-react'
+import { ArrowRight, TrendingUp, Shield, Zap, BarChart3, Target, Sparkles, Check, LogIn, Crown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
@@ -35,7 +35,7 @@ const useIntersectionObserver = (options = {}) => {
 }
 
 const Hero = () => {
-  const { isAuthenticated } = useAuth()
+  const { user, firebaseUser, userProfile, isPremium, isAdmin } = useAuth()
   const [bitcoinPrice, setBitcoinPrice] = useState(65432)
   const [bitcoinChange, setBitcoinChange] = useState(2.34)
   const [ripplePrice, setRipplePrice] = useState(0.5234)
@@ -245,13 +245,46 @@ const Hero = () => {
             {/* 모바일 전용 로그인/회원가입 버튼 */}
             {isMobile && (
               <div className={`mobile-auth-buttons fade-in-up-delay-1 ${descVisible ? 'visible' : ''}`}>
-                <Link to="/signup" className="mobile-auth-btn signup-btn">
-                  회원가입
-                </Link>
-                <Link to="/login" className="mobile-auth-btn login-btn">
-                  <LogIn size={16} />
-                  로그인
-                </Link>
+                {(() => {
+                  // 디버깅용 로그
+                  console.log('🔧 Hero 버튼 렌더링 상태:', {
+                    firebaseUser: !!firebaseUser,
+                    firebaseUserEmail: firebaseUser?.email,
+                    user: !!user,
+                    userEmail: user?.email,
+                    isPremium: isPremium,
+                    isAdmin: isAdmin,
+                    userProfile: userProfile,
+                    userProfileExchangeRegistered: userProfile?.exchange_registered,
+                    userProfileIsPremium: userProfile?.is_premium
+                  });
+                  
+                  if (!firebaseUser) {
+                    // 로그인하지 않은 경우: 회원가입/로그인 버튼 표시
+                    return (
+                      <>
+                        <Link to="/signup" className="mobile-auth-btn signup-btn">
+                          회원가입
+                        </Link>
+                        <Link to="/login" className="mobile-auth-btn login-btn">
+                          <LogIn size={16} />
+                          로그인
+                        </Link>
+                      </>
+                    );
+                                     } else if (!isPremium && !isAdmin) {
+                     // 로그인했지만 프리미엄이 아니고 관리자도 아닌 경우: 프리미엄 가입 버튼 표시
+                     return (
+                       <Link to="/premium" className="mobile-auth-btn premium-btn">
+                         <Crown size={16} />
+                         BitView 프리미엄 가입하기
+                       </Link>
+                     );
+                  } else {
+                    // 프리미엄 회원이거나 관리자인 경우: 버튼 숨기기
+                    return null;
+                  }
+                })()}
               </div>
             )}
 
@@ -727,6 +760,25 @@ const Hero = () => {
             0 6px 20px rgba(0, 0, 0, 0.25),
             0 0 30px rgba(59, 130, 246, 0.2),
             0 0 60px rgba(59, 130, 246, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .mobile-auth-btn.premium-btn {
+          color: #8b5cf6;
+          border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .mobile-auth-btn.premium-btn::before {
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.1) 50%, rgba(109, 40, 217, 0.08) 100%);
+        }
+
+        .mobile-auth-btn.premium-btn:hover {
+          color: #a78bfa;
+          border-color: rgba(139, 92, 246, 0.4);
+          box-shadow: 
+            0 6px 20px rgba(0, 0, 0, 0.25),
+            0 0 30px rgba(139, 92, 246, 0.2),
+            0 0 60px rgba(139, 92, 246, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 

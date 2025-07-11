@@ -270,7 +270,7 @@ const Navbar = () => {
                   )}
                 </>
               ) : (
-                /* 로그인 전 상태 - 회원가입 버튼만 표시 */
+                /* 로그인 전 상태 - 회원가입과 로그인 버튼 표시 */
                 <>
                   <Link 
                     to="/signup" 
@@ -279,6 +279,14 @@ const Navbar = () => {
                   >
                     <UserPlus size={16} />
                     회원가입
+                  </Link>
+                  <Link 
+                    to="/login" 
+                    className="mobile-sidebar-link"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <User size={16} />
+                    로그인
                   </Link>
                 </>
               )}

@@ -245,10 +245,9 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // 프리미엄 상태 확인
+  // 프리미엄 상태 확인 (관리자 제외한 순수 프리미엄 상태)
   const isPremium = userProfile?.exchange_registered || 
                    userProfile?.is_premium || 
-                   isAdmin || 
                    false
 
   // 프리미엄 활성화 (거래소 가입 완료 시 호출)
