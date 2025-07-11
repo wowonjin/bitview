@@ -584,6 +584,9 @@ const Admin = () => {
           margin: 0 auto;
           padding: 20px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          background: #0a0a0a;
+          color: #ffffff;
+          min-height: 100vh;
         }
 
         .admin-header {
@@ -592,7 +595,7 @@ const Admin = () => {
           align-items: center;
           margin-bottom: 30px;
           padding-bottom: 20px;
-          border-bottom: 2px solid #eee;
+          border-bottom: 2px solid #374151;
         }
 
         .admin-title {
@@ -603,7 +606,7 @@ const Admin = () => {
 
         .admin-title h1 {
           margin: 0;
-          color: #333;
+          color: #ffffff;
           font-size: 28px;
           font-weight: 600;
         }
@@ -627,21 +630,21 @@ const Admin = () => {
         }
 
         .refresh-btn {
-          background: #f8f9fa;
-          color: #495057;
+          background: #374151;
+          color: #d1d5db;
         }
 
         .refresh-btn:hover {
-          background: #e9ecef;
+          background: #4b5563;
         }
 
         .export-btn {
-          background: #007bff;
+          background: #3b82f6;
           color: white;
         }
 
         .export-btn:hover {
-          background: #0056b3;
+          background: #2563eb;
         }
 
         .loading-spinner {
@@ -651,6 +654,7 @@ const Admin = () => {
           justify-content: center;
           padding: 60px;
           text-align: center;
+          color: #9ca3af;
         }
 
         .spin {
@@ -667,8 +671,8 @@ const Admin = () => {
           align-items: center;
           gap: 8px;
           padding: 12px 16px;
-          background: #f8d7da;
-          color: #721c24;
+          background: #7f1d1d;
+          color: #fecaca;
           border-radius: 8px;
           margin-bottom: 20px;
         }
@@ -685,27 +689,28 @@ const Admin = () => {
           align-items: center;
           gap: 16px;
           padding: 20px;
-          background: white;
+          background: #1a1a1a;
           border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          border: 1px solid #374151;
         }
 
         .stat-icon {
           padding: 12px;
           border-radius: 10px;
-          background: #f8f9fa;
-          color: #495057;
+          background: #374151;
+          color: #9ca3af;
         }
 
         .stat-value {
           font-size: 24px;
           font-weight: 700;
-          color: #333;
+          color: #ffffff;
         }
 
         .stat-label {
           font-size: 14px;
-          color: #6c757d;
+          color: #9ca3af;
         }
 
         .filters-container {
@@ -726,15 +731,27 @@ const Admin = () => {
           left: 12px;
           top: 50%;
           transform: translateY(-50%);
-          color: #6c757d;
+          color: #9ca3af;
         }
 
         .search-box input {
           width: 100%;
           padding: 12px 12px 12px 40px;
-          border: 1px solid #ddd;
+          border: 1px solid #374151;
           border-radius: 8px;
           font-size: 14px;
+          background: #1a1a1a;
+          color: #ffffff;
+        }
+
+        .search-box input:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .search-box input::placeholder {
+          color: #6b7280;
         }
 
         .filter-group {
@@ -744,17 +761,26 @@ const Admin = () => {
 
         .filter-group select {
           padding: 12px;
-          border: 1px solid #ddd;
+          border: 1px solid #374151;
           border-radius: 8px;
           font-size: 14px;
           min-width: 120px;
+          background: #1a1a1a;
+          color: #ffffff;
+        }
+
+        .filter-group select:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         .users-table-container {
-          background: white;
+          background: #1a1a1a;
           border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
           overflow: hidden;
+          border: 1px solid #374151;
         }
 
         .table-wrapper {
@@ -768,25 +794,25 @@ const Admin = () => {
         }
 
         .users-table thead {
-          background: #f8f9fa;
-          border-bottom: 2px solid #dee2e6;
+          background: #374151;
+          border-bottom: 2px solid #4b5563;
         }
 
         .users-table th {
           padding: 16px 12px;
           text-align: left;
           font-weight: 600;
-          color: #495057;
+          color: #ffffff;
           white-space: nowrap;
         }
 
         .users-table tbody tr {
-          border-bottom: 1px solid #dee2e6;
+          border-bottom: 1px solid #374151;
           transition: background-color 0.2s;
         }
 
         .users-table tbody tr:hover {
-          background-color: #f8f9fa;
+          background-color: #2a2a2a;
         }
 
         .users-table td {
@@ -833,18 +859,18 @@ const Admin = () => {
         .user-name {
           font-size: 14px;
           font-weight: 600;
-          color: #333;
+          color: #ffffff;
           margin-bottom: 2px;
         }
 
         .user-id {
           font-size: 12px;
-          color: #6c757d;
+          color: #9ca3af;
         }
 
         .email-cell {
           font-size: 14px;
-          color: #495057;
+          color: #d1d5db;
           max-width: 200px;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -856,7 +882,7 @@ const Admin = () => {
 
         .date-cell {
           font-size: 13px;
-          color: #6c757d;
+          color: #9ca3af;
           white-space: nowrap;
         }
 
@@ -868,7 +894,7 @@ const Admin = () => {
           display: flex;
           align-items: center;
           gap: 4px;
-          color: #28a745;
+          color: #10b981;
           font-size: 12px;
         }
 
@@ -876,7 +902,7 @@ const Admin = () => {
           display: flex;
           align-items: center;
           gap: 4px;
-          color: #6c757d;
+          color: #9ca3af;
           font-size: 12px;
         }
 
@@ -901,7 +927,7 @@ const Admin = () => {
         }
 
         .admin-badge {
-          background: #dc3545;
+          background: #dc2626;
           color: white;
           padding: 2px 6px;
           border-radius: 4px;
@@ -910,7 +936,7 @@ const Admin = () => {
         }
 
         .user-badge {
-          background: #6c757d;
+          background: #6b7280;
           color: white;
           padding: 2px 6px;
           border-radius: 4px;
@@ -919,7 +945,7 @@ const Admin = () => {
         }
 
         .vip-badge {
-          background: #ff6b35;
+          background: #f97316;
           color: white;
           padding: 2px 6px;
           border-radius: 4px;
@@ -928,8 +954,8 @@ const Admin = () => {
         }
 
         .premium-badge {
-          background: #ffc107;
-          color: #212529;
+          background: #fbbf24;
+          color: #1f2937;
           padding: 2px 6px;
           border-radius: 4px;
           font-size: 10px;
@@ -937,8 +963,8 @@ const Admin = () => {
         }
 
         .basic-badge {
-          background: #e9ecef;
-          color: #495057;
+          background: #4b5563;
+          color: #d1d5db;
           padding: 2px 6px;
           border-radius: 4px;
           font-size: 10px;
@@ -946,48 +972,48 @@ const Admin = () => {
         }
 
         .action-btn.edit-btn {
-          background: #f8f9fa;
-          color: #495057;
+          background: #374151;
+          color: #d1d5db;
         }
 
         .action-btn.edit-btn:hover {
-          background: #e9ecef;
+          background: #4b5563;
         }
 
         .action-btn.premium-btn {
-          background: #ffc107;
-          color: #212529;
+          background: #fbbf24;
+          color: #1f2937;
         }
 
         .action-btn.premium-btn:hover {
-          background: #e0a800;
+          background: #f59e0b;
         }
 
         .action-btn.vip-btn {
-          background: #ff6b35;
+          background: #f97316;
           color: white;
         }
 
         .action-btn.vip-btn:hover {
-          background: #e55a2b;
+          background: #ea580c;
         }
 
         .action-btn.expire-btn {
-          background: #6c757d;
+          background: #6b7280;
           color: white;
         }
 
         .action-btn.expire-btn:hover {
-          background: #5a6268;
+          background: #4b5563;
         }
 
         .action-btn.delete-btn {
-          background: #dc3545;
+          background: #dc2626;
           color: white;
         }
 
         .action-btn.delete-btn:hover {
-          background: #c82333;
+          background: #b91c1c;
         }
 
         /* 테이블 반응형 스타일 */
@@ -1066,23 +1092,23 @@ const Admin = () => {
 
         /* 테이블 줄무늬 효과 */
         .users-table tbody tr:nth-child(even) {
-          background-color: #f8f9fa;
+          background-color: #1e1e1e;
         }
 
         .users-table tbody tr:nth-child(even):hover {
-          background-color: #e9ecef;
+          background-color: #2a2a2a;
         }
 
         /* 테이블 헤더 그림자 */
         .users-table thead {
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         /* 빈 테이블 상태 */
         .empty-table {
           text-align: center;
           padding: 60px 20px;
-          color: #6c757d;
+          color: #9ca3af;
         }
 
         .empty-table svg {
@@ -1098,7 +1124,7 @@ const Admin = () => {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0,0,0,0.5);
+          background: rgba(0,0,0,0.7);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1106,16 +1132,17 @@ const Admin = () => {
         }
 
         .modal-content {
-          background: white;
+          background: #1a1a1a;
           border-radius: 12px;
           padding: 24px;
           width: 400px;
           max-width: 90vw;
+          border: 1px solid #374151;
         }
 
         .modal-content h3 {
           margin: 0 0 20px 0;
-          color: #333;
+          color: #ffffff;
         }
 
         .form-group {
@@ -1126,16 +1153,26 @@ const Admin = () => {
           display: block;
           margin-bottom: 4px;
           font-weight: 500;
-          color: #333;
+          color: #d1d5db;
         }
 
         .form-group input,
         .form-group select {
           width: 100%;
           padding: 8px 12px;
-          border: 1px solid #ddd;
+          border: 1px solid #374151;
           border-radius: 6px;
           font-size: 14px;
+          background: #111111;
+          color: #ffffff;
+          box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         .form-group input[type="checkbox"] {
@@ -1150,7 +1187,7 @@ const Admin = () => {
         }
 
         .save-btn {
-          background: #007bff;
+          background: #3b82f6;
           color: white;
           border: none;
           padding: 10px 20px;
@@ -1160,11 +1197,11 @@ const Admin = () => {
         }
 
         .save-btn:hover {
-          background: #0056b3;
+          background: #2563eb;
         }
 
         .cancel-btn {
-          background: #6c757d;
+          background: #6b7280;
           color: white;
           border: none;
           padding: 10px 20px;
@@ -1174,7 +1211,7 @@ const Admin = () => {
         }
 
         .cancel-btn:hover {
-          background: #5a6268;
+          background: #4b5563;
         }
 
         @media (max-width: 768px) {
