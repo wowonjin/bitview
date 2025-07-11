@@ -195,10 +195,10 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      const { email, password } = userData
-      console.log('🔧 AuthContext signup 시작:', { email })
+      const { name, email, password } = userData
+      console.log('🔧 AuthContext signup 시작:', { name, email })
       
-      const result = await signUpUser(email, password)
+      const result = await signUpUser(email, password, name)
       console.log('✅ Firebase 회원가입 완료:', result)
       
       return { success: true }

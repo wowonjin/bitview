@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Check, X } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Check, X, User } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const Signup = () => {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -97,6 +98,7 @@ const Signup = () => {
       })
       
       const result = await signup({
+        name: formData.name,
         email: formData.email,
         password: formData.password,
         confirmPassword: formData.confirmPassword
@@ -247,7 +249,22 @@ const Signup = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-
+            <div className="form-group">
+              <label htmlFor="name">이름</label>
+              <div className="input-container">
+                <User size={20} className="input-icon" />
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="홍길동"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
 
             <div className="form-group">
               <label htmlFor="email">이메일 주소</label>

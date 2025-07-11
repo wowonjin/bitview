@@ -255,8 +255,8 @@ export const getUserFavorites = async (userId) => {
 };
 
 // 사용자 회원가입 (Firebase 인증 + Firestore 프로필 생성)
-export const signUpUser = async (email, password) => {
-  console.log('🔧 회원가입 시작:', { email });
+export const signUpUser = async (email, password, name) => {
+  console.log('🔧 회원가입 시작:', { email, name });
   
   try {
     // Firebase 인증
@@ -267,10 +267,14 @@ export const signUpUser = async (email, password) => {
     // Firestore 프로필 생성 (권한 오류 시 무시)
     try {
       console.log('🔧 Firestore 프로필 생성 시작:', { 
-        userId: user.uid
+        userId: user.uid,
+        name: name
       });
       
-      await createUserProfile(user, { displayName: 'User' });
+      await createUserProfile(user, { 
+        displayName: name || 'User',
+        name: name || 'User'
+      });
       console.log('✅ Firestore 프로필 생성 완료');
     } catch (firestoreError) {
       console.log('⚠️ Firestore 프로필 생성 실패:', firestoreError.message);
