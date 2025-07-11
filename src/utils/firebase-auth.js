@@ -80,11 +80,7 @@ export const createUserProfile = async (user, additionalData = {}) => {
       const { displayName, email, photoURL } = user;
       const createdAt = serverTimestamp();
 
-      // additionalData에서 displayName이 전달되면 그것을 우선 사용
-      const finalDisplayName = additionalData.displayName || displayName || 'User';
-
       const userData = {
-        displayName: finalDisplayName,
         email,
         photoURL,
         createdAt,
@@ -92,19 +88,13 @@ export const createUserProfile = async (user, additionalData = {}) => {
         is_premium: false,
         premium_expires: null,
         last_login: serverTimestamp(),
-        ...additionalData,
-        // displayName은 마지막에 다시 설정해서 덮어쓰기 방지
-        displayName: finalDisplayName
+        ...additionalData
       };
 
       // 디버깅 로그 추가
       console.log('🔧 Firestore 프로필 생성 데이터:', {
         userId: user.uid,
-        email: userData.email,
-        displayName: userData.displayName,
-        additionalDisplayName: additionalData.displayName,
-        userDisplayName: displayName,
-        finalDisplayName: finalDisplayName
+        email: userData.email
       });
 
       // 관리자 계정인 경우 디버깅 로그
@@ -123,7 +113,7 @@ export const createUserProfile = async (user, additionalData = {}) => {
       
       console.log('✅ Firestore 프로필 저장 완료:', {
         userId: user.uid,
-        displayName: userData.displayName
+        email: userData.email
       });
     }
 
@@ -172,12 +162,13 @@ export const getUserProfile = async (userId) => {
       const userData = { id: userDoc.id, ...userDoc.data() };
       console.log('🔧 Firestore에서 가져온 사용자 데이터:', {
         userId: userData.id,
-        displayName: userData.displayName,
-        name: userData.name,
         email: userData.email
       });
+      
       return userData;
     }
+    
+
     
     console.log('🔧 Firestore에서 사용자 프로필을 찾을 수 없음:', userId);
     return null;
@@ -255,8 +246,8 @@ export const getUserFavorites = async (userId) => {
 };
 
 // 사용자 회원가입 (Firebase 인증 + Firestore 프로필 생성)
-export const signUpUser = async (email, password, name) => {
-  console.log('🔧 회원가입 시작:', { email, name });
+export const signUpUser = async (email, password) => {
+  console.log('🔧 회원가입 시작:', { email });
   
   try {
     // Firebase 인증
@@ -264,16 +255,15 @@ export const signUpUser = async (email, password, name) => {
     const user = userCredential.user;
     console.log('✅ Firebase 인증 성공:', user.uid);
 
-    // Firestore 프로필 생성 (권한 오류 시 무시)
+    // Firestore 프로필 생성 (기본 정보만)
     try {
       console.log('🔧 Firestore 프로필 생성 시작:', { 
         userId: user.uid,
-        name: name
+        email: email
       });
       
       await createUserProfile(user, { 
-        displayName: name || 'User',
-        name: name || 'User'
+        email: email
       });
       console.log('✅ Firestore 프로필 생성 완료');
     } catch (firestoreError) {
@@ -399,7 +389,7 @@ export const createAdminUser = async (email, password) => {
 };
 
 // 프리미엄 회원 등급 설정
-export const setPremiumMembership = async (userId, durationDays = 30) => {
+export const setPremiumMembership = async (userId, durationDays = 30, exchangeType = null) => {
   if (!userId) throw new Error('사용자 ID가 필요합니다');
 
   try {
@@ -410,7 +400,9 @@ export const setPremiumMembership = async (userId, durationDays = 30) => {
       is_premium: true,
       premium_expires: premiumExpires.toISOString(),
       membership_type: 'premium',
-      premium_activated_at: serverTimestamp()
+      premium_activated_at: serverTimestamp(),
+      exchange_registered: true,
+      ...(exchangeType && { exchange_type: exchangeType })
     };
 
     await updateUserProfile(userId, updates);
@@ -424,7 +416,7 @@ export const setPremiumMembership = async (userId, durationDays = 30) => {
 };
 
 // VIP 회원 등급 설정
-export const setVipMembership = async (userId, durationDays = 365) => {
+export const setVipMembership = async (userId, durationDays = 365, exchangeType = null) => {
   if (!userId) throw new Error('사용자 ID가 필요합니다');
 
   try {
@@ -436,7 +428,9 @@ export const setVipMembership = async (userId, durationDays = 365) => {
       is_vip: true,
       premium_expires: vipExpires.toISOString(),
       membership_type: 'vip',
-      vip_activated_at: serverTimestamp()
+      vip_activated_at: serverTimestamp(),
+      exchange_registered: true,
+      ...(exchangeType && { exchange_type: exchangeType })
     };
 
     await updateUserProfile(userId, updates);
@@ -473,14 +467,15 @@ export const expireMembership = async (userId) => {
 };
 
 // 거래소 등록 상태 업데이트
-export const updateExchangeRegistration = async (userId, exchangeEmail) => {
+export const updateExchangeRegistration = async (userId, exchangeEmail, exchangeType = null) => {
   if (!userId) throw new Error('사용자 ID가 필요합니다');
 
   try {
     const updates = {
       exchange_registered: true,
       exchange_email: exchangeEmail,
-      exchange_registered_at: serverTimestamp()
+      exchange_registered_at: serverTimestamp(),
+      ...(exchangeType && { exchange_type: exchangeType })
     };
 
     await updateUserProfile(userId, updates);

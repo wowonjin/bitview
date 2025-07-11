@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Check, X, User } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Check, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -74,18 +73,21 @@ const Signup = () => {
     if (!agreedToTerms) {
       setError('서비스 약관에 동의해주세요.')
       setIsLoading(false)
+      clearTimeout(safetyTimeout)
       return
     }
 
     if (!passwordValidation.minLength || !passwordValidation.hasNumber || !passwordValidation.hasLetter) {
       setError('비밀번호 조건을 모두 만족해주세요.')
       setIsLoading(false)
+      clearTimeout(safetyTimeout)
       return
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError('비밀번호가 일치하지 않습니다.')
       setIsLoading(false)
+      clearTimeout(safetyTimeout)
       return
     }
 
@@ -98,8 +100,7 @@ const Signup = () => {
       })
       
       const result = await signup({
-        name: formData.name,
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
         confirmPassword: formData.confirmPassword
       })
@@ -249,22 +250,7 @@ const Signup = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-            <div className="form-group">
-              <label htmlFor="name">이름</label>
-              <div className="input-container">
-                <User size={20} className="input-icon" />
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="홍길동"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
+
 
             <div className="form-group">
               <label htmlFor="email">이메일 주소</label>

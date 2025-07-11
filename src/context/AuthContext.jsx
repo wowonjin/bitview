@@ -195,10 +195,10 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      const { name, email, password } = userData
-      console.log('🔧 AuthContext signup 시작:', { name, email })
+      const { email, password } = userData
+      console.log('🔧 AuthContext signup 시작:', { email })
       
-      const result = await signUpUser(email, password, name)
+      const result = await signUpUser(email, password)
       console.log('✅ Firebase 회원가입 완료:', result)
       
       return { success: true }
@@ -251,14 +251,15 @@ export const AuthProvider = ({ children }) => {
                    false
 
   // 프리미엄 활성화 (거래소 가입 완료 시 호출)
-  const activatePremium = async (exchangeEmail = null) => {
+  const activatePremium = async (exchangeEmail = null, exchangeType = null) => {
     if (!user) return { success: false, message: '로그인이 필요합니다' }
 
     try {
       const updates = {
         exchange_registered: true,
         is_premium: true,
-        ...(exchangeEmail && { exchange_email: exchangeEmail })
+        ...(exchangeEmail && { exchange_email: exchangeEmail }),
+        ...(exchangeType && { exchange_type: exchangeType })
       }
       
       await updateUserProfile(user.uid, updates)
@@ -402,17 +403,18 @@ export const AuthProvider = ({ children }) => {
   }
 
   // 거래소 등록 상태 업데이트
-  const updateExchangeStatus = async (exchangeEmail) => {
+  const updateExchangeStatus = async (exchangeEmail, exchangeType = null) => {
     if (!user) return { success: false, message: '로그인이 필요합니다' }
 
     try {
-      await updateExchangeRegistration(user.uid, exchangeEmail)
+      await updateExchangeRegistration(user.uid, exchangeEmail, exchangeType)
       
       // 로컬 상태 업데이트
       setUserProfile(prev => ({
         ...prev,
         exchange_registered: true,
-        exchange_email: exchangeEmail
+        exchange_email: exchangeEmail,
+        ...(exchangeType && { exchange_type: exchangeType })
       }))
       
       return { success: true }
@@ -447,8 +449,28 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Firebase Auth 사용자 정보와 Firestore 프로필 정보를 결합
+  const combinedUser = user ? {
+    ...(userProfile || {}),
+    email: user.email, // Firebase Auth의 email 사용 (항상 존재)
+    uid: user.uid,
+    displayName: userProfile?.displayName || user.displayName || user.email?.split('@')[0] || 'User'
+  } : null
+
+  // 디버깅을 위한 로그
+  if (user && process.env.NODE_ENV === 'development') {
+    console.log('🔧 AuthContext - 사용자 정보 결합:', {
+      hasFirebaseUser: !!user,
+      hasUserProfile: !!userProfile,
+      firebaseEmail: user.email,
+      profileEmail: userProfile?.email,
+      combinedUserEmail: combinedUser?.email,
+      combinedUser
+    })
+  }
+
   const value = {
-    user: userProfile, // Firestore의 사용자 프로필 정보
+    user: combinedUser, // 결합된 사용자 정보
     firebaseUser: user, // Firebase 인증 사용자 정보
     login,
     signup,
@@ -488,17 +510,7 @@ export const AuthProvider = ({ children }) => {
       })
     }
     
-    // 사용자 이름 디버깅 함수 추가
-    window.checkUserName = () => {
-      console.log('🔧 사용자 이름 상태 확인:', {
-        firebaseUser: user,
-        userProfile: userProfile,
-        firebaseDisplayName: user?.displayName,
-        firestoreDisplayName: userProfile?.displayName,
-        firestoreName: userProfile?.name,
-        finalDisplayName: userProfile?.displayName || userProfile?.name || user?.displayName || user?.email?.split('@')[0] || 'User'
-      })
-    }
+
   }
 
   return (

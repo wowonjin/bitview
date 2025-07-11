@@ -32,8 +32,8 @@ const Premium = () => {
   const handleEmailSubmit = (e) => {
     e.preventDefault()
     if (email.trim()) {
-      // 프리미엄 활성화 (이메일 정보 포함)
-      activatePremium(email.trim())
+      // 프리미엄 활성화 (이메일 정보와 거래소 타입 포함)
+      activatePremium(email.trim(), exchangeType)
       // 성공 메시지 표시 후 홈으로 이동
       alert('프리미엄 기능이 활성화되었습니다!')
       navigate('/')

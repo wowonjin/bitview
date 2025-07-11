@@ -3,42 +3,32 @@ import { useNavigate } from 'react-router-dom'
 import { 
   Users, 
   Trash2, 
-  Crown, 
   Search, 
   Filter, 
   Download, 
-  Edit, 
   Shield, 
-  UserCheck, 
-  UserX,
   RefreshCw,
   AlertTriangle,
   Calendar,
   Mail,
-  MapPin,
-  Award
+  MapPin
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { useAuth } from '../context/AuthContext'
 import { 
   getAllUsers, 
-  deleteUserFromFirestore, 
-  updateUserRole, 
-  setPremiumMembership, 
-  setVipMembership, 
-  expireMembership 
+  deleteUserFromFirestore
 } from '../utils/firebase-auth'
 
 const Admin = () => {
   const [users, setUsers] = useState([])
   const [filteredUsers, setFilteredUsers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [roleFilter, setRoleFilter] = useState('all')
+
   const [membershipFilter, setMembershipFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [showEditModal, setShowEditModal] = useState(false)
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     premiumUsers: 0,
@@ -50,13 +40,16 @@ const Admin = () => {
   const { user: currentUser, userProfile } = useAuth()
 
   useEffect(() => {
-    // 관리자 권한 확인
+    console.log('🔧 Admin 페이지 초기화 중...')
+    
+    // 로그인 확인
     if (!currentUser) {
       console.log('🔧 Admin 페이지 - 로그인 필요')
       navigate('/login')
       return
     }
 
+    // 관리자 권한 확인
     console.log('🔧 Admin 페이지 - 권한 확인 중:', {
       currentUserEmail: currentUser.email,
       userProfileIsAdmin: userProfile?.isAdmin,
@@ -64,62 +57,75 @@ const Admin = () => {
       userProfileExists: !!userProfile
     })
 
+    // admin@gmail.com은 항상 관리자로 인정
     const isAdminUser = currentUser.email === 'admin@gmail.com' || 
-                       userProfile?.isAdmin || 
+                       userProfile?.isAdmin === true || 
                        userProfile?.role === 'admin'
 
     if (!isAdminUser) {
       console.warn('⚠️ Admin 페이지 - 관리자 권한 없음')
-      console.warn('현재 사용자:', currentUser.email)
-      console.warn('사용자 프로필:', userProfile)
       
-      if (currentUser.email === 'admin@gmail.com' && !userProfile?.isAdmin) {
-        alert('관리자 권한이 설정되지 않았습니다. 브라우저 콘솔에서 setupAdminAccount()를 실행하거나 URL에 ?setup=admin을 추가하세요.')
+      // admin@gmail.com인데 권한이 없는 경우 특별 처리
+      if (currentUser.email === 'admin@gmail.com') {
+        console.log('🔧 admin@gmail.com 계정 - 강제 진입 허용')
+        // admin@gmail.com은 강제로 진입 허용
       } else {
         alert('관리자 권한이 필요합니다.')
+        navigate('/')
+        return
       }
-      
-      navigate('/')
-      return
     }
 
     console.log('✅ Admin 페이지 - 관리자 권한 확인 완료')
     document.title = 'BitView - 회원 관리'
+    
+    // 데이터 로딩
     loadUsers()
   }, [currentUser, userProfile, navigate])
 
   useEffect(() => {
     filterUsers()
-  }, [users, searchTerm, roleFilter, membershipFilter])
+  }, [users, searchTerm, membershipFilter])
 
   const loadUsers = async () => {
+    console.log('🔧 사용자 목록 로딩 시작...')
+    
     try {
       setLoading(true)
       setError('')
       
+      console.log('🔧 getAllUsers 호출 중...')
       const usersData = await getAllUsers()
-      setUsers(usersData)
+      console.log('✅ 사용자 데이터 로딩 완료:', usersData?.length || 0, '명')
+      
+      setUsers(usersData || [])
       
       // 통계 계산
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       
-      const todaySignups = usersData.filter(user => {
-        const createdAt = user.createdAt?.toDate() || new Date(user.createdAt)
+      const todaySignups = (usersData || []).filter(user => {
+        if (!user.createdAt) return false
+        const createdAt = user.createdAt?.toDate ? user.createdAt.toDate() : new Date(user.createdAt)
         return createdAt >= today
       }).length
       
-      setStats({
-        totalUsers: usersData.length,
-        premiumUsers: usersData.filter(user => user.is_premium).length,
-        vipUsers: usersData.filter(user => user.is_vip).length,
+      const newStats = {
+        totalUsers: (usersData || []).length,
+        premiumUsers: (usersData || []).filter(user => user.is_premium).length,
+        vipUsers: (usersData || []).filter(user => user.is_vip).length,
         todaySignups
-      })
+      }
+      
+      console.log('📊 통계 계산 완료:', newStats)
+      setStats(newStats)
       
     } catch (err) {
-      console.error('사용자 목록 로딩 실패:', err)
-      setError('사용자 목록을 불러오는데 실패했습니다.')
+      console.error('❌ 사용자 목록 로딩 실패:', err)
+      setError(`사용자 목록을 불러오는데 실패했습니다: ${err.message}`)
+      setUsers([]) // 에러 시 빈 배열 설정
     } finally {
+      console.log('🔧 로딩 상태 해제')
       setLoading(false)
     }
   }
@@ -129,16 +135,12 @@ const Admin = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(user => {
-        const name = user.displayName || user.name || ''
         const email = user.email || ''
+        const userId = user.id || ''
         
-        return name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               email.toLowerCase().includes(searchTerm.toLowerCase())
+        return email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               userId.toLowerCase().includes(searchTerm.toLowerCase())
       })
-    }
-
-    if (roleFilter !== 'all') {
-      filtered = filtered.filter(user => user.role === roleFilter || (!user.role && roleFilter === 'user'))
     }
 
     if (membershipFilter !== 'all') {
@@ -154,85 +156,71 @@ const Admin = () => {
     setFilteredUsers(filtered)
   }
 
-  const handleDeleteUser = async (userId, userName) => {
-    if (userId === currentUser.uid) {
-      alert('자신의 계정은 삭제할 수 없습니다.')
-      return
+  // 개발 환경에서 디버깅 함수 추가
+  if (process.env.NODE_ENV === 'development') {
+    window.checkAdminPageState = () => {
+      console.log('🔧 Admin 페이지 상태:', {
+        loading,
+        error,
+        currentUser: currentUser ? {
+          email: currentUser.email,
+          uid: currentUser.uid
+        } : null,
+        userProfile,
+        usersCount: users.length,
+        filteredUsersCount: filteredUsers.length,
+        stats
+      })
     }
 
-    if (window.confirm(`정말로 "${userName}" 사용자를 삭제하시겠습니까?`)) {
-      try {
-        await deleteUserFromFirestore(userId)
-        await loadUsers()
-        alert('사용자가 성공적으로 삭제되었습니다.')
-      } catch (err) {
-        console.error('사용자 삭제 실패:', err)
-        alert('사용자 삭제에 실패했습니다.')
+    window.checkUserExchangeInfo = (userIndex = 0) => {
+      const user = filteredUsers[userIndex]
+      if (user) {
+        console.log('🔧 사용자 거래소 정보:', {
+          email: user.email,
+          exchange_email: user.exchange_email,
+          exchange_type: user.exchange_type,
+          exchange_source: user.exchange_source,
+          exchange_registered: user.exchange_registered,
+          is_premium: user.is_premium,
+          is_vip: user.is_vip,
+          calculatedExchange: getExchangeName(user)
+        })
+      } else {
+        console.log('❌ 사용자를 찾을 수 없습니다. 인덱스:', userIndex)
       }
     }
   }
 
-  const handleEditUser = (user) => {
-    setSelectedUser(user)
-    setShowEditModal(true)
-  }
+  const handleDeleteUser = async (userId, userName) => {
+    if (userId === currentUser?.uid) {
+      alert('자신의 계정은 삭제할 수 없습니다.')
+      return
+    }
 
-  const handleUpdateUser = async (userId, updates) => {
     try {
-      await updateUserRole(userId, updates.role, updates.is_premium)
+      console.log('🔧 사용자 삭제 시작:', userId)
+      await deleteUserFromFirestore(userId)
+      console.log('✅ 사용자 삭제 완료')
       await loadUsers()
-      setShowEditModal(false)
-      setSelectedUser(null)
-      alert('사용자 정보가 성공적으로 업데이트되었습니다.')
     } catch (err) {
-      console.error('사용자 업데이트 실패:', err)
-      alert('사용자 정보 업데이트에 실패했습니다.')
+      console.error('❌ 사용자 삭제 실패:', err)
+      alert(`사용자 삭제에 실패했습니다: ${err.message}`)
     }
   }
 
-  const handleSetPremium = async (userId, duration) => {
-    try {
-      await setPremiumMembership(userId, duration)
-      await loadUsers()
-      alert(`프리미엄 회원으로 설정되었습니다. (${duration}일)`)
-    } catch (err) {
-      console.error('프리미엄 설정 실패:', err)
-      alert('프리미엄 설정에 실패했습니다.')
-    }
-  }
 
-  const handleSetVip = async (userId, duration) => {
-    try {
-      await setVipMembership(userId, duration)
-      await loadUsers()
-      alert(`VIP 회원으로 설정되었습니다. (${duration}일)`)
-    } catch (err) {
-      console.error('VIP 설정 실패:', err)
-      alert('VIP 설정에 실패했습니다.')
-    }
-  }
-
-  const handleExpireMembership = async (userId) => {
-    try {
-      await expireMembership(userId)
-      await loadUsers()
-      alert('회원 등급이 만료되었습니다.')
-    } catch (err) {
-      console.error('회원 등급 만료 실패:', err)
-      alert('회원 등급 만료에 실패했습니다.')
-    }
-  }
 
   const exportToExcel = () => {
     const exportData = filteredUsers.map(user => ({
-      '이름': user.displayName || user.name || '',
+      'ID': user.id || '',
       '이메일': user.email || '',
-      '역할': user.role || 'user',
+      'VIP 이메일': user.exchange_email || '',
       '프리미엄': user.is_premium ? '예' : '아니오',
       'VIP': user.is_vip ? '예' : '아니오',
       '가입일': user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString('ko-KR') : '',
       '최근 로그인': user.last_login ? new Date(user.last_login.toDate()).toLocaleDateString('ko-KR') : '',
-      '거래소 등록': user.exchange_registered ? '예' : '아니오'
+      '거래소': getExchangeName(user)
     }))
 
     const ws = XLSX.utils.json_to_sheet(exportData)
@@ -262,11 +250,46 @@ const Admin = () => {
     return <span className="basic-badge">일반</span>
   }
 
-  const getRoleBadge = (role) => {
-    if (role === 'admin') {
-      return <span className="admin-badge">관리자</span>
+  const getExchangeName = (user) => {
+    // 먼저 exchange_type 필드 확인 (가장 정확한 정보)
+    if (user.exchange_type) {
+      if (user.exchange_type === 'binance') {
+        return '바이낸스'
+      }
+      if (user.exchange_type === 'bybit') {
+        return '바이비트'
+      }
     }
-    return <span className="user-badge">사용자</span>
+    
+    // VIP/거래소 이메일이 있으면 이메일 패턴으로 거래소 구분
+    if (user.exchange_email) {
+      const email = user.exchange_email.toLowerCase()
+      
+      // 바이낸스 관련 패턴 확인
+      if (email.includes('binance') || 
+          email.includes('@binance.') ||
+          user.exchange_source === 'binance') {
+        return '바이낸스'
+      }
+      
+      // 바이비트 관련 패턴 확인
+      if (email.includes('bybit') || 
+          email.includes('@bybit.') ||
+          user.exchange_source === 'bybit') {
+        return '바이비트'
+      }
+      
+      // 구체적인 거래소 구분이 안 되는 경우
+      return '등록됨'
+    }
+    
+    // 프리미엄 회원이지만 거래소 정보가 없는 경우
+    if (user.is_premium && user.exchange_registered) {
+      return '등록됨'
+    }
+    
+    // 거래소 등록하지 않음
+    return '미등록'
   }
 
   if (loading) {
@@ -319,7 +342,7 @@ const Admin = () => {
         </div>
         <div className="stat-card">
           <div className="stat-icon">
-            <Crown size={24} />
+            <Shield size={24} />
           </div>
           <div className="stat-info">
             <div className="stat-value">{stats.premiumUsers}</div>
@@ -328,7 +351,7 @@ const Admin = () => {
         </div>
         <div className="stat-card">
           <div className="stat-icon">
-            <Award size={24} />
+            <Mail size={24} />
           </div>
           <div className="stat-info">
             <div className="stat-value">{stats.vipUsers}</div>
@@ -352,17 +375,12 @@ const Admin = () => {
           <Search size={16} />
           <input
             type="text"
-            placeholder="이름 또는 이메일로 검색..."
+            placeholder="이메일 또는 ID로 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="filter-group">
-          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
-            <option value="all">모든 역할</option>
-            <option value="admin">관리자</option>
-            <option value="user">사용자</option>
-          </select>
           <select value={membershipFilter} onChange={(e) => setMembershipFilter(e.target.value)}>
             <option value="all">모든 등급</option>
             <option value="basic">일반</option>
@@ -378,13 +396,12 @@ const Admin = () => {
           <table className="users-table">
             <thead>
               <tr>
-                <th>사용자</th>
+                <th>ID</th>
                 <th>이메일</th>
-                <th>역할</th>
                 <th>등급</th>
                 <th>가입일</th>
                 <th>최근 접속</th>
-                <th>거래소 등록</th>
+                <th>거래소</th>
                 <th>관리</th>
               </tr>
             </thead>
@@ -393,27 +410,17 @@ const Admin = () => {
                 <tr key={user.id}>
                   <td>
                     <div className="user-cell">
-                      <div className="user-avatar">
-                        {user.photoURL ? (
-                          <img src={user.photoURL} alt={user.displayName} />
-                        ) : (
-                          <div className="avatar-placeholder">
-                            {(user.displayName || user.email || 'U').charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
                       <div className="user-info">
-                        <div className="user-name">{user.displayName || user.name || '이름 없음'}</div>
                         <div className="user-id">ID: {user.id.slice(0, 8)}...</div>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <div className="email-cell">{user.email}</div>
-                  </td>
-                  <td>
-                    <div className="role-cell">
-                      {getRoleBadge(user.role)}
+                    <div className="email-cell">
+                      <div className="email-primary">{user.email}</div>
+                      {user.exchange_email && (
+                        <div className="email-secondary">VIP: {user.exchange_email}</div>
+                      )}
                     </div>
                   </td>
                   <td>
@@ -435,12 +442,10 @@ const Admin = () => {
                     <div className="exchange-cell">
                       {user.exchange_registered ? (
                         <div className="exchange-registered">
-                          <UserCheck size={16} />
-                          <span>등록됨</span>
+                          <span>{getExchangeName(user)}</span>
                         </div>
                       ) : (
                         <div className="exchange-not-registered">
-                          <UserX size={16} />
                           <span>미등록</span>
                         </div>
                       )}
@@ -448,48 +453,10 @@ const Admin = () => {
                   </td>
                   <td>
                     <div className="actions-cell">
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handleEditUser(user)}
-                        title="수정"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      
-                      {!user.is_premium && (
-                        <button
-                          className="action-btn premium-btn"
-                          onClick={() => handleSetPremium(user.id, 30)}
-                          title="프리미엄으로 변경"
-                        >
-                          <Crown size={14} />
-                        </button>
-                      )}
-                      
-                      {!user.is_vip && (
-                        <button
-                          className="action-btn vip-btn"
-                          onClick={() => handleSetVip(user.id, 365)}
-                          title="VIP로 변경"
-                        >
-                          <Award size={14} />
-                        </button>
-                      )}
-                      
-                      {(user.is_premium || user.is_vip) && (
-                        <button
-                          className="action-btn expire-btn"
-                          onClick={() => handleExpireMembership(user.id)}
-                          title="등급 해제"
-                        >
-                          <UserX size={14} />
-                        </button>
-                      )}
-                      
-                      {user.id !== currentUser.uid && (
+                      {user.id && user.id !== currentUser?.uid && (
                         <button
                           className="action-btn delete-btn"
-                          onClick={() => handleDeleteUser(user.id, user.displayName || user.email)}
+                          onClick={() => handleDeleteUser(user.id, user.email || '사용자')}
                           title="삭제"
                         >
                           <Trash2 size={14} />
@@ -504,7 +471,7 @@ const Admin = () => {
         </div>
       </div>
 
-      {filteredUsers.length === 0 && (
+      {!loading && filteredUsers.length === 0 && (
         <div className="users-table-container">
           <div className="empty-table">
             <Users size={48} />
@@ -513,76 +480,13 @@ const Admin = () => {
         </div>
       )}
 
-      {/* 사용자 수정 모달 */}
-      {showEditModal && selectedUser && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>사용자 정보 수정</h3>
-            <div className="modal-body">
-              <div className="form-group">
-                <label>이름:</label>
-                <input
-                  type="text"
-                  value={selectedUser.displayName || ''}
-                  readOnly
-                />
-              </div>
-              <div className="form-group">
-                <label>이메일:</label>
-                <input
-                  type="email"
-                  value={selectedUser.email || ''}
-                  readOnly
-                />
-              </div>
-              <div className="form-group">
-                <label>역할:</label>
-                <select
-                  value={selectedUser.role || 'user'}
-                  onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
-                >
-                  <option value="user">사용자</option>
-                  <option value="admin">관리자</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>프리미엄 회원:</label>
-                <input
-                  type="checkbox"
-                  checked={selectedUser.is_premium || false}
-                  onChange={(e) => setSelectedUser({...selectedUser, is_premium: e.target.checked})}
-                />
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button
-                className="save-btn"
-                onClick={() => handleUpdateUser(selectedUser.id, {
-                  role: selectedUser.role,
-                  is_premium: selectedUser.is_premium
-                })}
-              >
-                저장
-              </button>
-              <button
-                className="cancel-btn"
-                onClick={() => {
-                  setShowEditModal(false)
-                  setSelectedUser(null)
-                }}
-              >
-                취소
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       <style jsx>{`
         .admin-container {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 20px;
+          padding: 80px 20px 20px 20px;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           background: #0a0a0a;
           color: #ffffff;
@@ -689,9 +593,9 @@ const Admin = () => {
           align-items: center;
           gap: 16px;
           padding: 20px;
-          background: #1a1a1a;
+          background: transparent;
           border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          box-shadow: none;
           border: 1px solid #374151;
         }
 
@@ -740,7 +644,7 @@ const Admin = () => {
           border: 1px solid #374151;
           border-radius: 8px;
           font-size: 14px;
-          background: #1a1a1a;
+          background: transparent;
           color: #ffffff;
         }
 
@@ -765,7 +669,7 @@ const Admin = () => {
           border-radius: 8px;
           font-size: 14px;
           min-width: 120px;
-          background: #1a1a1a;
+          background: transparent;
           color: #ffffff;
         }
 
@@ -776,9 +680,9 @@ const Admin = () => {
         }
 
         .users-table-container {
-          background: #1a1a1a;
+          background: transparent;
           border-radius: 12px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          box-shadow: none;
           overflow: hidden;
           border: 1px solid #374151;
         }
@@ -794,7 +698,7 @@ const Admin = () => {
         }
 
         .users-table thead {
-          background: #374151;
+          background: transparent;
           border-bottom: 2px solid #4b5563;
         }
 
@@ -809,15 +713,17 @@ const Admin = () => {
         .users-table tbody tr {
           border-bottom: 1px solid #374151;
           transition: background-color 0.2s;
+          background: transparent;
         }
 
         .users-table tbody tr:hover {
-          background-color: #2a2a2a;
+          background-color: rgba(255, 255, 255, 0.05);
         }
 
         .users-table td {
           padding: 16px 12px;
           vertical-align: middle;
+          text-align: left;
         }
 
         .user-cell {
@@ -826,42 +732,13 @@ const Admin = () => {
           gap: 12px;
         }
 
-        .user-avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          overflow: hidden;
-          flex-shrink: 0;
-        }
 
-        .user-avatar img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .avatar-placeholder {
-          width: 100%;
-          height: 100%;
-          background: #007bff;
-          color: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 16px;
-          font-weight: 600;
-        }
 
         .user-info {
           min-width: 0;
         }
 
-        .user-name {
-          font-size: 14px;
-          font-weight: 600;
-          color: #ffffff;
-          margin-bottom: 2px;
-        }
+
 
         .user-id {
           font-size: 12px;
@@ -876,8 +753,21 @@ const Admin = () => {
           text-overflow: ellipsis;
         }
 
-        .role-cell, .membership-cell {
-          text-align: center;
+        .email-primary {
+          font-size: 14px;
+          color: #d1d5db;
+          font-weight: 500;
+          margin-bottom: 2px;
+        }
+
+        .email-secondary {
+          font-size: 12px;
+          color: #94a3b8;
+          font-weight: 400;
+        }
+
+        .membership-cell {
+          text-align: left;
         }
 
         .date-cell {
@@ -887,7 +777,7 @@ const Admin = () => {
         }
 
         .exchange-cell {
-          text-align: center;
+          text-align: left;
         }
 
         .exchange-registered {
@@ -909,7 +799,7 @@ const Admin = () => {
         .actions-cell {
           display: flex;
           gap: 4px;
-          justify-content: center;
+          justify-content: flex-start;
           flex-wrap: wrap;
         }
 
@@ -926,23 +816,7 @@ const Admin = () => {
           padding: 0;
         }
 
-        .admin-badge {
-          background: #dc2626;
-          color: white;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 10px;
-          font-weight: 500;
-        }
 
-        .user-badge {
-          background: #6b7280;
-          color: white;
-          padding: 2px 6px;
-          border-radius: 4px;
-          font-size: 10px;
-          font-weight: 500;
-        }
 
         .vip-badge {
           background: #f97316;
@@ -971,41 +845,7 @@ const Admin = () => {
           font-weight: 500;
         }
 
-        .action-btn.edit-btn {
-          background: #374151;
-          color: #d1d5db;
-        }
 
-        .action-btn.edit-btn:hover {
-          background: #4b5563;
-        }
-
-        .action-btn.premium-btn {
-          background: #fbbf24;
-          color: #1f2937;
-        }
-
-        .action-btn.premium-btn:hover {
-          background: #f59e0b;
-        }
-
-        .action-btn.vip-btn {
-          background: #f97316;
-          color: white;
-        }
-
-        .action-btn.vip-btn:hover {
-          background: #ea580c;
-        }
-
-        .action-btn.expire-btn {
-          background: #6b7280;
-          color: white;
-        }
-
-        .action-btn.expire-btn:hover {
-          background: #4b5563;
-        }
 
         .action-btn.delete-btn {
           background: #dc2626;
@@ -1048,18 +888,7 @@ const Admin = () => {
             padding: 8px 4px;
           }
           
-          .user-avatar {
-            width: 32px;
-            height: 32px;
-          }
-          
-          .avatar-placeholder {
-            font-size: 14px;
-          }
-          
-          .user-name {
-            font-size: 12px;
-          }
+
           
           .user-id {
             font-size: 10px;
@@ -1092,11 +921,11 @@ const Admin = () => {
 
         /* 테이블 줄무늬 효과 */
         .users-table tbody tr:nth-child(even) {
-          background-color: #1e1e1e;
+          background-color: transparent;
         }
 
         .users-table tbody tr:nth-child(even):hover {
-          background-color: #2a2a2a;
+          background-color: rgba(255, 255, 255, 0.05);
         }
 
         /* 테이블 헤더 그림자 */
@@ -1109,6 +938,7 @@ const Admin = () => {
           text-align: center;
           padding: 60px 20px;
           color: #9ca3af;
+          background: transparent;
         }
 
         .empty-table svg {
@@ -1118,101 +948,7 @@ const Admin = () => {
 
 
 
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.7);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        }
 
-        .modal-content {
-          background: #1a1a1a;
-          border-radius: 12px;
-          padding: 24px;
-          width: 400px;
-          max-width: 90vw;
-          border: 1px solid #374151;
-        }
-
-        .modal-content h3 {
-          margin: 0 0 20px 0;
-          color: #ffffff;
-        }
-
-        .form-group {
-          margin-bottom: 16px;
-        }
-
-        .form-group label {
-          display: block;
-          margin-bottom: 4px;
-          font-weight: 500;
-          color: #d1d5db;
-        }
-
-        .form-group input,
-        .form-group select {
-          width: 100%;
-          padding: 8px 12px;
-          border: 1px solid #374151;
-          border-radius: 6px;
-          font-size: 14px;
-          background: #111111;
-          color: #ffffff;
-          box-sizing: border-box;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-          outline: none;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-
-        .form-group input[type="checkbox"] {
-          width: auto;
-        }
-
-        .modal-actions {
-          display: flex;
-          gap: 12px;
-          justify-content: flex-end;
-          margin-top: 24px;
-        }
-
-        .save-btn {
-          background: #3b82f6;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .save-btn:hover {
-          background: #2563eb;
-        }
-
-        .cancel-btn {
-          background: #6b7280;
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .cancel-btn:hover {
-          background: #4b5563;
-        }
 
         @media (max-width: 768px) {
           .admin-container {
