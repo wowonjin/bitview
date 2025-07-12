@@ -28,16 +28,13 @@ const Premium = () => {
     setSearchParams({ exchange })
   }
 
-  // 이메일 제출 핸들러
-  const handleEmailSubmit = (e) => {
-    e.preventDefault()
-    if (email.trim()) {
-      // 프리미엄 활성화 (이메일 정보와 거래소 타입 포함)
-      activatePremium(email.trim(), exchangeType)
-      // 성공 메시지 표시 후 홈으로 이동
-      alert('프리미엄 기능이 활성화되었습니다!')
-      navigate('/')
-    }
+  // 프리미엄 활성화 핸들러
+  const handlePremiumActivation = () => {
+    // 프리미엄 활성화 (거래소 타입 포함)
+    activatePremium('', exchangeType)
+    // 성공 메시지 표시 후 홈으로 이동
+    alert('프리미엄 기능이 활성화되었습니다!')
+    navigate('/')
   }
 
   // 기존 화면으로 돌아가기
@@ -199,7 +196,7 @@ const Premium = () => {
                 <div className="step-circle">
                   <span>2</span>
                 </div>
-                <span className="step-label">이메일 인증</span>
+                <span className="step-label">프리미엄 시작</span>
               </div>
               <div className="progress-line"></div>
               <div className="progress-step">
@@ -229,37 +226,19 @@ const Premium = () => {
               
               <div className="main-content">
                 <h1 className="modern-title">
-                  거의 완료되었어요!
+                  프리미엄을 사용하세요!
                 </h1>
                 <p className="modern-subtitle">
                   {exchangeName} 가입이 확인되었습니다.<br/>
-                  마지막 단계로 가입 시 사용한 이메일을 입력해주세요.
+                  아래 버튼을 눌러주세요!
                 </p>
                 
-                <form onSubmit={handleEmailSubmit} className="modern-form">
-                  <div className="input-group">
-                    <div className="modern-input-wrapper">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="example@email.com"
-                        className="modern-input"
-                        required
-                      />
-                                            <div className="input-icon">
-                        <Mail className="w-5 h-5" />
-                      </div>
-                    </div>
+                <button onClick={handlePremiumActivation} className="modern-submit-button">
+                  <span>프리미엄 시작하기</span>
+                  <div className="button-icon">
+                    <Zap className="w-5 h-5" />
                   </div>
-                  
-                  <button type="submit" className="modern-submit-button">
-                    <span>프리미엄 시작하기</span>
-                    <div className="button-icon">
-                      <Zap className="w-5 h-5" />
-                    </div>
-                  </button>
-                </form>
+                </button>
                 
 
               </div>
