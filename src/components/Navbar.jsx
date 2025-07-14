@@ -8,6 +8,8 @@ import logoImage from '../assets/logo.png'
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [realTimeDropdownOpen, setRealTimeDropdownOpen] = useState(false)
+  const [calculatorDropdownOpen, setCalculatorDropdownOpen] = useState(false)
   const [userInfoModalOpen, setUserInfoModalOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -15,6 +17,8 @@ const Navbar = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const dropdownRef = useRef(null)
+  const realTimeDropdownRef = useRef(null)
+  const calculatorDropdownRef = useRef(null)
 
   // 프리미엄 버튼 클릭 핸들러
   const handlePremiumClick = (e) => {
@@ -24,10 +28,32 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
+    if (isOpen) {
+      setRealTimeDropdownOpen(false)
+      setCalculatorDropdownOpen(false)
+    }
   }
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen)
+  }
+
+  const toggleRealTimeDropdown = () => {
+    setRealTimeDropdownOpen(!realTimeDropdownOpen)
+  }
+
+  const handleRealTimeInfoClick = () => {
+    navigate('/live-coins')
+    setRealTimeDropdownOpen(false)
+  }
+
+  const toggleCalculatorDropdown = () => {
+    setCalculatorDropdownOpen(!calculatorDropdownOpen)
+  }
+
+  const handleCalculatorInfoClick = () => {
+    navigate('/profit-calculator')
+    setCalculatorDropdownOpen(false)
   }
 
   const handleLogout = () => {
@@ -53,6 +79,12 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false)
+      }
+      if (realTimeDropdownRef.current && !realTimeDropdownRef.current.contains(event.target)) {
+        setRealTimeDropdownOpen(false)
+      }
+      if (calculatorDropdownRef.current && !calculatorDropdownRef.current.contains(event.target)) {
+        setCalculatorDropdownOpen(false)
       }
     }
 
@@ -83,22 +115,89 @@ const Navbar = () => {
               <Link to="/" className="navbar-logo">
                 <img src={logoImage} alt="BitView" className="logo-image" />
               </Link>
-              <Link to="/live-coins" className={`chart-link ${location.pathname === '/live-coins' ? 'active' : ''}`}>
-                실시간 코인 가격
-              </Link>
-              <Link to="/chart" className={`chart-link ${location.pathname === '/chart' ? 'active' : ''}`}>
-                실시간 차트
-              </Link>
+              {/* 실시간 정보 드롭다운 */}
+              <div className="realtime-dropdown" ref={realTimeDropdownRef}>
+                <button 
+                  className={`chart-link dropdown-btn ${location.pathname === '/live-coins' || location.pathname === '/chart' ? 'active' : ''}`}
+                  onClick={handleRealTimeInfoClick}
+                  onMouseEnter={() => setRealTimeDropdownOpen(true)}
+                  onMouseLeave={() => setRealTimeDropdownOpen(false)}
+                >
+                  실시간 정보
+                  <ChevronDown size={16} className={`dropdown-arrow ${realTimeDropdownOpen ? 'open' : ''}`} />
+                </button>
+                
+                {realTimeDropdownOpen && (
+                  <div 
+                    className="realtime-dropdown-menu"
+                    onMouseEnter={() => setRealTimeDropdownOpen(true)}
+                    onMouseLeave={() => setRealTimeDropdownOpen(false)}
+                  >
+                    <Link 
+                      to="/live-coins" 
+                      className="dropdown-item"
+                      onClick={() => setRealTimeDropdownOpen(false)}
+                    >
+                      <TrendingUp size={16} />
+                      실시간 가격
+                    </Link>
+                    <Link 
+                      to="/chart" 
+                      className="dropdown-item"
+                      onClick={() => setRealTimeDropdownOpen(false)}
+                    >
+                      <BarChart3 size={16} />
+                      실시간 차트
+                    </Link>
+                  </div>
+                )}
+              </div>
 
-              <Link to="/profit-calculator" className={`chart-link ${location.pathname === '/profit-calculator' ? 'active' : ''}`}>
-                수익 복리 계산기
-              </Link>
-              <Link to="/funding-calculator" className={`chart-link ${location.pathname === '/funding-calculator' ? 'active' : ''}`}>
-                펀딩비 계산기
-              </Link>
-              <Link to="/advanced-backtest" className={`chart-link ${location.pathname === '/advanced-backtest' ? 'active' : ''}`}>
-                백테스트
-              </Link>
+              {/* 수익 계산기 드롭다운 */}
+              <div className="calculator-dropdown" ref={calculatorDropdownRef}>
+                <button 
+                  className={`chart-link dropdown-btn ${location.pathname === '/profit-calculator' || location.pathname === '/funding-calculator' || location.pathname === '/advanced-backtest' ? 'active' : ''}`}
+                  onClick={handleCalculatorInfoClick}
+                  onMouseEnter={() => setCalculatorDropdownOpen(true)}
+                  onMouseLeave={() => setCalculatorDropdownOpen(false)}
+                >
+                  수익 계산기
+                  <ChevronDown size={16} className={`dropdown-arrow ${calculatorDropdownOpen ? 'open' : ''}`} />
+                </button>
+                
+                {calculatorDropdownOpen && (
+                  <div 
+                    className="calculator-dropdown-menu"
+                    onMouseEnter={() => setCalculatorDropdownOpen(true)}
+                    onMouseLeave={() => setCalculatorDropdownOpen(false)}
+                  >
+                    <Link 
+                      to="/profit-calculator" 
+                      className="dropdown-item"
+                      onClick={() => setCalculatorDropdownOpen(false)}
+                    >
+                      <Calculator size={16} />
+                      수익 복리 계산기
+                    </Link>
+                    <Link 
+                      to="/funding-calculator" 
+                      className="dropdown-item"
+                      onClick={() => setCalculatorDropdownOpen(false)}
+                    >
+                      <DollarSign size={16} />
+                      펀딩비 계산기
+                    </Link>
+                    <Link 
+                      to="/advanced-backtest" 
+                      className="dropdown-item"
+                      onClick={() => setCalculatorDropdownOpen(false)}
+                    >
+                      <Activity size={16} />
+                      백테스트 계산기
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* 사용자 메뉴 */}
@@ -205,13 +304,15 @@ const Navbar = () => {
             </div>
             
             <div className="mobile-sidebar-nav">
+              {/* 실시간 정보 섹션 */}
+              <div className="mobile-sidebar-category">실시간 정보</div>
               <Link
                 to="/live-coins"
                 className="mobile-sidebar-link"
                 onClick={() => setIsOpen(false)}
               >
                 <TrendingUp size={16} />
-                실시간 코인 가격
+                실시간 가격
               </Link>
               
               <Link
@@ -223,6 +324,9 @@ const Navbar = () => {
                 실시간 차트
               </Link>
               
+              {/* 수익 계산기 섹션 */}
+              <div className="mobile-sidebar-divider"></div>
+              <div className="mobile-sidebar-category">수익 계산기</div>
               <Link
                 to="/profit-calculator"
                 className="mobile-sidebar-link"
@@ -247,7 +351,7 @@ const Navbar = () => {
                 onClick={() => setIsOpen(false)}
               >
                 <Activity size={16} />
-                백테스트
+                백테스트 계산기
               </Link>
             
               {/* 구분선과 함께 표시 */}

@@ -1552,6 +1552,136 @@ main {
   color: white;
 }
 
+/* 실시간 정보 드롭다운 스타일 */
+.realtime-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.realtime-dropdown .dropdown-btn {
+  background: none;
+  border: none;
+  color: #cccccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.realtime-dropdown .dropdown-btn:hover {
+  color: white;
+}
+
+.realtime-dropdown .dropdown-btn.active {
+  color: white;
+}
+
+.realtime-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 160px;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+.realtime-dropdown-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #cccccc;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.realtime-dropdown-menu .dropdown-item:hover {
+  background: #333;
+  color: white;
+}
+
+.realtime-dropdown-menu .dropdown-item:first-child {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.realtime-dropdown-menu .dropdown-item:last-child {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* 수익 계산기 드롭다운 스타일 */
+.calculator-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.calculator-dropdown .dropdown-btn {
+  background: none;
+  border: none;
+  color: #cccccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.calculator-dropdown .dropdown-btn:hover {
+  color: white;
+}
+
+.calculator-dropdown .dropdown-btn.active {
+  color: white;
+}
+
+.calculator-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 180px;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+.calculator-dropdown-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #cccccc;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.calculator-dropdown-menu .dropdown-item:hover {
+  background: #333;
+  color: white;
+}
+
+.calculator-dropdown-menu .dropdown-item:first-child {
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.calculator-dropdown-menu .dropdown-item:last-child {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
 .navbar-right {
   display: flex;
   align-items: center;
@@ -2216,6 +2346,22 @@ main {
   flex: 1;
 }
 
+.mobile-sidebar-category {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.mobile-sidebar-category:first-child {
+  margin-top: 0;
+}
+
 .mobile-sidebar-link {
   display: flex;
   align-items: center;
@@ -2235,10 +2381,67 @@ main {
   }
 }
 
+/* 모바일 사이드바 섹션 스타일 */
+.mobile-sidebar-section {
+  margin-bottom: 0.25rem;
+}
+
+.mobile-sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+}
+
+.mobile-sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.mobile-sidebar-toggle .dropdown-arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.mobile-sidebar-toggle .dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.mobile-sidebar-submenu {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  margin: 0.5rem 0 0.5rem 1rem;
+  padding: 0.5rem 0;
+}
+
+.mobile-sidebar-sublink {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-radius: 0.25rem;
+  margin: 0.25rem 0.5rem;
+  font-size: 0.95rem;
+}
+
+.mobile-sidebar-sublink:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
 .mobile-sidebar-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 0.5rem 0;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 1rem 0;
 }
 
 .mobile-sidebar-user {

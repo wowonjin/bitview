@@ -46,10 +46,24 @@ const FundingCalculator = () => {
   const fetchBinanceFundingRate = async (symbol) => {
     try {
       const response = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const data = await response.json()
+      
+      if (data.lastFundingRate !== undefined && data.nextFundingTime !== undefined) {
+        return {
+          fundingRate: parseFloat(data.lastFundingRate),
+          nextFundingTime: new Date(data.nextFundingTime)
+        }
+      }
+      
+      // API 응답이 예상과 다를 경우 기본값
       return {
-        fundingRate: parseFloat(data.lastFundingRate),
-        nextFundingTime: new Date(data.nextFundingTime)
+        fundingRate: 0.001,
+        nextFundingTime: new Date(Date.now() + 8 * 60 * 60 * 1000)
       }
     } catch (error) {
       console.error('바이낸스 펀딩비 조회 실패:', error)
@@ -60,9 +74,21 @@ const FundingCalculator = () => {
     }
   }
 
-  // 바이비트 펀딩비 조회 (모의 데이터)
+  // 바이비트 펀딩비 조회
   const fetchBybitFundingRate = async (symbol) => {
     try {
+      const response = await fetch(`https://api.bybit.com/v5/market/tickers?category=linear&symbol=${symbol}`)
+      const data = await response.json()
+      
+      if (data.retCode === 0 && data.result.list.length > 0) {
+        const ticker = data.result.list[0]
+        return {
+          fundingRate: parseFloat(ticker.fundingRate),
+          nextFundingTime: new Date(parseInt(ticker.nextFundingTime))
+        }
+      }
+      
+      // API 호출 실패 시 기본값
       return {
         fundingRate: 0.0005,
         nextFundingTime: new Date(Date.now() + 8 * 60 * 60 * 1000)
@@ -198,7 +224,7 @@ const FundingCalculator = () => {
       <div className="calculator-container">
         <div className="calculator-header">
           <h1 className="mobile-page-title">펀딩비 계산기</h1>
-                      <p className="mobile-page-description">바이낸스와 바이비트 선물 거래 펀딩비를<br />실시간으로 계산해보세요</p>
+                      <p className="mobile-page-description">바이낸스와 바이비트 선물 거래 펀딩비를 <br />실시간으로 계산해보세요</p>
         </div>
 
         <div className="calculator-content">

@@ -141,7 +141,7 @@ const ProfitCalculator = () => {
       <div className="calculator-container">
         <div className="calculator-header">
           <h1 className="mobile-page-title">수익 복리 계산기</h1>
-          <p className="mobile-page-description">바이낸스와 바이비트 선물 거래 수익을<br />원화(KRW) 기준으로 계산해보세요</p>
+          <p className="mobile-page-description">바이낸스와 바이비트 선물 거래 수익을 <br />원화(KRW) 기준으로 계산해보세요</p>
         </div>
 
         <div className="calculator-content">
