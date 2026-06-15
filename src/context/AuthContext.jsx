@@ -470,7 +470,8 @@ export const AuthProvider = ({ children }) => {
   }
 
   const value = {
-    user: combinedUser, // 결합된 사용자 정보
+    user: combinedUser, // 결합된 사용자 정보 (Firestore 프로필 포함)
+    userProfile, // Firestore 프로필 원본
     firebaseUser: user, // Firebase 인증 사용자 정보
     login,
     signup,

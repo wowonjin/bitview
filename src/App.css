@@ -48,22 +48,30 @@ body::after {
   66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  width: 100%;
+/* .container 정의는 index.css에서 관리 */
+
+.page-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 1rem;
+  color: var(--text-secondary, #888);
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
+.page-loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(128, 128, 128, 0.2);
+  border-top-color: var(--accent-color, #f0b90b);
+  border-radius: 50%;
+  animation: page-loader-spin 0.8s linear infinite;
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 0.75rem;
+@keyframes page-loader-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -1520,7 +1528,7 @@ main {
 .navbar-logo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-primary);
   text-decoration: none;
 }
 

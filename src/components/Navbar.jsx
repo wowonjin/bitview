@@ -3,7 +3,14 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Menu, X, User, LogOut, ChevronDown, Settings, UserCircle, Eye, EyeOff, TrendingUp, BarChart3, Calculator, DollarSign, Activity, UserPlus, Mail } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import logoImage from '../assets/logo.png'
+import { useTheme } from '../context/ThemeContext'
+import {
+  ROUTES,
+  isRealtimeRoute,
+  isCalculatorRoute,
+} from '../constants/routes'
+import logoWhite from '../assets/white.png'
+import logoDark from '../assets/dark.png'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -14,8 +21,10 @@ const Navbar = () => {
   const [showPassword, setShowPassword] = useState(false)
 
   const { user, logout, isAuthenticated, isAdmin, isPremium, updateUser } = useAuth()
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
+  const logoImage = theme === 'light' ? logoWhite : logoDark
   const dropdownRef = useRef(null)
   const realTimeDropdownRef = useRef(null)
   const calculatorDropdownRef = useRef(null)
@@ -23,7 +32,7 @@ const Navbar = () => {
   // 프리미엄 버튼 클릭 핸들러
   const handlePremiumClick = (e) => {
     e.preventDefault()
-    navigate('/premium')
+    navigate(ROUTES.PREMIUM)
   }
 
   const toggleMenu = () => {
@@ -43,7 +52,7 @@ const Navbar = () => {
   }
 
   const handleRealTimeInfoClick = () => {
-    navigate('/live-coins')
+    navigate(ROUTES.LIVE_COINS)
     setRealTimeDropdownOpen(false)
   }
 
@@ -52,13 +61,13 @@ const Navbar = () => {
   }
 
   const handleCalculatorInfoClick = () => {
-    navigate('/profit-calculator')
+    navigate(ROUTES.PROFIT_CALCULATOR)
     setCalculatorDropdownOpen(false)
   }
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+    navigate(ROUTES.HOME)
     setIsOpen(false)
     setDropdownOpen(false)
   }
@@ -97,7 +106,7 @@ const Navbar = () => {
   return (
     <>
       {/* 공지글 배너 - 메인페이지에서만 표시, 프리미엄 사용자에게는 표시하지 않음 */}
-      {!isPremium && location.pathname === '/' && (
+      {!isPremium && location.pathname === ROUTES.HOME && (
         <div className="notice-banner" onClick={handlePremiumClick}>
           <div className="notice-content">
             <span className="notice-text">
@@ -107,7 +116,7 @@ const Navbar = () => {
         </div>
       )}
 
-      <nav className="navbar">
+      <nav className={`navbar ${theme === 'light' ? 'navbar-light' : ''}`}>
         <div className="container">
           <div className="navbar-content">
             {/* 로고와 차트보기 */}
@@ -118,7 +127,7 @@ const Navbar = () => {
               {/* 실시간 정보 드롭다운 */}
               <div className="realtime-dropdown" ref={realTimeDropdownRef}>
                 <button 
-                  className={`chart-link dropdown-btn ${location.pathname === '/live-coins' || location.pathname === '/chart' ? 'active' : ''}`}
+                  className={`chart-link dropdown-btn ${isRealtimeRoute(location.pathname) ? 'active' : ''}`}
                   onClick={handleRealTimeInfoClick}
                   onMouseEnter={() => setRealTimeDropdownOpen(true)}
                   onMouseLeave={() => setRealTimeDropdownOpen(false)}
@@ -156,7 +165,7 @@ const Navbar = () => {
               {/* 수익 계산기 드롭다운 */}
               <div className="calculator-dropdown" ref={calculatorDropdownRef}>
                 <button 
-                  className={`chart-link dropdown-btn ${location.pathname === '/profit-calculator' || location.pathname === '/funding-calculator' || location.pathname === '/advanced-backtest' ? 'active' : ''}`}
+                  className={`chart-link dropdown-btn ${isCalculatorRoute(location.pathname) ? 'active' : ''}`}
                   onClick={handleCalculatorInfoClick}
                   onMouseEnter={() => setCalculatorDropdownOpen(true)}
                   onMouseLeave={() => setCalculatorDropdownOpen(false)}
@@ -206,7 +215,7 @@ const Navbar = () => {
                 <>
                   {/* 로그인 상태 - 프리미엄 버튼 (일반 사용자만) */}
                   {!isPremium && !isAdmin && (
-                    <button onClick={handlePremiumClick} className={`premium-link ${location.pathname === '/premium' ? 'active' : ''}`}>
+                    <button onClick={handlePremiumClick} className={`premium-link ${location.pathname === ROUTES.PREMIUM ? 'active' : ''}`}>
                       <span className="premium-text">💎 프리미엄</span>
                     </button>
                   )}
@@ -289,7 +298,7 @@ const Navbar = () => {
           />
 
           {/* 모바일 사이드바 */}
-          <div className={`mobile-sidebar ${isOpen ? 'active' : ''}`}>
+          <div className={`mobile-sidebar ${isOpen ? 'active' : ''} ${theme === 'light' ? 'mobile-sidebar-light' : ''}`}>
             <div className="mobile-sidebar-header">
               <Link to="/" className="mobile-sidebar-logo" onClick={() => setIsOpen(false)}>
                 <img src={logoImage} alt="BitView" className="sidebar-logo-image" />
@@ -492,14 +501,39 @@ const Navbar = () => {
 
         .navbar {
           position: fixed;
-          top: ${!isPremium && location.pathname === '/' ? '2.75rem' : '0'};
+          top: ${!isPremium && location.pathname === ROUTES.HOME ? '2.75rem' : '0'};
           left: 0;
           right: 0;
           z-index: 1000;
           background: rgba(17, 17, 17, 0.65);
           backdrop-filter: blur(18px);
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          transition: top 0.3s ease;
+          transition: top 0.3s ease, background 0.25s ease, border-color 0.25s ease;
+        }
+
+        .navbar.navbar-light {
+          background: rgba(255, 255, 255, 0.88);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .navbar.navbar-light .chart-link {
+          color: #6b7684;
+        }
+
+        .navbar.navbar-light .chart-link:hover,
+        .navbar.navbar-light .chart-link.active {
+          color: #191f28;
+        }
+
+        .navbar.navbar-light .mobile-menu-toggle {
+          color: #191f28;
+        }
+
+        .logo-image {
+          height: 1.75rem;
+          width: auto;
+          max-width: 9.5rem;
+          object-fit: contain;
         }
 
         .navbar-content {
@@ -804,6 +838,24 @@ const Navbar = () => {
           transform: translateX(0);
         }
 
+        .mobile-sidebar.mobile-sidebar-light {
+          background: #ffffff;
+          box-shadow: 2px 0 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .mobile-sidebar.mobile-sidebar-light .mobile-sidebar-header {
+          background: #ffffff;
+          border-bottom: 1px solid #e5e8eb;
+        }
+
+        .mobile-sidebar.mobile-sidebar-light .mobile-sidebar-close {
+          color: #191f28;
+        }
+
+        .mobile-sidebar.mobile-sidebar-light .mobile-sidebar-link {
+          color: #191f28;
+        }
+
         .mobile-sidebar-header {
           display: flex;
           align-items: center;
@@ -822,8 +874,10 @@ const Navbar = () => {
         }
 
         .sidebar-logo-image {
-          height: 20px;
+          height: 1.75rem;
           width: auto;
+          max-width: 9.5rem;
+          object-fit: contain;
         }
 
         .mobile-sidebar-close {

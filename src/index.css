@@ -51,6 +51,22 @@
   --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
+html[data-theme='light'] {
+  color-scheme: light;
+
+  --bg-primary: #f2f4f6;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e5e8eb;
+  --bg-card: #ffffff;
+  --bg-gradient: linear-gradient(135deg, #f2f4f6 0%, #ffffff 50%, #e5e8eb 100%);
+
+  --text-primary: #191f28;
+  --text-secondary: #4e5968;
+  --text-muted: #8b95a1;
+
+  --border-color: #e5e8eb;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -75,9 +91,22 @@ html {
 
 /* 유틸리티 클래스 */
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 2rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem;
+  }
 }
 
 .text-gradient {
@@ -155,10 +184,6 @@ html {
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .container {
-    padding: 0 1rem;
-  }
-  
   .btn {
     padding: 0.75rem 1.5rem;
     font-size: 0.9rem;
@@ -179,10 +204,6 @@ html {
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 0 0.75rem;
-  }
-  
   .btn {
     padding: 0.625rem 1.25rem;
     font-size: 0.8rem;

@@ -135,14 +135,6 @@ const Login = () => {
             >
               로그인하기
             </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="auth-subtitle"
-            >
-              BitView와 함께 당신의 자산을 지키세요.
-            </motion.p>
           </div>
 
           <motion.form

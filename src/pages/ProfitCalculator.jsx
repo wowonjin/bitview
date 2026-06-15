@@ -1,8 +1,8 @@
-import { useState, useContext } from 'react'
-import { AuthContext } from '../context/AuthContext'
+import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 const ProfitCalculator = () => {
-  const { user, isPremium } = useContext(AuthContext)
+  const { user, isPremium } = useAuth()
   const [amount, setAmount] = useState('')
   const [displayAmount, setDisplayAmount] = useState('')
   const [leverage, setLeverage] = useState('custom')

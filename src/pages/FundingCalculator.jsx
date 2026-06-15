@@ -1,8 +1,8 @@
-import { useState, useContext, useEffect } from 'react'
-import { AuthContext } from '../context/AuthContext'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 const FundingCalculator = () => {
-  const { user, isPremium } = useContext(AuthContext)
+  const { user, isPremium } = useAuth()
   const [amount, setAmount] = useState('')
   const [displayAmount, setDisplayAmount] = useState('')
   const [leverage, setLeverage] = useState(1)

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { 
   Users, 
   Trash2, 
@@ -36,52 +35,12 @@ const Admin = () => {
     todaySignups: 0
   })
   
-  const navigate = useNavigate()
   const { user: currentUser, userProfile } = useAuth()
 
   useEffect(() => {
-    console.log('🔧 Admin 페이지 초기화 중...')
-    
-    // 로그인 확인
-    if (!currentUser) {
-      console.log('🔧 Admin 페이지 - 로그인 필요')
-      navigate('/login')
-      return
-    }
-
-    // 관리자 권한 확인
-    console.log('🔧 Admin 페이지 - 권한 확인 중:', {
-      currentUserEmail: currentUser.email,
-      userProfileIsAdmin: userProfile?.isAdmin,
-      userProfileRole: userProfile?.role,
-      userProfileExists: !!userProfile
-    })
-
-    // admin@gmail.com은 항상 관리자로 인정
-    const isAdminUser = currentUser.email === 'admin@gmail.com' || 
-                       userProfile?.isAdmin === true || 
-                       userProfile?.role === 'admin'
-
-    if (!isAdminUser) {
-      console.warn('⚠️ Admin 페이지 - 관리자 권한 없음')
-      
-      // admin@gmail.com인데 권한이 없는 경우 특별 처리
-      if (currentUser.email === 'admin@gmail.com') {
-        console.log('🔧 admin@gmail.com 계정 - 강제 진입 허용')
-        // admin@gmail.com은 강제로 진입 허용
-      } else {
-        alert('관리자 권한이 필요합니다.')
-        navigate('/')
-        return
-      }
-    }
-
-    console.log('✅ Admin 페이지 - 관리자 권한 확인 완료')
     document.title = 'BitView - 회원 관리'
-    
-    // 데이터 로딩
     loadUsers()
-  }, [currentUser, userProfile, navigate])
+  }, [])
 
   useEffect(() => {
     filterUsers()

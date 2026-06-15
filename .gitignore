@@ -11,6 +11,15 @@ node_modules
 dist
 dist-ssr
 *.local
+.vercel
+
+# 이전 자동매매 프로젝트 (보관)
+_legacy_autotrading/
+.venv/
+data/
+frontend/
+.env
+.env.upbit_autotrading.bak
 
 # Editor directories and files
 .vscode/*
